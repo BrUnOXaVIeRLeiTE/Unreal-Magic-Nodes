@@ -1,6 +1,6 @@
 # MAGIC NODE PLUGIN -- UNREAL ENGINE 4
 
-* I've put together a system which I call "Magic Node" where we can write some C++ functions in-place on any Blueprint Graph and that node will "morph" to match the input and output parameters of the function you wrote within the node itself. Sometimes it's simply faster to type a few lines of code instead of dealing with wire spaghetti!
+I've put together a system which I call "Magic Node" where we can write some C++ functions in-place on any Blueprint Graph and that node will "morph" to match the input and output parameters of the function you wrote within the node itself. Sometimes it's simply faster to type a few lines of code instead of dealing with wire spaghetti!
 
 With this I hope, with time, Blueprint developers have a first contact with C++ code and slowly become comfortable moving to Visual Studio workflow later on, if wanted:
 
@@ -10,9 +10,8 @@ With this I hope, with time, Blueprint developers have a first contact with C++ 
 
 
 More Info:
-
 [Unreal Marketplace]: https://www.unrealengine.com/marketplace/magic-node
-[Quick Guide]: https://brunoxavierleite.com/2019/01/16/unreal-magic-nodes-programming/
+[Quick Guide]: https://brunoxavierleite.com/2019/01/16/unreal-magic-nodes-programming
 
 
 
