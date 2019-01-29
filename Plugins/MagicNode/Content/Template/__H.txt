@@ -1,0 +1,36 @@
+////////////////////////////////////////////////////////////////
+///		{MGC} 2019 : GENERATED CLASS * Do NOT edit!
+////////////////////////////////////////////////////////////////
+
+#pragma once
+
+#include "Runtime/Core/Public/CoreMinimal.h"
+#include "Runtime/CoreUObject/Public/UObject/Object.h"
+#include "Runtime/CoreUObject/Public/UObject/ObjectMacros.h"
+#include "Runtime/CoreUObject/Public/UObject/WeakObjectPtr.h"
+#include "Runtime/CoreUObject/Public/UObject/SoftObjectPtr.h"
+#include "Runtime/CoreUObject/Public/UObject/SoftObjectPath.h"
+#include "Runtime/CoreUObject/Public/UObject/UObjectIterator.h"
+
+{Includes}
+
+#include "MagicNodeRuntime.h"
+#include "{ScriptClass}__CPP.generated.h"
+
+
+{Macros}
+
+
+{Types}
+
+
+UCLASS()
+class {ProjectName}_API U{ScriptClass}__CPP : public U{ParentClass}
+{
+	GENERATED_BODY()
+
+{Header}
+
+};
+
+////////////////////////////////////////////////////////////////
