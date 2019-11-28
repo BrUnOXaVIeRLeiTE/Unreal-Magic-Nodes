@@ -14,59 +14,59 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-DEFINE_LOG_CATEGORY(MGC);
+DEFINE_LOG_CATEGORY(MagicNodes);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 MAGICNODERUNTIME_API void LOG_MGC(const TCHAR* Message) {
-	UE_LOG(MGC,Warning,TEXT("%s"),Message);
+	UE_LOG(MagicNodes,Warning,TEXT("%s"),Message);
 }
 
 MAGICNODERUNTIME_API void LOG_MGC(const FName Message) {
-	UE_LOG(MGC,Warning,TEXT("%s"),*Message.ToString());
+	UE_LOG(MagicNodes,Warning,TEXT("%s"),*Message.ToString());
 }
 
 MAGICNODERUNTIME_API void LOG_MGC(const FString Message) {
-	UE_LOG(MGC,Warning,TEXT("%s"),*Message);
+	UE_LOG(MagicNodes,Warning,TEXT("%s"),*Message);
 }
 
 MAGICNODERUNTIME_API void LOG_MGC(const EMGCSeverity Severity, const TCHAR* Message) {
 	switch (Severity) {
 		case EMGCSeverity::Info:
-			UE_LOG(MGC,Log,TEXT("%s"),Message); break;
+			UE_LOG(MagicNodes,Log,TEXT("%s"),Message); break;
 		case EMGCSeverity::Warning:
-			UE_LOG(MGC,Warning,TEXT("%s"),Message); break;
+			UE_LOG(MagicNodes,Warning,TEXT("%s"),Message); break;
 		case EMGCSeverity::Error:
-			UE_LOG(MGC,Error,TEXT("%s"),Message); break;
+			UE_LOG(MagicNodes,Error,TEXT("%s"),Message); break;
 		case EMGCSeverity::Fatal:
-			UE_LOG(MGC,Fatal,TEXT("%s"),Message); break;
+			UE_LOG(MagicNodes,Fatal,TEXT("%s"),Message); break;
 	default: break;}
 }
 
 MAGICNODERUNTIME_API void LOG_MGC(const EMGCSeverity Severity, const FName Message) {
 	switch (Severity) {
 		case EMGCSeverity::Info:
-			UE_LOG(MGC,Log,TEXT("%s"),*Message.ToString()); break;
+			UE_LOG(MagicNodes,Log,TEXT("%s"),*Message.ToString()); break;
 		case EMGCSeverity::Warning:
-			UE_LOG(MGC,Warning,TEXT("%s"),*Message.ToString()); break;
+			UE_LOG(MagicNodes,Warning,TEXT("%s"),*Message.ToString()); break;
 		case EMGCSeverity::Error:
-			UE_LOG(MGC,Error,TEXT("%s"),*Message.ToString()); break;
+			UE_LOG(MagicNodes,Error,TEXT("%s"),*Message.ToString()); break;
 		case EMGCSeverity::Fatal:
-			UE_LOG(MGC,Fatal,TEXT("%s"),*Message.ToString()); break;
+			UE_LOG(MagicNodes,Fatal,TEXT("%s"),*Message.ToString()); break;
 	default: break;}
 }
 
 MAGICNODERUNTIME_API void LOG_MGC(const EMGCSeverity Severity, const FString Message) {
 	switch (Severity) {
 		case EMGCSeverity::Info:
-			UE_LOG(MGC,Log,TEXT("%s"),*Message); break;
+			UE_LOG(MagicNodes,Log,TEXT("%s"),*Message); break;
 		case EMGCSeverity::Warning:
-			UE_LOG(MGC,Warning,TEXT("%s"),*Message); break;
+			UE_LOG(MagicNodes,Warning,TEXT("%s"),*Message); break;
 		case EMGCSeverity::Error:
-			UE_LOG(MGC,Error,TEXT("%s"),*Message); break;
+			UE_LOG(MagicNodes,Error,TEXT("%s"),*Message); break;
 		case EMGCSeverity::Fatal:
-			UE_LOG(MGC,Fatal,TEXT("%s"),*Message); break;
+			UE_LOG(MagicNodes,Fatal,TEXT("%s"),*Message); break;
 	default: break;}
 }
 

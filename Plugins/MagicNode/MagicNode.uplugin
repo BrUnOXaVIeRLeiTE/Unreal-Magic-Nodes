@@ -1,8 +1,8 @@
 {
 	"FileVersion": 1,
 	"Version": 1,
-	"VersionName": "0.1.4",
-	"EngineVersion" : "4.21.0",
+	"VersionName": "0.1.6",
+	"EngineVersion" : "4.24.0",
 	"FriendlyName": "Magic Node",
 	"Description": "Scriptable Blueprint Nodes for EVERYONE!",
 	"Category": "SYNAPTECH",
@@ -31,7 +31,7 @@
 		},
 		{
 			"Name": "MagicNodeKismet",
-			"Type": "Developer",
+			"Type": "DeveloperTool",
 			"LoadingPhase": "Default",
 			"WhitelistPlatforms": [
 				"Android",

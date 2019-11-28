@@ -80,8 +80,15 @@ const EMGC_CompilerResult IKMGC_ScriptParser::CompileScriptClass(const FString &
 	///
 	FString Include;
 	for (FString In : Includes) {
-		FString InFormat = FString::Printf(TEXT("#include \"%s\""),*In);
-		Include.Append(InFormat); Include.AppendChar(TEXT('\n'));
+		if (!In.Contains(TEXT(".h"))) {continue;}
+		//
+		if (!In.Contains(TEXT("#include"))) {
+			FString InFormat = FString::Printf(TEXT("#include \"%s\""),*In);
+			Include.Append(InFormat); Include.AppendChar(TEXT('\n'));
+		} else {
+			Include.Append(In);
+			Include.AppendChar(TEXT('\n'));
+		}///
 	}///
 	Include.RemoveFromEnd(TEXT("\n"));
 	IKMGC_ScriptParser::THeader.ReplaceInline(TEXT("{Includes}"),*Include);

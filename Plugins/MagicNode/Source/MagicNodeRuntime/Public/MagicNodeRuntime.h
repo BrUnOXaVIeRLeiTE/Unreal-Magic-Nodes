@@ -26,7 +26,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define Ensure(OBJ) if (!ensureMsgf((OBJ!=NULL)&&(OBJ->IsValidLowLevel()),TEXT("{MGC}: Just checked and it doesn't seem to be a valid pointer to an object!"))) {return;}
-#define Subscribe(_Context,_Type) MGC_Allocate<_Type>(_Context,_Type::StaticClass())
+#define Enroll(_Context,_Type) MGC_Allocate<_Type>(_Context,_Type::StaticClass())
 
 #define UPDATE() virtual void Update(float DeltaTime) override
 #define START() virtual void Start() override
@@ -110,9 +110,9 @@ public:
 template<typename T>
 static T* MGC_Allocate(UObject* Context, UClass* Class) {
 	if (Context && Context->GetWorld()) {
-		UMagicNode* MGC = NewObject<UMagicNode>(Context,Class,Class->GetFName(),RF_Transient);
-		MGC->RegisterWorld(Context->GetWorld());
-		return CastChecked<T>(MGC);
+		UMagicNode* NewMGC = NewObject<UMagicNode>(Context,Class,Class->GetFName(),RF_Transient);
+		NewMGC->RegisterWorld(Context->GetWorld());
+		return CastChecked<T>(NewMGC);
 	}///
 	//
 	return nullptr;

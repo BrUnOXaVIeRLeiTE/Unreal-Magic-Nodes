@@ -367,7 +367,7 @@ UEdGraphPin* UKMGC_MagicNode::GetContextPin(const TArray<UEdGraphPin*>* InPinsTo
 
 bool UKMGC_MagicNode::IsCompatibleWithGraph(const UEdGraph* TargetGraph) const  {
 	UBlueprint* Blueprint = FBlueprintEditorUtils::FindBlueprintForGraph(TargetGraph);
-	return Super::IsCompatibleWithGraph(TargetGraph) && (!Blueprint || (FBlueprintEditorUtils::FindUserConstructionScript(Blueprint) != TargetGraph && Blueprint->GeneratedClass->GetDefaultObject()->ImplementsGetWorld()));
+	return Super::IsCompatibleWithGraph(TargetGraph) && (!Blueprint||(FBlueprintEditorUtils::FindUserConstructionScript(Blueprint)!= TargetGraph && Blueprint->GeneratedClass->GetDefaultObject()->ImplementsGetWorld()));
 }
 
 bool UKMGC_MagicNode::IsDefaultPin(UEdGraphPin* Pin) {

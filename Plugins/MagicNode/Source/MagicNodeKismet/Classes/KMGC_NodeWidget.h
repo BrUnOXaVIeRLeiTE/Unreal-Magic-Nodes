@@ -12,13 +12,13 @@
 
 #include "Runtime/Slate/Public/Widgets/Layout/SBox.h"
 #include "Runtime/SlateCore/Public/Widgets/SOverlay.h"
-#include "Runtime/Slate/Public/Widgets/Images/SImage.h"
 #include "Runtime/Slate/Public/Widgets/Input/SButton.h"
 #include "Runtime/Slate/Public/Widgets/Layout/SBorder.h"
 #include "Runtime/Slate/Public/Widgets/Views/SListView.h"
 #include "Runtime/Slate/Public/Widgets/Input/SCheckBox.h"
 #include "Runtime/Slate/Public/Widgets/Layout/SScrollBar.h"
 #include "Runtime/Slate/Public/Widgets/Layout/SScrollBox.h"
+#include "Runtime/SlateCore/Public/Widgets/Images/SImage.h"
 #include "Runtime/Slate/Public/Widgets/Input/SEditableText.h"
 
 #if WITH_EDITOR

@@ -58,7 +58,7 @@ private:
 	//
 public:
 	virtual void StartupModule() override {
-		UE_LOG(MGC,Log,TEXT("Initializing Magic Nodes..."));
+		UE_LOG(MagicNodes,Log,TEXT("Initializing Magic Nodes..."));
 		RegisterSettings();
 		//
 		FAssetRegistryModule &AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");

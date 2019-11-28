@@ -148,7 +148,21 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 		return FReply::Handled();
 	}///
 	//
-	if (Key==EKeys::Enter) {return FReply::Handled();}
+	if (Key==EKeys::Enter) {
+		FString Indent;
+		TArray<FString>Lines;
+		FString Appended(TEXT("\n"));
+		GetText().ToString().ParseIntoArrayLines(Lines,false);
+		//
+		if (Lines.IsValidIndex(CursorLocation.GetLineIndex())) {
+			if (Lines[CursorLocation.GetLineIndex()].StartsWith(TEXT("\t"))) {
+				Lines[CursorLocation.GetLineIndex()].Split(TEXT("\t"),&Indent,nullptr,ESearchCase::IgnoreCase,ESearchDir::FromEnd);
+				Indent.AppendChar(TEXT('\t')); Appended.Append(Indent);
+		InsertTextAtCursor(Appended);}}
+		//
+		return FReply::Handled();
+	}///
+	//
 	return SMultiLineEditableText::OnKeyDown(Geometry,KeyEvent);
 }
 

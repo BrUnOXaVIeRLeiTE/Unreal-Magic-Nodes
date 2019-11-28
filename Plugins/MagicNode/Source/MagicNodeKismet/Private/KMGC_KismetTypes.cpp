@@ -562,7 +562,7 @@ UMGC_KeywordDB::UMGC_KeywordDB() {
 	Macros.Add(TEXT("FSelf"));
 	Macros.Add(TEXT("Ensure"));
 	Macros.Add(TEXT("MgcHint"));
-	Macros.Add(TEXT("Subscribe"));
+	Macros.Add(TEXT("Enroll"));
 	//
 	Macros.Add(TEXT("STOP"));
 	Macros.Add(TEXT("AWAKE"));
@@ -1337,7 +1337,7 @@ UMGC_SemanticDB::UMGC_SemanticDB() {
 	MDefinition.Info = TEXT("MGC Macro.\n\nChecks if a pointer to an object is valid,\npreventing memory access violations (prevents runtime crashes).");
 	MacroDefinitions.Add(Keyword,MDefinition);
 	//
-	Keyword = TEXT("Subscribe");
+	Keyword = TEXT("Enroll");
 	MDefinition.Info = TEXT("MGC Macro.\n\nRegisters this Script as a 'Runtime Latent Node'.\nThis is a fundamental step to enable the use Magic Nodes with built-in persistent functions, such as\n\nAwake()\nStart()\nUpdate()\nStop()");
 	MacroDefinitions.Add(Keyword,MDefinition);
 	//
