@@ -5,28 +5,27 @@ using System.IO;
 
 public class MagicNodeEditor : ModuleRules {
     public MagicNodeEditor(ReadOnlyTargetRules Target) : base(Target) {
-		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         PrivatePCHHeaderFile = "Public/MagicNodeEditor_Shared.h";
 		bEnforceIWYU = true;
 		//
         PublicDependencyModuleNames.AddRange(
             new string[] {
                 "Core",
+                "Slate",
                 "Engine",
+                "SlateCore",
+                "InputCore",
                 "CoreUObject",
                 "MagicNodeKismet",
                 "MagicNodeRuntime"
             }///
         );//
         //
-        PrivateDependencyModuleNames.AddRange(
+        PublicDependencyModuleNames.AddRange(
             new string[] {
-                "Slate",
                 "Kismet",
                 "UnrealEd",
                 "Projects",
-                "InputCore",
-                "SlateCore",
                 "AssetTools",
 				"GraphEditor",
                 "LevelEditor",

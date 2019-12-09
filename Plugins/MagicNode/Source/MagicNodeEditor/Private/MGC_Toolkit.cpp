@@ -53,7 +53,8 @@ public:
 /// MGC State-Machine Toolkit Native API:
 
 void FMGC_Toolkit::INIT_CodeEditor(const EToolkitMode::Type Mode, const TSharedPtr<IToolkitHost>&InitToolkitHost, UMagicNodeScript* ScriptObject) {
-	FAssetEditorManager::Get().CloseOtherEditors(ScriptObject,this);
+	GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->CloseOtherEditors(ScriptObject,this);
+	///FAssetEditorManager::Get().CloseOtherEditors(ScriptObject,this);
 	//
 	ScriptObject_Inline = ScriptObject;
 	check(ScriptObject_Inline);

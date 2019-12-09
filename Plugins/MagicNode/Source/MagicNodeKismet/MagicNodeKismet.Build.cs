@@ -5,31 +5,30 @@ using System.IO;
 
 public class MagicNodeKismet : ModuleRules {
     public MagicNodeKismet(ReadOnlyTargetRules Target) : base(Target) {
-		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-        PrivatePCHHeaderFile = "Public/MagicNodeKismet_Shared.h";
+		PrivatePCHHeaderFile = "Public/MagicNodeKismet_Shared.h";
 		bEnforceIWYU = true;
 		//
-        PublicDependencyModuleNames.AddRange(
-            new string[] {
-                "Core",
-                "Engine",
-                "CoreUObject",
-                "MagicNodeRuntime"
+		PublicDependencyModuleNames.AddRange(
+			new string[] {
+				"Core",
+				"Engine",
+				"CoreUObject",
+				"MagicNodeRuntime"
             }///
         );//
         //
-        PrivateDependencyModuleNames.AddRange(
+        PublicDependencyModuleNames.AddRange(
             new string[] {
-                "Slate",
-                "Kismet",
-                "UnrealEd",
-                "Projects",
-                "InputCore",
-                "SlateCore",
+				"Slate",
+				"Kismet",
+				"UnrealEd",
+				"Projects",
+				"InputCore",
+				"SlateCore",
 				"GraphEditor",
-                "LevelEditor",
-                "EditorStyle",
-                "PropertyEditor",
+				"LevelEditor",
+				"EditorStyle",
+				"PropertyEditor",
 				"KismetCompiler",
 				"BlueprintGraph"
             }///
