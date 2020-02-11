@@ -1,6 +1,5 @@
 # EPIC MEGA GRANTS RECIPIENT 2020!
-Thank you Epic Games!
-Great things are coming: [Mega Grants]: https://forums.unrealengine.com/community/community-content-tools-and-tutorials/1573386-mgc-magic-nodes?p=1720050#post1720050
+![MegaGrant](https://i.imgur.com/5RkEkpe.png)
 
 # MAGIC NODE PLUGIN -- UNREAL ENGINE 4
 
