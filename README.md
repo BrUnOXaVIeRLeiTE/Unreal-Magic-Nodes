@@ -1,3 +1,7 @@
+# EPIC MEGA GRANTS RECIPIENT 2020!
+Thank you Epic Games!
+Great things are coming: [Mega Grants]: https://forums.unrealengine.com/community/community-content-tools-and-tutorials/1573386-mgc-magic-nodes?p=1720050#post1720050
+
 # MAGIC NODE PLUGIN -- UNREAL ENGINE 4
 
 I've put together a system which I call "Magic Node" where we can write some C++ functions in-place on any Blueprint Graph and that node will "morph" to match the input and output parameters of the function you wrote within the node itself. Sometimes it's simply faster to type a few lines of code instead of dealing with wire spaghetti!
