@@ -6,6 +6,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "KMGC_NodeWidget.h"
+
+#include "KMGC_NodeStyle.h"
 #include "KMGC_TextSyntaxHighlighter.h"
 
 #include "Runtime/Core/Public/Misc/CString.h"
@@ -91,8 +93,8 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 					SAssignNew(SCRIPT_PICKER,SContentReference)
 					.AssetReference(this,&SKMGC_MagicNodeWidget::GetScriptObject)
 					.OnSetReference(this,&SKMGC_MagicNodeWidget::SetScriptObject)
-					.AllowedClass(UMagicNodeScript::StaticClass())
 					.AssetPickerSizeOverride(FVector2D(540.f,360.f))
+					.AllowedClass(UMagicNodeScript::StaticClass())
 					.ShowFindInBrowserButton(true)
 					.AllowClearingReference(true)
 					.AllowSelectingNewAsset(true)
@@ -265,7 +267,7 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 						SNew(SBox)
 						.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
 						.MinDesiredWidth(400.f).MinDesiredHeight(250.f)
-						.MaxDesiredHeight(1010.f).MaxDesiredWidth(1010.f)
+						.MaxDesiredHeight(1250.f).MaxDesiredWidth(1500.f)
 						[
 							SNew(SBorder)
 							.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
@@ -376,7 +378,7 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 												SNew(STextBlock).Margin(2)
 												.Text(LOCTEXT("KMGC_SearchToggleCase","Aa"))
 												.ColorAndOpacity(FSlateColor(FLinearColor(FColor(255,255,255,225))))
-												.Font(FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.SourceBlockStyle").Font)
+												.Font(FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.CodeBlockStyle").Font)
 											]
 										]
 										+SHorizontalBox::Slot()
@@ -526,6 +528,7 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 				.OnUserScrolled(this,&SKMGC_MagicNodeWidget::OnAutoCompleteScroll)
 				.Orientation(EOrientation::Orient_Vertical)
 				.ScrollBarThickness(FVector2D(8.f,8.f))
+				//
 				+SScrollBox::Slot()
 				.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
 				[
@@ -541,6 +544,9 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 		]
 	]
 	];
+	//
+	//
+	UpdateTextEditorScriptReference();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -594,6 +600,18 @@ void SKMGC_MagicNodeWidget::UpdateDatabaseSemantics() {
 	}///
 }
 
+void SKMGC_MagicNodeWidget::UpdateTextEditorScriptReference() {
+	UMagicNodeScript* Script = (CastChecked<UKMGC_MagicNode>(GraphNode))->GetScriptObject();
+	//
+	if (HEADER_EDITOR.IsValid()) {HEADER_EDITOR->SetScriptObject(Script);}
+	if (SCRIPT_EDITOR.IsValid()) {SCRIPT_EDITOR->SetScriptObject(Script);}
+}
+
+void SKMGC_MagicNodeWidget::UpdateTextEditorScriptReference(UMagicNodeScript* Script) {
+	if (HEADER_EDITOR.IsValid()) {HEADER_EDITOR->SetScriptObject(Script);}
+	if (SCRIPT_EDITOR.IsValid()) {SCRIPT_EDITOR->SetScriptObject(Script);}
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool SKMGC_MagicNodeWidget::IsInteractable() const {
@@ -627,6 +645,8 @@ void SKMGC_MagicNodeWidget::SetScriptObject(UObject* New) {
 	//
 	UMagicNodeScript* Script = Cast<UMagicNodeScript>(New);
 	CastChecked<UKMGC_MagicNode>(GraphNode)->SetScriptObject(Script);
+	//
+	UpdateTextEditorScriptReference(Script);
 }
 
 void SKMGC_MagicNodeWidget::SetScriptText(const FText &NewText) {
@@ -667,9 +687,9 @@ void SKMGC_MagicNodeWidget::SetTypesText(const FText &NewText) {
 void SKMGC_MagicNodeWidget::SetLineCountList(const int32 Count) {
 	LineCount.Empty();
 	//
-	for (int32 I=1; I<=Count; I++) {
+	for (int32 I=1; I<=Count+1; I++) {
 		FString ID = FString::Printf(TEXT("%i"),I);
-		LineCount.Add(MakeShareable(new FString(*ID)));
+		LineCount.Add(MakeShareable(new FString(ID)));
 	}///
 	//
 	if (LINE_COUNTER.IsValid()) {LINE_COUNTER->RequestListRefresh();}
@@ -679,7 +699,8 @@ void SKMGC_MagicNodeWidget::SetAutoCompleteList(const TArray<FString>&List) {
 	AutoCompleteList.Empty();
 	//
 	for (const FString &S : List) {
-		AutoCompleteList.Add(MakeShareable(new FString(*S)));
+		if (S.TrimStartAndEnd().IsEmpty()) {continue;}
+		AutoCompleteList.Add(MakeShareable(new FString(S)));
 	}///
 	//
 	if (AUTOCOMPLETE.IsValid()) {AUTOCOMPLETE->RequestListRefresh();}
@@ -689,7 +710,7 @@ void SKMGC_MagicNodeWidget::SetIncludesList(const TArray<FString>&List) {
 	SourceIncludes.Empty();
 	//
 	for (const FString &S : List) {
-		SourceIncludes.Add(MakeShareable(new FString(*S)));
+		SourceIncludes.Add(MakeShareable(new FString(S)));
 	}///
 	//
 	if (INCLUDES_LIST.IsValid()) {INCLUDES_LIST->RequestListRefresh();}
@@ -699,7 +720,7 @@ void SKMGC_MagicNodeWidget::SetMacrosList(const TArray<FString>&List) {
 	SourceMacros.Empty();
 	//
 	for (const FString &S : List) {
-		SourceMacros.Add(MakeShareable(new FString(*S)));
+		SourceMacros.Add(MakeShareable(new FString(S)));
 	}///
 	//
 	if (MACROS_LIST.IsValid()) {MACROS_LIST->RequestListRefresh();}
@@ -797,9 +818,9 @@ FText SKMGC_MagicNodeWidget::GetCursorLocation() const {
 	if (!HEADER_EDITOR.IsValid()||!SCRIPT_EDITOR.IsValid()) {return FText();}
 	//
 	if (Source==ESKMGC_Source::Header) {
-		return FText::FromString(FString::Printf(TEXT("Lin: %i  |  Col: %i"),HEADER_EDITOR->GetCursorLocation().GetLineIndex()+1,HEADER_EDITOR->GetCursorLocation().GetOffset()));
+		return FText::FromString(FString::Printf(TEXT("Ln: %i  |  Col: %i"),HEADER_EDITOR->GetCursorLocation().GetLineIndex()+1,HEADER_EDITOR->GetCursorLocation().GetOffset()+1));
 	} else if (Source==ESKMGC_Source::Script) {
-		return FText::FromString(FString::Printf(TEXT("Lin: %i  |  Col: %i"),SCRIPT_EDITOR->GetCursorLocation().GetLineIndex()+1,SCRIPT_EDITOR->GetCursorLocation().GetOffset()));
+		return FText::FromString(FString::Printf(TEXT("Ln: %i  |  Col: %i"),SCRIPT_EDITOR->GetCursorLocation().GetLineIndex()+1,SCRIPT_EDITOR->GetCursorLocation().GetOffset()+1));
 	}///
 	//
 	return FText();
@@ -838,7 +859,11 @@ EVisibility SKMGC_MagicNodeWidget::GetTypesPanelVisibility() const {
 }
 
 EVisibility SKMGC_MagicNodeWidget::GetAutoCompleteVisibility() const {
-	if (AutoComplete==EAutoComplete::Active) {return EVisibility::Visible;}
+	if (AutoComplete==EAutoComplete::Active) {
+		if (GraphNode && GraphNode->AdvancedPinDisplay != ENodeAdvancedPins::Hidden) {
+			return EVisibility::Visible;
+		}///
+	}///
 	//
 	return EVisibility::Collapsed;
 }
@@ -880,18 +905,20 @@ FSlateColor SKMGC_MagicNodeWidget::GetTypesIconColor() const {
 }
 
 int32 SKMGC_MagicNodeWidget::GetLineCount() const {
-	TArray<FString>Array;
 	int32 Count = 0;
 	//
 	if (Source==ESKMGC_Source::Header) {
-		FString Text = GetHeaderText().ToString();
-		Count = Text.ParseIntoArray(Array,TEXT("\n"),false);
+		for (const TCHAR &CH : GetHeaderText().ToString().GetCharArray()) {
+			if (CH==TEXT('\n')) {Count++;}
+		}///
 	} else if (Source==ESKMGC_Source::Script) {
-		FString Text = GetScriptText().ToString();
-		Count = Text.ParseIntoArray(Array,TEXT("\n"),false);
+		for (const TCHAR &CH : GetScriptText().ToString().GetCharArray()) {
+			if (CH==TEXT('\n')) {Count++;}
+		}///
 	} else if (Source==ESKMGC_Source::Types) {
-		FString Text = GetTypesText().ToString();
-		Count = Text.ParseIntoArray(Array,TEXT("\n"),false);
+		for (const TCHAR &CH : GetTypesText().ToString().GetCharArray()) {
+			if (CH==TEXT('\n')) {Count++;}
+		}///
 	}///
 	//
 	return Count;
@@ -946,9 +973,10 @@ void SKMGC_MagicNodeWidget::OnScriptTextChanged(const FText &InText, ETextCommit
 		else {SCRIPT_EDITOR->AutoCompleteSubject(Subject);}
 	} else {
 		FString Subject = SCRIPT_EDITOR->ParseAutoCompleteWord(Lines);
+		//
 		if (SCRIPT_EDITOR->IsAutoComplete(Subject)) {
 			SCRIPT_EDITOR->AutoCompleteSubject(Subject);
-		}///
+		} else {SCRIPT_EDITOR->AutoSuggest(Lines);}
 	}///
 	//
 	//
@@ -969,9 +997,10 @@ void SKMGC_MagicNodeWidget::OnHeaderTextChanged(const FText &InText, ETextCommit
 		else {HEADER_EDITOR->AutoCompleteSubject(Subject);}
 	} else {
 		FString Subject = HEADER_EDITOR->ParseAutoCompleteWord(Lines);
+		//
 		if (HEADER_EDITOR->IsAutoComplete(Subject)) {
 			HEADER_EDITOR->AutoCompleteSubject(Subject);
-		}///
+		} else {HEADER_EDITOR->AutoSuggest(Lines);}
 	}///
 	//
 	//
@@ -1080,7 +1109,7 @@ void SKMGC_MagicNodeWidget::OnAdvanceAutoComplete(const FString &Search) {
 	for (const TSharedPtr<FString>&Item : AutoCompleteList) {
 		if (!Item.IsValid()) {continue;}
 		//
-		if (Item->Contains(Search)) {Found.Add(*Item.Get());}
+		if (Item->Contains(Search)) {Found.Add(**Item.Get());}
 	}///
 	//
 	if (Found.Num()>=1) {SetAutoCompleteList(Found);}
@@ -1420,8 +1449,7 @@ TSharedRef<ITableRow>SKMGC_MagicNodeWidget::OnGenerateAutoComplete(TSharedPtr<FS
 		if (Item.Get()->Contains(TEXT("ST|"))) {R=125, G=125, B=125;}
 		FSlateColor Color = FSlateColor(FLinearColor(FColor(R,G,B,255)));
 		//
-		return
-		SNew(SComboRow<TSharedRef<FString>>,OwnerTable)
+		return SNew(SComboRow<TSharedRef<FString>>,OwnerTable)
 		[
 			SNew(SHorizontalBox)
 			+SHorizontalBox::Slot()
@@ -1442,7 +1470,7 @@ TSharedRef<ITableRow>SKMGC_MagicNodeWidget::OnGenerateAutoComplete(TSharedPtr<FS
 					.ColorAndOpacity(Color)
 					.Margin(FMargin(2.f,2.f,2.f,2.f))
 					.Text(FText::FromString(Caption))
-					.Font(FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.SourceBlockStyle").Font)
+					.Font(FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.CodeBlockStyle").Font)
 				]
 			]
 		];//
@@ -1451,8 +1479,7 @@ TSharedRef<ITableRow>SKMGC_MagicNodeWidget::OnGenerateAutoComplete(TSharedPtr<FS
 		//
 		Item.Get()->Split(TEXT("|"),nullptr,&Caption,ESearchCase::IgnoreCase,ESearchDir::FromEnd);
 		//
-		return
-		SNew(SComboRow<TSharedRef<FString>>,OwnerTable)
+		return SNew(SComboRow<TSharedRef<FString>>,OwnerTable)
 		[
 			SNew(SHorizontalBox)
 			+SHorizontalBox::Slot()
@@ -1473,7 +1500,7 @@ TSharedRef<ITableRow>SKMGC_MagicNodeWidget::OnGenerateAutoComplete(TSharedPtr<FS
 					.Margin(FMargin(2.f,2.f,2.f,2.f))
 					.Text(FText::FromString(Caption))
 					.ColorAndOpacity(FSlateColor(FLinearColor(FColor(255,235,195,255))))
-					.Font(FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.SourceBlockStyle").Font)
+					.Font(FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.CodeBlockStyle").Font)
 				]
 			]
 		];//
@@ -1595,6 +1622,16 @@ FReply SKMGC_MagicNodeWidget::OnMouseMove(const FGeometry &MyGeometry, const FPo
 	UKMGC_MagicNode* KNode = (CastChecked<UKMGC_MagicNode>(GraphNode));
 	UMagicNodeScript* Script = KNode->GetScriptObject();
 	//
+	if (KNode->AdvancedPinDisplay==ENodeAdvancedPins::Hidden) {
+		if (Source==ESKMGC_Source::Header) {KNode->SetTooltip(Script->Source.Script);}
+		if (Source==ESKMGC_Source::Script) {KNode->SetTooltip(Script->Source.Header);}
+		//
+		return SGraphNode::OnMouseMove(MyGeometry,MouseEvent);
+	} else if (HEADER_EDITOR->HasSuggestion()||SCRIPT_EDITOR->HasSuggestion()) {
+		KNode->SetTooltip(TEXT("")); return SGraphNode::OnMouseMove(MyGeometry,MouseEvent);
+	}///
+	//
+	//
 	if ((HasKeyboardFocus()||HasFocusedDescendants())&&(HEADER_EDITOR->GetCursorLocation().GetOffset()>=1||SCRIPT_EDITOR->GetCursorLocation().GetOffset()>=1)&&(GraphNode->AdvancedPinDisplay!=ENodeAdvancedPins::Hidden)) {
 		FString Keyword;
 		//
@@ -1610,10 +1647,7 @@ FReply SKMGC_MagicNodeWidget::OnMouseMove(const FGeometry &MyGeometry, const FPo
 			if (Keyword.TrimStart().IsEmpty()) {Keyword=SCRIPT_EDITOR->GetUnderCursor();}
 		}///
 		//
-		if (Keyword.TrimStart().IsEmpty()&&(KNode->GetTooltipText().ToString()!=Script->Source.Script)) {
-			if (Source==ESKMGC_Source::Header) {KNode->SetTooltip(Script->Source.Script);}
-			if (Source==ESKMGC_Source::Script) {KNode->SetTooltip(Script->Source.Header);}
-		} else if (HintTimer >= 10.f && (!LastHint.Equals(Keyword))) {
+		if (HintTimer >= 10.f && (!LastHint.Equals(Keyword))) {
 			LastHint = Keyword; HintTimer = 0.f;
 			//
 			const FKeywordDefinition &KeyInfo = IKMGC_ScriptParser::GetKeywordInfo(Keyword);
@@ -1623,7 +1657,7 @@ FReply SKMGC_MagicNodeWidget::OnMouseMove(const FGeometry &MyGeometry, const FPo
 			} else if (_Settings->ShowKeywordHints) {
 				const FClassDefinition &ClassInfo = IKMGC_ScriptParser::GetClassPointerInfo(Keyword);
 				//
-				bool Nill=true;
+				bool Nill = true;
 				FString Info = Keyword+FString(TEXT(" ::\n\n"));
 				//
 				if (!ClassInfo.Hint.IsEmpty()) {Info+=(ClassInfo.Hint+FString(TEXT("\n\n"))); Nill=false;}
@@ -1666,14 +1700,10 @@ FReply SKMGC_MagicNodeWidget::OnMouseMove(const FGeometry &MyGeometry, const FPo
 						if (!Nill) {KNode->SetTooltip(Info);} else {KNode->SetTooltip(Keyword);}
 					}///
 				}///
-			} else {
-				if (Source==ESKMGC_Source::Header) {KNode->SetTooltip(Script->Source.Script);}
-				if (Source==ESKMGC_Source::Script) {KNode->SetTooltip(Script->Source.Header);}
 			}///
 		}///
-	} else if (!HasKeyboardFocus()&&(KNode->GetTooltipText().ToString()!=Script->Source.Script)) {
-		if (Source==ESKMGC_Source::Header) {KNode->SetTooltip(Script->Source.Script);}
-		if (Source==ESKMGC_Source::Script) {KNode->SetTooltip(Script->Source.Header);}
+	} else if (GraphNode->AdvancedPinDisplay!=ENodeAdvancedPins::Hidden) {
+		if (KNode->GetTooltipText().ToString().Len()>0) {KNode->SetTooltip(TEXT(""));}
 	}///
 	//
 	return SGraphNode::OnMouseMove(MyGeometry,MouseEvent);

@@ -393,17 +393,20 @@ const FString & IKMGC_ScriptParser::GetClassDocumentation(const FString &Keyword
 const FSlateColor IKMGC_ScriptParser::GetTypeColor(const FString &Notation) {
 	FSlateColor Color = FSlateColor(FLinearColor::White);
 	//
+	if (Notation.Contains(TEXT("STT|"),ESearchCase::CaseSensitive)) {Color=FSlateColor(FLinearColor(0,0,0.8f)); return Color;}
 	if (Notation.Contains(TEXT("BOL|"),ESearchCase::CaseSensitive)) {Color=FSlateColor(FLinearColor(0.7f,0,0)); return Color;}
 	if (Notation.Contains(TEXT("FLO|"),ESearchCase::CaseSensitive)) {Color=FSlateColor(FLinearColor(0,0.8f,0)); return Color;}
+	if (Notation.Contains(TEXT("ENU|"),ESearchCase::CaseSensitive)) {Color=FSlateColor(FLinearColor(0,0.8f,0.8f)); return Color;}
 	if (Notation.Contains(TEXT("BYT|"),ESearchCase::CaseSensitive)) {Color=FSlateColor(FLinearColor(0,0.4f,0.25f)); return Color;}
 	if (Notation.Contains(TEXT("STR|"),ESearchCase::CaseSensitive)) {Color=FSlateColor(FLinearColor(0.85f,0,0.6f)); return Color;}
 	if (Notation.Contains(TEXT("INT|"),ESearchCase::CaseSensitive)) {Color=FSlateColor(FLinearColor(0,0.95f,0.5f)); return Color;}
 	if (Notation.Contains(TEXT("NAM|"),ESearchCase::CaseSensitive)) {Color=FSlateColor(FLinearColor(0.55f,0.35f,0.8f)); return Color;}
 	if (Notation.Contains(TEXT("TEX|"),ESearchCase::CaseSensitive)) {Color=FSlateColor(FLinearColor(0.85f,0.4f,0.55f)); return Color;}
-	if (Notation.Contains(TEXT("OBJ|"),ESearchCase::CaseSensitive)) {Color=FSlateColor(FLinearColor(0.45f,0.45f,0.85f)); return Color;}
 	if (Notation.Contains(TEXT("ARR|"),ESearchCase::CaseSensitive)) {Color=FSlateColor(FLinearColor(0.55f,0.45f,0.85f)); return Color;}
 	if (Notation.Contains(TEXT("SET|"),ESearchCase::CaseSensitive)) {Color=FSlateColor(FLinearColor(0.45f,0.85f,0.55f)); return Color;}
 	if (Notation.Contains(TEXT("MAP|"),ESearchCase::CaseSensitive)) {Color=FSlateColor(FLinearColor(0.85f,0.55f,0.45f)); return Color;}
+	if (Notation.Contains(TEXT("OBJ|"),ESearchCase::CaseSensitive)) {Color=FSlateColor(FLinearColor(0.45f,0.45f,0.85f)); return Color;}
+	if (Notation.Contains(TEXT("CLS|"),ESearchCase::CaseSensitive)) {Color=FSlateColor(FLinearColor(0.85f,0.35f,0.65f)); return Color;}
 	//
 	return Color;
 }
@@ -411,7 +414,7 @@ const FSlateColor IKMGC_ScriptParser::GetTypeColor(const FString &Notation) {
 const FSlateBrush* IKMGC_ScriptParser::GetTypeIcon(const FString &Notation) {
 	const FSlateBrush* Brush = FEditorStyle::GetBrush(TEXT("Kismet.VariableList.TypeIcon"));
 	//
-	if (Notation.Contains(TEXT("OBJ|"),ESearchCase::CaseSensitive)) {Brush=FEditorStyle::GetBrush(TEXT("GraphEditor.SpawnActor_16x"));}
+	if (Notation.Contains(TEXT("OBJ|"),ESearchCase::CaseSensitive)) {Brush=FEditorStyle::GetBrush(TEXT("CodeView.ClassIcon"));}
 	if (Notation.Contains(TEXT("SET|"),ESearchCase::CaseSensitive)) {Brush=FEditorStyle::GetBrush(TEXT("Kismet.VariableList.SetTypeIcon"));}
 	if (Notation.Contains(TEXT("ARR|"),ESearchCase::CaseSensitive)) {Brush=FEditorStyle::GetBrush(TEXT("Kismet.VariableList.ArrayTypeIcon"));}
 	if (Notation.Contains(TEXT("MAP|"),ESearchCase::CaseSensitive)) {Brush=FEditorStyle::GetBrush(TEXT("Kismet.VariableList.MapValueTypeIcon"));}
@@ -423,8 +426,10 @@ const FSlateBrush* IKMGC_ScriptParser::GetTypeIcon(const FString &Notation) {
 
 void IKMGC_ScriptParser::AutoComplete(const FString &Owner, const FString &Keyword, TArray<FString>&Results) {
 	const FClassDefinition &ClassInfo = IKMGC_ScriptParser::GetClassInfo(Keyword);
+	//
 	if (!IKMGC_ScriptParser::BuildAutoComplete(ClassInfo,Results)) {
 		const FClassDefinition &ClassPtr = IKMGC_ScriptParser::GetClassPointerInfo(Keyword);
+		//
 		if (!IKMGC_ScriptParser::BuildAutoComplete(ClassPtr,Results)) {
 			const FClassDefinition &OwnerPointer = IKMGC_ScriptParser::GetClassPointerInfo(Owner);
 			if (Keyword.IsEmpty()&&(IKMGC_ScriptParser::BuildAutoComplete(OwnerPointer,Results))) {return;}
@@ -518,17 +523,24 @@ const bool IKMGC_ScriptParser::BuildAutoComplete(const FClassDefinition &Definit
 			default: break;}
 			//
 			switch (DEF.TypeOf) {
-				case EType::Set: Result += FString(TEXT("SET|")); break;
-				case EType::Map: Result += FString(TEXT("MAP|")); break;
+				case EType::Int: Result += FString(TEXT("INT|")); break;
 				case EType::Byte: Result += FString(TEXT("BYT|")); break;
 				case EType::Bool: Result += FString(TEXT("BOL|")); break;
 				case EType::Name: Result += FString(TEXT("NAM|")); break;
 				case EType::Text: Result += FString(TEXT("TEX|")); break;
-				case EType::Array: Result += FString(TEXT("ARR|")); break;
 				case EType::Float: Result += FString(TEXT("FLO|")); break;
 				case EType::String: Result += FString(TEXT("STR|")); break;
+				//
+				case EType::Enum: Result += FString(TEXT("ENU|")); break;
+				case EType::Class: Result += FString(TEXT("CLS|")); break;
+				case EType::Struct: Result += FString(TEXT("STT|")); break;
 				case EType::Object: Result += FString(TEXT("OBJ|")); break;
-				case EType::Integer: Result += FString(TEXT("INT|")); break;
+			default: break;}
+			//
+			switch (DEF.StackOf) {
+				case EStack::Set: Result += FString(TEXT("SET|")); break;
+				case EStack::Map: Result += FString(TEXT("MAP|")); break;
+				case EStack::Array: Result += FString(TEXT("ARR|")); break;
 			default: break;}
 			//
 			Result += Item;
@@ -552,6 +564,49 @@ const bool IKMGC_ScriptParser::BuildAutoComplete(const FClassDefinition &Definit
 	} else {return false;}
 	//
 	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void IKMGC_ScriptParser::AutoSuggest(const TArray<FString>&Lines, const FString &Keyword, TArray<FString>&Results) {
+	static const TCHAR* Whitespace[] = {
+		TEXT("\t "),TEXT("\t"),TEXT(" "),
+		TEXT("("),TEXT(")"),TEXT("&"),
+		TEXT("["),TEXT("]"),TEXT("*"),
+		TEXT("{"),TEXT("}"),TEXT("?"),
+		TEXT("<"),TEXT(">"),TEXT(":"),
+		TEXT("."),TEXT(","),TEXT(";"),
+		TEXT("-"),TEXT("+"),TEXT("="),
+		TEXT("!"),TEXT("^"),TEXT("#"),
+		TEXT("%"),TEXT("/"),TEXT("|"),
+		TEXT("\'"),TEXT("\""),TEXT("\\")
+	};//
+	//
+	for (const FString &Item : Lines) {
+		if (!Item.Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+		//
+		TArray<FString>Line;
+		int32 Nums = UE_ARRAY_COUNT(Whitespace);	
+		Item.ParseIntoArray(Line,Whitespace,Nums,true);
+		//
+		for (const FString &Key : Line) {
+			if (!Key.Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+			//
+			FString Clean;
+			for (const TCHAR &CH : Key) {
+				if ((TChar<WIDECHAR>::IsAlpha(CH)||TChar<WIDECHAR>::IsDigit(CH)||CH==TEXT('_'))) {Clean.AppendChar(CH);}
+			}///
+			//
+			if (Keyword.Contains(Clean)||Clean.Len()<=Keyword.Len())
+			{continue;} else {Results.AddUnique(Clean);}
+		}///
+	}///
+	//
+	Results.Sort();
+	//
+	if (Results.Num()==0) {
+		//@ToDo: Search C++/H files , need a real "File Explorer" tree view.
+	}///
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -691,6 +746,8 @@ const bool IKMGC_ScriptParser::ParseHeaderIsland(const FString &Class, const FSt
 		//
 		uint8 Flag = INDEX_NONE;
 		EType TypeOf = EType::None;
+		EStack StackOf = EStack::None;
+		EFunctionFlag FunType = EFunctionFlag::None;
 		//
 		FString Ptr, Var;
 		FString Raw = Body.TrimStartAndEnd();
@@ -728,27 +785,27 @@ const bool IKMGC_ScriptParser::ParseHeaderIsland(const FString &Class, const FSt
 			if (Line.StartsWith(TEXT("FUByte"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Byte; Flag=0; Prop.ReturnType=TEXT("uint8");} else
 			if (Line.StartsWith(TEXT("uint16"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Byte; Flag=0; Prop.ReturnType=TEXT("uint16");} else
 			if (Line.StartsWith(TEXT("FUShort"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Byte; Flag=0; Prop.ReturnType=TEXT("uint16");} else
-			if (Line.StartsWith(TEXT("uint32"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Integer; Flag=0; Prop.ReturnType=TEXT("uint32");} else
-			if (Line.StartsWith(TEXT("FUInt"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Integer; Flag=0; Prop.ReturnType=TEXT("uint32");} else
-			if (Line.StartsWith(TEXT("uint64"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Integer; Flag=0; Prop.ReturnType=TEXT("uint64");} else
-			if (Line.StartsWith(TEXT("FULong"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Integer; Flag=0; Prop.ReturnType=TEXT("uint64");} else
+			if (Line.StartsWith(TEXT("uint32"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Int; Flag=0; Prop.ReturnType=TEXT("uint32");} else
+			if (Line.StartsWith(TEXT("FUInt"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Int; Flag=0; Prop.ReturnType=TEXT("uint32");} else
+			if (Line.StartsWith(TEXT("uint64"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Int; Flag=0; Prop.ReturnType=TEXT("uint64");} else
+			if (Line.StartsWith(TEXT("FULong"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Int; Flag=0; Prop.ReturnType=TEXT("uint64");} else
 			//
 			if (Line.StartsWith(TEXT("int8"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Byte; Flag=0; Prop.ReturnType=TEXT("int8");} else
 			if (Line.StartsWith(TEXT("FByte"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Byte; Flag=0; Prop.ReturnType=TEXT("int8");} else
 			if (Line.StartsWith(TEXT("int16"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Byte; Flag=0; Prop.ReturnType=TEXT("int16");} else
 			if (Line.StartsWith(TEXT("FShort"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Byte; Flag=0; Prop.ReturnType=TEXT("int16");} else
-			if (Line.StartsWith(TEXT("int32"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Integer; Flag=0; Prop.ReturnType=TEXT("int32");} else
-			if (Line.StartsWith(TEXT("FInt"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Integer; Flag=0; Prop.ReturnType=TEXT("int32");} else
-			if (Line.StartsWith(TEXT("int64"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Integer; Flag=0; Prop.ReturnType=TEXT("int64");} else
-			if (Line.StartsWith(TEXT("FLong"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Integer; Flag=0; Prop.ReturnType=TEXT("int64");} else
+			if (Line.StartsWith(TEXT("int32"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Int; Flag=0; Prop.ReturnType=TEXT("int32");} else
+			if (Line.StartsWith(TEXT("FInt"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Int; Flag=0; Prop.ReturnType=TEXT("int32");} else
+			if (Line.StartsWith(TEXT("int64"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Int; Flag=0; Prop.ReturnType=TEXT("int64");} else
+			if (Line.StartsWith(TEXT("FLong"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Int; Flag=0; Prop.ReturnType=TEXT("int64");} else
 			//
 			if (Line.StartsWith(TEXT("FText"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Text; Flag=0; Prop.ReturnType=TEXT("FText");} else
 			if (Line.StartsWith(TEXT("FName"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::Name; Flag=0; Prop.ReturnType=TEXT("FName");} else
 			if (Line.StartsWith(TEXT("FString"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(" "),&Ptr,&Var); TypeOf=EType::String; Flag=0; Prop.ReturnType=TEXT("FString");} else
 			//
-			if (Line.StartsWith(TEXT("TArray"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(">"),&Ptr,&Var); Ptr.AppendChar(TEXT('>')); TypeOf=EType::Array; Flag=0; Prop.ReturnType=TEXT("TArra<>");} else
-			if (Line.StartsWith(TEXT("TSet"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(">"),&Ptr,&Var); Ptr.AppendChar(TEXT('>'));  TypeOf=EType::Set; Flag=0; Prop.ReturnType=TEXT("TSet<>");} else
-			if (Line.StartsWith(TEXT("TMap"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(">"),&Ptr,&Var); Ptr.AppendChar(TEXT('>'));  TypeOf=EType::Map; Flag=0; Prop.ReturnType=TEXT("TMap<>");} else
+			if (Line.StartsWith(TEXT("TArray"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(">"),&Ptr,&Var); Ptr.AppendChar(TEXT('>')); StackOf=EStack::Array; Flag=0; Prop.ReturnType=TEXT("TArra<>");} else
+			if (Line.StartsWith(TEXT("TSet"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(">"),&Ptr,&Var); Ptr.AppendChar(TEXT('>'));  StackOf=EStack::Set; Flag=0; Prop.ReturnType=TEXT("TSet<>");} else
+			if (Line.StartsWith(TEXT("TMap"),ESearchCase::CaseSensitive)) {Line.Split(TEXT(">"),&Ptr,&Var); Ptr.AppendChar(TEXT('>'));  StackOf=EStack::Map; Flag=0; Prop.ReturnType=TEXT("TMap<>");} else
 			//
 			if (Line.Contains(TEXT("*")) && !Line.Contains(TEXT("("))) {
 				TypeOf=EType::Object; Flag=0;
@@ -775,7 +832,7 @@ const bool IKMGC_ScriptParser::ParseHeaderIsland(const FString &Class, const FSt
 			if (Line.Contains(TEXT("("))) {
 				Line.Split(TEXT("("),&Line,nullptr);
 				Line.TrimStartAndEndInline();
-				TypeOf=EType::Native; Flag=1;
+				FunType=EFunctionFlag::Native; Flag=1;
 				//
 				if (Line.Split(TEXT(">"),&Ptr,&Var)) {
 					Ptr.AppendChar(TEXT('>'));
@@ -790,10 +847,13 @@ const bool IKMGC_ScriptParser::ParseHeaderIsland(const FString &Class, const FSt
 		if (Flag==0) {
 			Prop.Access = Level;
 			Prop.TypeOf = TypeOf;
+			Prop.StackOf = StackOf;
 			ClassInfo.Variables.Add(Var,Prop);
 		} else if (Flag==1) {
+			Fun.Flag = FunType;
 			Fun.Access = Level;
 			Fun.TypeOf = TypeOf;
+			Fun.StackOf = StackOf;
 			ClassInfo.Functions.Add(Var,Fun);
 		}///
 	}///

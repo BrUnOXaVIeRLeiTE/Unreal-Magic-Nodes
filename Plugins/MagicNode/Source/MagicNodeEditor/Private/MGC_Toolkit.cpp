@@ -153,7 +153,7 @@ TSharedRef<SDockTab> FMGC_Toolkit::TABSpawn_Script(const FSpawnTabArgs &Args) {
 	//
 	//
 	return SNew(SDockTab)
-	.Icon(FMGC_CodeEditorStyle::Get().Get()->GetBrush("MGC.Toolbar.CPP"))
+	.Icon(FKMGC_NodeStyle::Get().Get()->GetBrush("KMGC.Toolbar.CPP"))
 	.Label(LOCTEXT("MGC_ScriptTitle","Script"))
 	[
 		SNew(SOverlay)
@@ -182,7 +182,7 @@ TSharedRef<SDockTab> FMGC_Toolkit::TABSpawn_Header(const FSpawnTabArgs &Args) {
 	//
 	//
 	return SNew(SDockTab)
-	.Icon(FMGC_CodeEditorStyle::Get().Get()->GetBrush("MGC.Toolbar.H"))
+	.Icon(FKMGC_NodeStyle::Get().Get()->GetBrush("KMGC.Toolbar.H"))
 	.Label(LOCTEXT("MGC_HeaderTitle","Header"))
 	[
 		SNew(SOverlay)
@@ -211,7 +211,7 @@ TSharedRef<SDockTab> FMGC_Toolkit::TABSpawn_Types(const FSpawnTabArgs &Args) {
 	//
 	//
 	return SNew(SDockTab)
-	.Icon(FMGC_CodeEditorStyle::Get().Get()->GetBrush("MGC.Toolbar.T"))
+	.Icon(FKMGC_NodeStyle::Get().Get()->GetBrush("KMGC.Toolbar.T"))
 	.Label(LOCTEXT("MGC_TypesTitle","Types"))
 	[
 		SNew(SOverlay)
@@ -308,7 +308,7 @@ FString FMGC_Toolkit::GetWorldCentricTabPrefix() const {
 }
 
 FString FMGC_Toolkit::GetDocumentationLink() const {
-	return TEXT("https://www.google.com/");
+	return TEXT("https://brunoxavierleite.wordpress.com/2019/01/16/unreal-magic-nodes-programming/");
 }
 
 void FMGC_Toolkit::OnToolkitHostingStarted(const TSharedRef<IToolkit>&Toolkit) {

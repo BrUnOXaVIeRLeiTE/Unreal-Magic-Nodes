@@ -9,7 +9,6 @@
 
 #include "MagicNodeEditor_Shared.h"
 #include "MagicNodeEditorStyle.h"
-#include "MGC_CodeEditorStyle.h"
 #include "MagicNodeEditor.h"
 
 #include "Developer/AssetTools/Public/IAssetTools.h"
@@ -22,37 +21,37 @@
 
 void FMagicNodeEditor::StartupModule() {
 	FMagicNodeEditorStyle::Initialize();
-	FMGC_CodeEditorStyle::Initialize();
 	//
 	//
 	IAssetTools &AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 	SY_AssetCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Synaptech")),LOCTEXT("SynaptechCategory","Synaptech"));
 	//
 	{
-		TSharedRef<IAssetTypeActions>ACT_MGCS = MakeShareable(new FATA_MGCScript);
-		AssetTools.RegisterAssetTypeActions(ACT_MGCS);
+		TSharedRef<IAssetTypeActions>ACT_MGC = MakeShareable(new FATA_MagicNode);
+		AssetTools.RegisterAssetTypeActions(ACT_MGC);
 	}
 	//
 	//
 	MenuExtender = MakeShareable(new FExtender());
-	MenuExtender->AddMenuExtension("FileProject",EExtensionHook::First,TSharedPtr<FUICommandList>(),FMenuExtensionDelegate::CreateStatic(&FMagicNodeEditor::ExtendMenu));
+	MenuExtender->AddMenuExtension("FileProject",EExtensionHook::After,TSharedPtr<FUICommandList>(),FMenuExtensionDelegate::CreateStatic(&FMagicNodeEditor::ExtendMenu));
 	//
 	FLevelEditorModule &LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 	LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(MenuExtender);
 }
 
 void FMagicNodeEditor::ShutdownModule() {
-	FMGC_CodeEditorStyle::Shutdown();
 	FMagicNodeEditorStyle::Shutdown();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void FMagicNodeEditor::ExtendMenu(FMenuBuilder &MenuBuilder) {
+	MenuBuilder.AddMenuSeparator();
+	//
 	MenuBuilder.AddMenuEntry (
-		LOCTEXT("MGC_NewScriptAsset","New Magic Node Class..." ),
+		LOCTEXT("MGC_NewScriptAsset","New Magic Node (C++)..." ),
 		LOCTEXT("MGC_NewScriptAsset_Tooltip", "Create a new 'Magic Node' class.\nThis special class allows you to create custom functions,\ntyping code within user Blueprint Graphs executing the node.\nChanges to the node's source code will update all instances in all graphs."),
-		FSlateIcon(FMagicNodeEditorStyle::Get().Get()->GetStyleSetName(),"ClassIcon.MagicNodeScript"),
+		FSlateIcon(FMagicNodeEditorStyle::Get().Get()->GetStyleSetName(),"ClassIcon.MagicNode"),
 		FUIAction(FExecuteAction::CreateStatic(&FMagicNodeEditor::CreateNewScriptAsset))
 	);///
 }

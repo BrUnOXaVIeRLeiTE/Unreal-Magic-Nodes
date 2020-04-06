@@ -21,12 +21,10 @@
 #include "Runtime/SlateCore/Public/Widgets/Images/SImage.h"
 #include "Runtime/Slate/Public/Widgets/Input/SEditableText.h"
 
-#if WITH_EDITOR
-  #include "Editor/UnrealEd/Public/FileHelpers.h"
-  #include "Editor/GraphEditor/Public/SGraphNode.h"
-  #include "Editor/EditorStyle/Public/EditorStyle.h"
-  #include "Editor/Kismet/Public/WorkflowOrientedApp/SContentReference.h"
-#endif
+#include "Editor/UnrealEd/Public/FileHelpers.h"
+#include "Editor/GraphEditor/Public/SGraphNode.h"
+#include "Editor/EditorStyle/Public/EditorStyle.h"
+#include "Editor/Kismet/Public/WorkflowOrientedApp/SContentReference.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -43,7 +41,6 @@ enum class ESKMGC_Source : uint8 {
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// PTM Property List Widget:
 
 class SKMGC_MagicNodeWidget : public SGraphNode {
 private:
@@ -95,6 +92,8 @@ public:
 	//
 	//
 	bool HasScript() const;
+	bool IsScriptSourceEditable() const;
+	//
 	int32 GetLineCount() const;
 	FText GetTypesText() const;
 	FText GetScriptText() const;
@@ -103,10 +102,10 @@ public:
 	FText GetReplaceText() const;
 	FText GetCursorLocation() const;
 	UObject* GetScriptObject() const;
-	bool IsScriptSourceEditable() const;
-	ECheckBoxState IsSearchSensitive() const;
-	TArray<FString>GetScriptIncludes() const;
+	//
 	TArray<FString>GetScriptMacros() const;
+	TArray<FString>GetScriptIncludes() const;
+	ECheckBoxState IsSearchSensitive() const;
 	//
 	//
 	FReply OnClickedCompile();
@@ -133,9 +132,9 @@ public:
 	EVisibility GetAutoCompleteVisibility() const;
 	EVisibility GetIncludesPanelVisibility() const;
 	//
+	FSlateColor GetTypesIconColor() const;
 	FSlateColor GetScriptIconColor() const;
 	FSlateColor GetHeaderIconColor() const;
-	FSlateColor GetTypesIconColor() const;
 	const FSlateBrush* GetCompilerIcon() const;
 	//
 	void OnVerticalScroll(float Offset);
@@ -149,6 +148,7 @@ public:
 	void OnAdvanceAutoComplete(const FString &Search);
 	void OnAutoComplete(const TArray<FString>&Results);
 	void OnSearchSensitiveChanged(ECheckBoxState NewState);
+	//
 	void OnTypesTextChanged(const FText &InText, ETextCommit::Type CommitType);
 	void OnScriptTextChanged(const FText &InText, ETextCommit::Type CommitType);
 	void OnHeaderTextChanged(const FText &InText, ETextCommit::Type CommitType);
@@ -193,8 +193,10 @@ public:
 	virtual void Tick(const FGeometry &AllottedGeometry, const double CurrentTime, const float DeltaTime) override;
 	//
 	//
-	void UpdateDatabaseReferences();
 	void UpdateDatabaseSemantics();
+	void UpdateDatabaseReferences();
+	void UpdateTextEditorScriptReference();
+	void UpdateTextEditorScriptReference(UMagicNodeScript* Script);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

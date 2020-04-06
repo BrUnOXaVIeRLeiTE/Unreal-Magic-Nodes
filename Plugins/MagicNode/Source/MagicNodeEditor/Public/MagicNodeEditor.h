@@ -38,11 +38,11 @@ static EAssetTypeCategories::Type SY_AssetCategory;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class FATA_MGCScript : public FAssetTypeActions_Base {
+class FATA_MagicNode : public FAssetTypeActions_Base {
 public:
 	virtual uint32 GetCategories() override { return SY_AssetCategory; }
 	//
-	virtual FText GetName() const override { return NSLOCTEXT("AssetTypeActions","FATA_MGCS","Magic Node Script"); }
+	virtual FText GetName() const override { return NSLOCTEXT("AssetTypeActions","FATA_MGC","Magic Node (C++)"); }
 	virtual UClass* GetSupportedClass() const override { return UMagicNodeScript::StaticClass(); }
 	virtual FColor GetTypeColor() const override { return FColor(25,185,165); }
 	//

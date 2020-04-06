@@ -11,6 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 UKMGC_Settings::UKMGC_Settings() {
+#if WITH_EDITOR
 	ShowKeywordHints = true;
 	//
 	LoadConfig();
@@ -25,6 +26,7 @@ UKMGC_Settings::UKMGC_Settings() {
 	if (SemanticCoreDB.Succeeded()) {SemanticDB.Add(TSoftObjectPtr<UMGC_SemanticDB>(SemanticCoreDB.Object));}
 	if (KeywordCoreDB.Succeeded()) {KeywordDB.Add(TSoftObjectPtr<UMGC_KeywordDB>(KeywordCoreDB.Object));}
 	if (ClassCoreDB.Succeeded()) {ClassDB.Add(TSoftObjectPtr<UMGC_ClassDB>(ClassCoreDB.Object));}
+#endif
 }
 
 void UKMGC_Settings::PostLoad() {

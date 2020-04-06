@@ -722,7 +722,7 @@ void UMGC_ClassDB::UpdateExtensions() {
 		FString Target = IT->GetName();
 		//
 		if (IT->IsA(UClass::StaticClass())) {Extensions.Add(FString(TEXT("U"))+Target); continue;}
-		if (IT->IsA(UScriptStruct::StaticClass())) {Extensions.Add(FString(TEXT("F"))+Target); continue;}
+		if (IT->IsA(UStruct::StaticClass())) {Extensions.Add(FString(TEXT("F"))+Target); continue;}
 	}///
 }
 
@@ -742,6 +742,9 @@ UMGC_FunctionDB::UMGC_FunctionDB() {
 	ScriptCore.Add(TEXT("Log"));
 	ScriptCore.Add(TEXT("StaticClass"));
 	ScriptCore.Add(TEXT("StaticClassFlags"));
+	//
+	ScriptCore.Add(TEXT("Cast"));
+	ScriptCore.Add(TEXT("CastChecked"));
 	//
 	//
 	for (TObjectIterator<UClass>IT; IT; ++IT) {
@@ -1366,324 +1369,6 @@ UMGC_SemanticDB::UMGC_SemanticDB() {
 	MacroDefinitions.Add(Keyword,MDefinition);
 	//
 	//
-	ClassDefinitions.Empty();
-	//
-	/// :: REGISTER CORE CLASSES ::
-	///
-	RegisterClassReflection(UObject::StaticClass(),TEXT("U"));
-	//
-	for (TObjectIterator<UStruct>IT; IT; ++IT) {
-		if (IT->IsA(UScriptStruct::StaticClass())) {
-			const UScriptStruct* Struct = CastChecked<UScriptStruct>(*IT);
-			const FString StructName = FString(TEXT("F"))+Struct->GetName();
-			//
-			const FString CHint = Struct->GetMetaData(TEXT("MgcHint"));
-			const FString CMeta = Struct->GetMetaData(TEXT("ToolTip"));
-			const FString CParent = (Struct->GetSuperStruct()) ? Struct->GetSuperStruct()->GetName() : TEXT("");
-			//
-			FClassDefinition StructDefinition;
-			StructDefinition.ParentClass = CParent;
-			StructDefinition.Tooltip = CMeta;
-			StructDefinition.Hint = CHint;
-			//
-			//
-			for (TFieldIterator<UProperty>PIT(Struct,EFieldIteratorFlags::IncludeSuper); PIT; ++PIT) {
-				FString PropName = PIT->GetName();
-				const UProperty* Property = *PIT;
-				//
-				const FString PHint = PIT->GetMetaData(TEXT("MgcHint"));
-				const FString PMeta = PIT->GetMetaData(TEXT("ToolTip"));
-				//
-				FPropertyDefinition PropDefinition;
-				PropDefinition.Tooltip = PMeta;
-				PropDefinition.Hint = PHint;
-				//
-				if (Property->IsA(UBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
-				if (Property->IsA(UEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
-				if (Property->IsA(UByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
-				if (Property->IsA(UNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
-				if (Property->IsA(UTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
-				if (Property->IsA(UStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
-				if (Property->IsA(UIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Integer;} else
-				if (Property->IsA(UFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;} else
-				if (Property->IsA(UObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
-				if (Property->IsA(UStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
-				if (Property->IsA(UArrayProperty::StaticClass())) {PropDefinition.TypeOf=EType::Array;} else
-				if (Property->IsA(USetProperty::StaticClass())) {PropDefinition.TypeOf=EType::Set;} else
-				if (Property->IsA(UMapProperty::StaticClass())) {PropDefinition.TypeOf=EType::Map;}
-				//
-				PropDefinition.ReturnType=TEXT("<?>");
-				const FString Display = (PropertyToTypeName(Property,Struct)+FString(TEXT(" "))+PropName);
-				PropDefinition.ReturnType = Display;
-				//
-				PropDefinition.Access = EAccessLevel::Public;
-				if (PIT->HasAnyPropertyFlags(CPF_Protected)) {PropDefinition.Access=EAccessLevel::Protected;}
-				//
-				StructDefinition.Variables.Add(PropName,PropDefinition);
-			}///
-			//
-			ClassDefinitions.Add(StructName,StructDefinition);
-		} else if (IT->IsA(UClass::StaticClass())&&IsValidTarget(CastChecked<UClass>(*IT))) {
-			const UClass* Class = CastChecked<UClass>(*IT);
-			const FString ClassName = FString(TEXT("U"))+Class->GetName();
-			//
-			const FString CHint = Class->GetMetaData(TEXT("MgcHint"));
-			const FString CMeta = Class->GetMetaData(TEXT("ToolTip"));
-			const FString CParent = (Class->GetSuperClass()) ? Class->GetSuperClass()->GetName() : TEXT("");
-			//
-			FClassDefinition ClassDefinition;
-			ClassDefinition.ParentClass = CParent;
-			ClassDefinition.Tooltip = CMeta;
-			ClassDefinition.Hint = CHint;
-			//
-			//
-			for (TFieldIterator<UProperty>PIT(Class,EFieldIteratorFlags::IncludeSuper); PIT; ++PIT) {
-				FString PropName = PIT->GetName();
-				const UProperty* Property = *PIT;
-				//
-				const FString PHint = PIT->GetMetaData(TEXT("MgcHint"));
-				const FString PMeta = PIT->GetMetaData(TEXT("ToolTip"));
-				//
-				FPropertyDefinition PropDefinition;
-				PropDefinition.Tooltip = PMeta;
-				PropDefinition.Hint = PHint;
-				//
-				if (Property->IsA(UBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
-				if (Property->IsA(UEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
-				if (Property->IsA(UByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
-				if (Property->IsA(UNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
-				if (Property->IsA(UTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
-				if (Property->IsA(UStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
-				if (Property->IsA(UIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Integer;} else
-				if (Property->IsA(UFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;} else
-				if (Property->IsA(UObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
-				if (Property->IsA(UStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
-				if (Property->IsA(UArrayProperty::StaticClass())) {PropDefinition.TypeOf=EType::Array;} else
-				if (Property->IsA(USetProperty::StaticClass())) {PropDefinition.TypeOf=EType::Set;} else
-				if (Property->IsA(UMapProperty::StaticClass())) {PropDefinition.TypeOf=EType::Map;}
-				//
-				PropDefinition.ReturnType=TEXT("<?>");
-				const FString Display = (PropertyToTypeName(Property,Class)+FString(TEXT(" "))+PropName);
-				PropDefinition.ReturnType = Display;
-				//
-				PropDefinition.Access = EAccessLevel::Public;
-				if (PIT->HasAnyPropertyFlags(CPF_Protected)) {PropDefinition.Access=EAccessLevel::Protected;}
-				//
-				ClassDefinition.Variables.Add(PropName,PropDefinition);
-			}///
-			//
-			//
-			for (TFieldIterator<UFunction>FIT(Class,EFieldIteratorFlags::IncludeSuper); FIT; ++FIT) {
-				const UFunction* Function = *FIT;
-				FString FunName = FIT->GetName();
-				//
-				const FString FHint = FIT->GetMetaData(TEXT("MgcHint"));
-				const FString FMeta = FIT->GetMetaData(TEXT("ToolTip"));
-				//
-				FFunctionDefinition FunDefinition;
-				FunDefinition.Tooltip = FMeta;
-				FunDefinition.Hint = FHint;
-				//
-				if (FIT->HasAnyFunctionFlags(FUNC_BlueprintCallable)) {FunDefinition.TypeOf=EType::Callable;}
-				if (FIT->HasAnyFunctionFlags(FUNC_BlueprintEvent)) {FunDefinition.TypeOf=EType::Event;}
-				if (FIT->HasAnyFunctionFlags(FUNC_BlueprintPure)) {FunDefinition.TypeOf=EType::Pure;}
-				if (FIT->HasAnyFunctionFlags(FUNC_Delegate)) {FunDefinition.TypeOf=EType::Delegate;}
-				if (FIT->HasAnyFunctionFlags(FUNC_Const)) {FunDefinition.TypeOf=EType::Const;}
-				if (FIT->HasAnyFunctionFlags(FUNC_Event)) {FunDefinition.TypeOf=EType::Event;}
-				//
-				if (FIT->HasAnyFunctionFlags(FUNC_Public)) {FunDefinition.Access=EAccessLevel::Public;}
-				if (FIT->HasAnyFunctionFlags(FUNC_Private)) {FunDefinition.Access=EAccessLevel::Private;}
-				if (FIT->HasAnyFunctionFlags(FUNC_Protected)) {FunDefinition.Access=EAccessLevel::Protected;}
-				//
-				FunDefinition.ReturnType=TEXT("void");
-				for (TFieldIterator<UProperty>PIT(Function); PIT&&(PIT->PropertyFlags&CPF_Parm); ++PIT) {
-					const UProperty* Property = *PIT;
-					//
-					const FString Display = (PropertyToTypeName(Property,Function)+FString(TEXT(" "))+Property->GetName());
-					//
-					if (Property->HasAnyPropertyFlags(CPF_ReturnParm)) {
-						FunDefinition.ReturnType = Display;
-					} else if (Property->HasAnyPropertyFlags(CPF_OutParm)) {
-						FunDefinition.Outputs.Add(Display);
-					} else {FunDefinition.Inputs.Add(Display);}
-				}///
-				//
-				ClassDefinition.Functions.Add(FunName,FunDefinition);
-			}///
-			//
-			ClassDefinitions.Add(ClassName,ClassDefinition);
-		}///
-	}///
-	//
-	//
-	/// :: REGISTER UNLOADED CLASSES (Actors) ::
-	///
-	RegisterClassReflection(AActor::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AAmbientSound::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ABrush::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ABrushShape::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AVolume::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AAudioVolume::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ABlockingVolume::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ACameraBlockingVolume::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ALevelStreamingVolume::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ALightmassCharacterIndirectDetailVolume::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ALightmassImportanceVolume::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AMeshMergeCullingVolume::StaticClass(),TEXT("A"));
-	RegisterClassReflection(APhysicsVolume::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ADefaultPhysicsVolume::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AKillZVolume::StaticClass(),TEXT("A"));
-	RegisterClassReflection(APainCausingVolume::StaticClass(),TEXT("A"));
-	RegisterClassReflection(APostProcessVolume::StaticClass(),TEXT("A"));
-	RegisterClassReflection(APrecomputedVisibilityOverrideVolume::StaticClass(),TEXT("A"));
-	RegisterClassReflection(APrecomputedVisibilityVolume::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ATriggerVolume::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AVolumetricLightmapDensityVolume::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ACameraActor::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AController::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ADebugCameraController::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ADecalActor::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ADocumentationActor::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AEmitter::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AHUD::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ADebugCameraHUD::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AInfo::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AExponentialHeightFog::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AGameModeBase::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AEmitterCameraLensEffectBase::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AGameMode::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AGameNetworkManager::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AGameSession::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AGameStateBase::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AGameState::StaticClass(),TEXT("A"));
-	RegisterClassReflection(APlayerState::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AServerStatReplicator::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ASkyLight::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AWindDirectionalSource::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AWorldSettings::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ALevelBounds::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ALevelScriptActor::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ALight::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ADirectionalLight::StaticClass(),TEXT("A"));
-	RegisterClassReflection(APointLight::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ARectLight::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ASpotLight::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AGeneratedMeshAreaLight::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ALightmassPortal::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ALODActor::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AMaterialInstanceActor::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AMatineeActor::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AMatineeActorCameraAnim::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ANavigationObjectBase::StaticClass(),TEXT("A"));
-	RegisterClassReflection(APlayerStart::StaticClass(),TEXT("A"));
-	RegisterClassReflection(APlayerStartPIE::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ANote::StaticClass(),TEXT("A"));
-	RegisterClassReflection(APawn::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ACharacter::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ADefaultPawn::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ASpectatorPawn::StaticClass(),TEXT("A"));
-	RegisterClassReflection(APlayerCameraManager::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AReflectionCapture::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ABoxReflectionCapture::StaticClass(),TEXT("A"));
-	RegisterClassReflection(APlaneReflectionCapture::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ASphereReflectionCapture::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ARigidBodyBase::StaticClass(),TEXT("A"));
-	RegisterClassReflection(APhysicsConstraintActor::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ARadialForceActor::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ASceneCapture::StaticClass(),TEXT("A"));
-	RegisterClassReflection(APlanarReflection::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ASceneCapture2D::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ASceneCaptureCube::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ASkeletalMeshActor::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ASplineMeshActor::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AStaticMeshActor::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ATargetPoint::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ATextRenderActor::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ATriggerBase::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ATriggerBox::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ATriggerCapsule::StaticClass(),TEXT("A"));
-	RegisterClassReflection(ATriggerSphere::StaticClass(),TEXT("A"));
-	RegisterClassReflection(AVectorFieldVolume::StaticClass(),TEXT("A"));
-	//
-	//
-	/// :: REGISTER UNLOADED CLASSES (Components) ::
-	///
-	RegisterClassReflection(UActorComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UApplicationLifecycleComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UInputComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UMovementComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UInterpToMovementComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UNavMovementComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UPawnMovementComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UCharacterMovementComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UFloatingPawnMovement::StaticClass(),TEXT("U"));
-	RegisterClassReflection(USpectatorPawnMovement::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UProjectileMovementComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(URotatingMovementComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UPawnNoiseEmitterComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UPhysicalAnimationComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UPlatformEventsComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(USceneComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UAtmosphericFogComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UAudioComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UCameraComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UChildActorComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UDecalComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UExponentialHeightFogComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UForceFeedbackComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(ULightComponentBase::StaticClass(),TEXT("U"));
-	RegisterClassReflection(ULightComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UDirectionalLightComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(ULocalLightComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UPointLightComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(USpotLightComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(URectLightComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(USkyLightComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(ULightmassPortalComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UPhysicsConstraintComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UPhysicsSpringComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UPhysicsThrusterComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UPostProcessComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UPrimitiveComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UArrowComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UBillboardComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UBrushComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UDrawFrustumComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(ULineBatchComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UMaterialBillboardComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UMeshComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(USkinnedMeshComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UPoseableMeshComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(USkeletalMeshComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UStaticMeshComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UInstancedStaticMeshComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UHierarchicalInstancedStaticMeshComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(USplineMeshComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UModelComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UParticleSystemComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UShapeComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UBoxComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UCapsuleComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(USphereComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UDrawSphereComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(USplineComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UTextRenderComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UVectorFieldComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(URadialForceComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UReflectionCaptureComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UBoxReflectionCaptureComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UPlaneReflectionCaptureComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(USphereReflectionCaptureComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(USceneCaptureComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UPlanarReflectionComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(USceneCaptureComponent2D::StaticClass(),TEXT("U"));
-	RegisterClassReflection(USceneCaptureComponentCube::StaticClass(),TEXT("U"));
-	RegisterClassReflection(USpringArmComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UStereoLayerComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UWindDirectionalSourceComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UTimelineComponent::StaticClass(),TEXT("U"));
-	//
-	//
 	/// :: REGISTER DOCUMENTATION LINKS ::
 	///
 	FString DocsURL;
@@ -2062,10 +1747,235 @@ UMGC_SemanticDB::UMGC_SemanticDB() {
 	Documentation.Add(Keyword,DocsURL);
 	//
 	//
+	///// :: REGISTER CORE CLASSES ::
+	///
+	RegisterClassReflection(UObject::StaticClass(),TEXT("U"));
+	//
+	RegisterClassReflection(AActor::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AAmbientSound::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ABrush::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ABrushShape::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AVolume::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AAudioVolume::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ABlockingVolume::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ACameraBlockingVolume::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ALevelStreamingVolume::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ALightmassCharacterIndirectDetailVolume::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ALightmassImportanceVolume::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AMeshMergeCullingVolume::StaticClass(),TEXT("A"));
+	RegisterClassReflection(APhysicsVolume::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ADefaultPhysicsVolume::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AKillZVolume::StaticClass(),TEXT("A"));
+	RegisterClassReflection(APainCausingVolume::StaticClass(),TEXT("A"));
+	RegisterClassReflection(APostProcessVolume::StaticClass(),TEXT("A"));
+	RegisterClassReflection(APrecomputedVisibilityOverrideVolume::StaticClass(),TEXT("A"));
+	RegisterClassReflection(APrecomputedVisibilityVolume::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ATriggerVolume::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AVolumetricLightmapDensityVolume::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ACameraActor::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AController::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ADebugCameraController::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ADecalActor::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ADocumentationActor::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AEmitter::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AHUD::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ADebugCameraHUD::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AInfo::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AExponentialHeightFog::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AGameModeBase::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AEmitterCameraLensEffectBase::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AGameMode::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AGameNetworkManager::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AGameSession::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AGameStateBase::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AGameState::StaticClass(),TEXT("A"));
+	RegisterClassReflection(APlayerState::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AServerStatReplicator::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ASkyLight::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AWindDirectionalSource::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AWorldSettings::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ALevelBounds::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ALevelScriptActor::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ALight::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ADirectionalLight::StaticClass(),TEXT("A"));
+	RegisterClassReflection(APointLight::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ARectLight::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ASpotLight::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AGeneratedMeshAreaLight::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ALightmassPortal::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ALODActor::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AMaterialInstanceActor::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AMatineeActor::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AMatineeActorCameraAnim::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ANavigationObjectBase::StaticClass(),TEXT("A"));
+	RegisterClassReflection(APlayerStart::StaticClass(),TEXT("A"));
+	RegisterClassReflection(APlayerStartPIE::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ANote::StaticClass(),TEXT("A"));
+	RegisterClassReflection(APawn::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ACharacter::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ADefaultPawn::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ASpectatorPawn::StaticClass(),TEXT("A"));
+	RegisterClassReflection(APlayerCameraManager::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AReflectionCapture::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ABoxReflectionCapture::StaticClass(),TEXT("A"));
+	RegisterClassReflection(APlaneReflectionCapture::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ASphereReflectionCapture::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ARigidBodyBase::StaticClass(),TEXT("A"));
+	RegisterClassReflection(APhysicsConstraintActor::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ARadialForceActor::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ASceneCapture::StaticClass(),TEXT("A"));
+	RegisterClassReflection(APlanarReflection::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ASceneCapture2D::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ASceneCaptureCube::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ASkeletalMeshActor::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ASplineMeshActor::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AStaticMeshActor::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ATargetPoint::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ATextRenderActor::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ATriggerBase::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ATriggerBox::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ATriggerCapsule::StaticClass(),TEXT("A"));
+	RegisterClassReflection(ATriggerSphere::StaticClass(),TEXT("A"));
+	RegisterClassReflection(AVectorFieldVolume::StaticClass(),TEXT("A"));
+	//
+	RegisterClassReflection(UActorComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UApplicationLifecycleComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UInputComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UMovementComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UInterpToMovementComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UNavMovementComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UPawnMovementComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UCharacterMovementComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UFloatingPawnMovement::StaticClass(),TEXT("U"));
+	RegisterClassReflection(USpectatorPawnMovement::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UProjectileMovementComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(URotatingMovementComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UPawnNoiseEmitterComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UPhysicalAnimationComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UPlatformEventsComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(USceneComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UAtmosphericFogComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UAudioComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UCameraComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UChildActorComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UDecalComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UExponentialHeightFogComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UForceFeedbackComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(ULightComponentBase::StaticClass(),TEXT("U"));
+	RegisterClassReflection(ULightComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UDirectionalLightComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(ULocalLightComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UPointLightComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(USpotLightComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(URectLightComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(USkyLightComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(ULightmassPortalComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UPhysicsConstraintComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UPhysicsSpringComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UPhysicsThrusterComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UPostProcessComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UPrimitiveComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UArrowComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UBillboardComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UBrushComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UDrawFrustumComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(ULineBatchComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UMaterialBillboardComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UMeshComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(USkinnedMeshComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UPoseableMeshComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(USkeletalMeshComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UStaticMeshComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UInstancedStaticMeshComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UHierarchicalInstancedStaticMeshComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(USplineMeshComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UModelComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UParticleSystemComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UShapeComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UBoxComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UCapsuleComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(USphereComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UDrawSphereComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(USplineComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UTextRenderComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UVectorFieldComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(URadialForceComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UReflectionCaptureComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UBoxReflectionCaptureComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UPlaneReflectionCaptureComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(USphereReflectionCaptureComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(USceneCaptureComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UPlanarReflectionComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(USceneCaptureComponent2D::StaticClass(),TEXT("U"));
+	RegisterClassReflection(USceneCaptureComponentCube::StaticClass(),TEXT("U"));
+	RegisterClassReflection(USpringArmComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UStereoLayerComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UWindDirectionalSourceComponent::StaticClass(),TEXT("U"));
+	RegisterClassReflection(UTimelineComponent::StaticClass(),TEXT("U"));
+	//
+	//
+	for (TObjectIterator<UField>IT; IT; ++IT) {
+		///if (IT->IsA(UProperty::StaticClass())) {continue;}
+		if (IT->IsA(UClass::StaticClass())&&IsValidTarget(Cast<UClass>(*IT))) {
+			UClass* Class = CastChecked<UClass>(*IT);
+			RegisterClassReflection(Class,TEXT("U"));
+		} else if (IT->IsA(UStruct::StaticClass())) {
+			UStruct* Struct = CastChecked<UStruct>(*IT);
+			RegisterStructReflection(Struct);
+		}/* else if (IT->IsA(UEnum::StaticClass())) {
+			UEnum* Enum = CastChecked<UEnum>(*IT);
+			RegisterEnumReflection(Enum);
+		}*///
+	}///
+	//
+	//
 	UpdateExtensions();
 }
 
 void UMGC_SemanticDB::UpdateExtensions() {
+	for (TObjectIterator<UMagicNode>IT; IT; ++IT) {
+		RegisterClassReflection(IT->GetClass(),TEXT("U"));
+		//
+		FClassRedirector CR;
+		CR.ObjectName = IT->GetName();
+		CR.ObjectClass = FString(TEXT("U"))+(IT->GetClass()->GetName());
+		//
+		ClassRedirectors.Add(IT->GetName(),CR);
+	}///
+	//
+	for (TObjectIterator<UEnum>IT; IT; ++IT) {
+		///RegisterEnumReflection((*IT)); // @TOO SLOW!!
+		//
+		FClassRedirector CR;
+		CR.ObjectName = IT->GetName();
+		CR.ObjectClass = FString(TEXT("E"))+((*IT)->GetName());
+		//
+		ClassRedirectors.Add((*IT)->GetName(),CR);
+	}///
+	//
+	for (TObjectIterator<UClass>IT; IT; ++IT) {
+		RegisterClassReflection((*IT),TEXT("U"));
+		//
+		FClassRedirector CR;
+		CR.ObjectName = IT->GetName();
+		CR.ObjectClass = FString(TEXT("U"))+((*IT)->GetName());
+		//
+		ClassRedirectors.Add((*IT)->GetName(),CR);
+	}///
+	//
+	for (TObjectIterator<UStruct>IT; IT; ++IT) {
+		if (IT->IsA(UClass::StaticClass())) {continue;}
+		if (IT->IsA(UFunction::StaticClass())) {continue;}
+		//
+		RegisterStructReflection((*IT));
+		//
+		FClassRedirector CR;
+		CR.ObjectName = IT->GetName();
+		CR.ObjectClass = FString(TEXT("F"))+((*IT)->GetName());
+		//
+		ClassRedirectors.Add((*IT)->GetName(),CR);
+	}///
+	//
 	for (TObjectIterator<AActor>IT; IT; ++IT) {
 		RegisterClassReflection(IT->GetClass(),TEXT("A"));
 		//
@@ -2086,28 +1996,13 @@ void UMGC_SemanticDB::UpdateExtensions() {
 		ClassRedirectors.Add(IT->GetName(),CR);
 	}///
 	//
-	for (TObjectIterator<UEnum>IT; IT; ++IT) {
-		RegisterClassReflection(IT->GetClass(),TEXT("E"));
-		//
-		FClassRedirector CR;
-		CR.ObjectName = IT->GetName();
-		CR.ObjectClass = FString(TEXT("E"))+(IT->GetClass()->GetName());
-		//
-		ClassRedirectors.Add(IT->GetName(),CR);
-	}///
-	//
-	for (TObjectIterator<UMagicNode>IT; IT; ++IT) {
-		RegisterClassReflection(IT->GetClass(),TEXT("U"));
-		//
-		FClassRedirector CR;
-		CR.ObjectName = IT->GetName();
-		CR.ObjectClass = FString(TEXT("U"))+(IT->GetClass()->GetName());
-		//
-		ClassRedirectors.Add(IT->GetName(),CR);
-	}///
-	//
 	for (TObjectIterator<UObject>IT; IT; ++IT) {
-		if (IT->IsA(UField::StaticClass())) {continue;}
+		if (IT->IsA(UEnum::StaticClass())) {continue;}
+		if (IT->IsA(UClass::StaticClass())) {continue;}
+		if (IT->IsA(AActor::StaticClass())) {continue;}
+		if (IT->IsA(UStruct::StaticClass())) {continue;}
+		///if (IT->IsA(UProperty::StaticClass())) {continue;}
+		if (IT->IsA(UActorComponent::StaticClass())) {continue;}
 		//
 		RegisterClassReflection(IT->GetClass(),TEXT("U"));
 		//
@@ -2140,64 +2035,106 @@ void UMGC_SemanticDB::UpdateExtensions() {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void UMGC_SemanticDB::RegisterClassReflection(const UClass* Class, const TCHAR* Prefix) {
-	if (Class==nullptr||Prefix==nullptr) {return;}
+void UMGC_SemanticDB::RegisterClassReflection(UClass* Class, FString Prefix) {
+	FString ClassName = Prefix+Class->GetName();
 	//
 	if (Class->HasAnyClassFlags(CLASS_Hidden)) {return;}
 	if (Class->HasAnyClassFlags(CLASS_Abstract)) {return;}
 	if (Class->HasAnyClassFlags(CLASS_Deprecated)) {return;}
 	if (Class->HasAnyClassFlags(CLASS_NewerVersionExists)) {return;}
 	//
-	const FString ClassName = FString(Prefix)+Class->GetName();
-	const FString ClassHint = Class->GetMetaData(TEXT("MgcHint"));
-	const FString ClassMeta = Class->GetMetaData(TEXT("ToolTip"));
-	const FString ClassParent = (Class->GetSuperClass()) ? Class->GetSuperClass()->GetName() : TEXT("");
+	const FString CHint = Class->GetMetaData(TEXT("MgcHint"));
+	const FString CMeta = Class->GetMetaData(TEXT("ToolTip"));
+	const FString CParent = (Class->GetSuperStruct()) ? Class->GetSuperStruct()->GetName() : TEXT("");
 	//
 	FClassDefinition ClassDefinition;
-	ClassDefinition.ParentClass = ClassParent;
-	ClassDefinition.Tooltip = ClassMeta;
-	ClassDefinition.Hint = ClassHint;
+	ClassDefinition.ParentClass = CParent;
+	ClassDefinition.Tooltip = CMeta;
+	ClassDefinition.Hint = CHint;
 	//
 	for (TFieldIterator<UProperty>PIT(Class,EFieldIteratorFlags::IncludeSuper); PIT; ++PIT) {
-		if (PIT->HasAnyPropertyFlags(CPF_Deprecated)) {continue;}
-		//
 		FString PropName = PIT->GetName();
-		const UProperty* Property = *PIT;
+		UProperty* Property = *PIT;
 		//
 		const FString PHint = PIT->GetMetaData(TEXT("MgcHint"));
 		const FString PMeta = PIT->GetMetaData(TEXT("ToolTip"));
 		//
 		FPropertyDefinition PropDefinition;
+		PropDefinition.ReturnType = PropertyToTypeName(Property)+FString(TEXT(" "))+PropName;
+		PropDefinition.Access = EAccessLevel::Public;
 		PropDefinition.Tooltip = PMeta;
 		PropDefinition.Hint = PHint;
 		//
-		if (Property->IsA(UBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
+		if (PIT->HasAnyPropertyFlags(CPF_Protected)) {PropDefinition.Access=EAccessLevel::Protected;}
+		//
 		if (Property->IsA(UEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
+		if (Property->IsA(UClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
+		if (Property->IsA(UStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
+		if (Property->IsA(UObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
+		//
+		if (Property->IsA(UIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
+		if (Property->IsA(UBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
 		if (Property->IsA(UByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
 		if (Property->IsA(UNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
 		if (Property->IsA(UTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
 		if (Property->IsA(UStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
-		if (Property->IsA(UIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Integer;} else
 		if (Property->IsA(UFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;} else
-		if (Property->IsA(UObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
-		if (Property->IsA(UStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
-		if (Property->IsA(UArrayProperty::StaticClass())) {PropDefinition.TypeOf=EType::Array;} else
-		if (Property->IsA(USetProperty::StaticClass())) {PropDefinition.TypeOf=EType::Set;} else
-		if (Property->IsA(UMapProperty::StaticClass())) {PropDefinition.TypeOf=EType::Map;}
 		//
-		PropDefinition.ReturnType=TEXT("<?>");
-		const FString Display = (PropertyToTypeName(Property,Class)+FString(TEXT(" "))+PropName);
-		PropDefinition.ReturnType = Display;
-		//
-		PropDefinition.Access = EAccessLevel::Public;
-		if (PIT->HasAnyPropertyFlags(CPF_Protected)) {PropDefinition.Access=EAccessLevel::Protected;}
+		if (Property->IsA(UArrayProperty::StaticClass())) {
+			UArrayProperty* PArray = CastChecked<UArrayProperty>(Property);
+			PropDefinition.StackOf = EStack::Array;
+			//
+			if (PArray->Inner && PArray->Inner->IsA(UEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
+			if (PArray->Inner && PArray->Inner->IsA(UClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
+			if (PArray->Inner && PArray->Inner->IsA(UStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
+			if (PArray->Inner && PArray->Inner->IsA(UObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
+			//
+			if (PArray->Inner && PArray->Inner->IsA(UIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
+			if (PArray->Inner && PArray->Inner->IsA(UBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
+			if (PArray->Inner && PArray->Inner->IsA(UByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
+			if (PArray->Inner && PArray->Inner->IsA(UNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
+			if (PArray->Inner && PArray->Inner->IsA(UTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
+			if (PArray->Inner && PArray->Inner->IsA(UStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
+			if (PArray->Inner && PArray->Inner->IsA(UFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;}
+		} else if (Property->IsA(USetProperty::StaticClass())) {
+			USetProperty* PSet = CastChecked<USetProperty>(Property);
+			PropDefinition.StackOf = EStack::Set;
+			//
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
+			//
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;}
+		} else if (Property->IsA(UMapProperty::StaticClass())) {
+			UMapProperty* PMap = CastChecked<UMapProperty>(Property);
+			PropDefinition.StackOf = EStack::Map;
+			//
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
+			//
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;}
+		}///
 		//
 		ClassDefinition.Variables.Add(PropName,PropDefinition);
 	}///
 	//
 	for (TFieldIterator<UFunction>FIT(Class,EFieldIteratorFlags::IncludeSuper); FIT; ++FIT) {
-		if (FIT->HasAnyFunctionFlags(FUNC_EditorOnly)) {continue;}
-		const UFunction* Function = *FIT;
+		UFunction* Function = *FIT;
 		//
 		FString FunName = FIT->GetName();
 		const FString FHint = FIT->GetMetaData(TEXT("MgcHint"));
@@ -2207,24 +2144,23 @@ void UMGC_SemanticDB::RegisterClassReflection(const UClass* Class, const TCHAR* 
 		FunDefinition.Tooltip = FMeta;
 		FunDefinition.Hint = FHint;
 		//
-		if (FIT->HasAnyFunctionFlags(FUNC_BlueprintCallable)) {FunDefinition.TypeOf=EType::Callable;}
-		if (FIT->HasAnyFunctionFlags(FUNC_BlueprintEvent)) {FunDefinition.TypeOf=EType::Event;}
-		if (FIT->HasAnyFunctionFlags(FUNC_BlueprintPure)) {FunDefinition.TypeOf=EType::Pure;}
-		if (FIT->HasAnyFunctionFlags(FUNC_Delegate)) {FunDefinition.TypeOf=EType::Delegate;}
-		if (FIT->HasAnyFunctionFlags(FUNC_Const)) {FunDefinition.TypeOf=EType::Const;}
-		if (FIT->HasAnyFunctionFlags(FUNC_Event)) {FunDefinition.TypeOf=EType::Event;}
+		if (FIT->HasAnyFunctionFlags(FUNC_BlueprintCallable)) {FunDefinition.Flag=EFunctionFlag::Callable;}
+		if (FIT->HasAnyFunctionFlags(FUNC_BlueprintEvent)) {FunDefinition.Flag=EFunctionFlag::Event;}
+		if (FIT->HasAnyFunctionFlags(FUNC_BlueprintPure)) {FunDefinition.Flag=EFunctionFlag::Pure;}
+		if (FIT->HasAnyFunctionFlags(FUNC_Delegate)) {FunDefinition.Flag=EFunctionFlag::Delegate;}
+		if (FIT->HasAnyFunctionFlags(FUNC_Const)) {FunDefinition.Flag=EFunctionFlag::Const;}
+		if (FIT->HasAnyFunctionFlags(FUNC_Event)) {FunDefinition.Flag=EFunctionFlag::Event;}
 		//
 		FunDefinition.Access = EAccessLevel::Static;
 		if (FIT->HasAnyFunctionFlags(FUNC_Public)) {FunDefinition.Access=EAccessLevel::Public;}
 		if (FIT->HasAnyFunctionFlags(FUNC_Private)) {FunDefinition.Access=EAccessLevel::Private;}
 		if (FIT->HasAnyFunctionFlags(FUNC_Protected)) {FunDefinition.Access=EAccessLevel::Protected;}
 		//
-		FunDefinition.ReturnType=TEXT("void");
+		FunDefinition.ReturnType = TEXT("void");
 		for (TFieldIterator<UProperty>PIT(Function); PIT&&(PIT->PropertyFlags&CPF_Parm); ++PIT) {
-			const UProperty* Property = *PIT;
+			UProperty* Property = *PIT;
 			//
-			const FString Display = (PropertyToTypeName(Property,Function)+FString(TEXT(" "))+Property->GetName());
-			//
+			FString Display = (PropertyToTypeName(Property)+FString(TEXT(" "))+Property->GetName());
 			if (Property->HasAnyPropertyFlags(CPF_ReturnParm)) {
 				FunDefinition.ReturnType = Display;
 			} else if (Property->HasAnyPropertyFlags(CPF_OutParm)) {
@@ -2247,46 +2183,184 @@ void UMGC_SemanticDB::RegisterClassReflection(const UClass* Class, const TCHAR* 
 	}///
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-bool UMGC_SemanticDB::IsValidTarget(const UClass* Class) const {
-	bool IsValid = true;
+void UMGC_SemanticDB::RegisterEnumReflection(UEnum* Enum) {
+	FString EnumName = FString(TEXT("E"))+Enum->GetName();
 	//
-	if (Class->HasAnyClassFlags(CLASS_Deprecated|CLASS_NewerVersionExists)) {IsValid=false;}
+	const FString CHint = Enum->GetMetaData(TEXT("MgcHint"));
+	const FString CMeta = Enum->GetMetaData(TEXT("ToolTip"));
+	const FString CParent = TEXT("UEnum");
 	//
-	return IsValid;
+	FClassDefinition EnumDefinition;
+	EnumDefinition.ParentClass = CParent;
+	EnumDefinition.Tooltip = CMeta;
+	EnumDefinition.Hint = CHint;
+	//
+	for (int64 I=0; I<(Enum->GetMaxEnumValue()); I++) {
+		FPropertyDefinition PropDefinition;
+		//
+		const FString &Item = Enum->GetNameStringByIndex(I);
+		PropDefinition.TypeOf = EType::Enum;
+		PropDefinition.ReturnType = Item;
+		//
+		EnumDefinition.Variables.Add(Item,PropDefinition);
+	}///
+	//
+	ClassDefinitions.Add(EnumName,EnumDefinition);
+	//
+	//
+	const auto &Settings = GetDefault<UKMGC_Settings>();
+	if (Settings->ClassDB.Num()>=1) {
+		UMGC_ClassDB* ClassDB = Settings->ClassDB.Array()[0].Get();
+		if (ClassDB==nullptr) {return;}
+		//
+		ClassDB->Extensions.Add(EnumName);
+	}///
 }
 
-const FString UMGC_SemanticDB::PropertyToTypeName(const UProperty* Property, const UObject* Container) {
+void UMGC_SemanticDB::RegisterStructReflection(UStruct* Struct) {
+	if (Struct->IsA(UFunction::StaticClass())) {return;}
+	if (Struct->IsA(UClass::StaticClass())) {return;}
+	//
+	FString StructName = FString(TEXT("F"))+Struct->GetName();
+	//
+	const FString CHint = Struct->GetMetaData(TEXT("MgcHint"));
+	const FString CMeta = Struct->GetMetaData(TEXT("ToolTip"));
+	const FString CParent = (Struct->GetSuperStruct()) ? Struct->GetSuperStruct()->GetName() : TEXT("");
+	//
+	FClassDefinition StructDefinition;
+	StructDefinition.ParentClass = CParent;
+	StructDefinition.Tooltip = CMeta;
+	StructDefinition.Hint = CHint;
+	//
+	//
+	for (TFieldIterator<UProperty>PIT(Struct,EFieldIteratorFlags::IncludeSuper); PIT; ++PIT) {
+		FString PropName = PIT->GetName();
+		UProperty* Property = *PIT;
+		//
+		const FString PHint = PIT->GetMetaData(TEXT("MgcHint"));
+		const FString PMeta = PIT->GetMetaData(TEXT("ToolTip"));
+		//
+		FPropertyDefinition PropDefinition;
+		PropDefinition.ReturnType = PropertyToTypeName(Property)+FString(TEXT(" "))+PropName;
+		PropDefinition.Access = EAccessLevel::Public;
+		PropDefinition.Tooltip = PMeta;
+		PropDefinition.Hint = PHint;
+		//
+		if (PIT->HasAnyPropertyFlags(CPF_Protected)) {PropDefinition.Access=EAccessLevel::Protected;}
+		//
+		if (Property->IsA(UEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
+		if (Property->IsA(UClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
+		if (Property->IsA(UStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
+		if (Property->IsA(UObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
+		//
+		if (Property->IsA(UIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
+		if (Property->IsA(UBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
+		if (Property->IsA(UByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
+		if (Property->IsA(UNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
+		if (Property->IsA(UTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
+		if (Property->IsA(UStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
+		if (Property->IsA(UFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;} else
+		//
+		if (Property->IsA(UArrayProperty::StaticClass())) {
+			UArrayProperty* PArray = CastChecked<UArrayProperty>(Property);
+			PropDefinition.StackOf = EStack::Array;
+			//
+			if (PArray->Inner && PArray->Inner->IsA(UEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
+			if (PArray->Inner && PArray->Inner->IsA(UClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
+			if (PArray->Inner && PArray->Inner->IsA(UStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
+			if (PArray->Inner && PArray->Inner->IsA(UObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
+			//
+			if (PArray->Inner && PArray->Inner->IsA(UIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
+			if (PArray->Inner && PArray->Inner->IsA(UBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
+			if (PArray->Inner && PArray->Inner->IsA(UByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
+			if (PArray->Inner && PArray->Inner->IsA(UNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
+			if (PArray->Inner && PArray->Inner->IsA(UTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
+			if (PArray->Inner && PArray->Inner->IsA(UStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
+			if (PArray->Inner && PArray->Inner->IsA(UFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;}
+		} else if (Property->IsA(USetProperty::StaticClass())) {
+			USetProperty* PSet = CastChecked<USetProperty>(Property);
+			PropDefinition.StackOf = EStack::Set;
+			//
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
+			//
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(UFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;}
+		} else if (Property->IsA(UMapProperty::StaticClass())) {
+			UMapProperty* PMap = CastChecked<UMapProperty>(Property);
+			PropDefinition.StackOf = EStack::Map;
+			//
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
+			//
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(UFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;}
+		}///
+		//
+		StructDefinition.Variables.Add(PropName,PropDefinition);
+	}///
+	//
+	ClassDefinitions.Add(StructName,StructDefinition);
+	//
+	//
+	const auto &Settings = GetDefault<UKMGC_Settings>();
+	if (Settings->ClassDB.Num()>=1) {
+		UMGC_ClassDB* ClassDB = Settings->ClassDB.Array()[0].Get();
+		if (ClassDB==nullptr) {return;}
+		//
+		ClassDB->Extensions.Add(StructName);
+	}///
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+FString UMGC_SemanticDB::PropertyToTypeName(UProperty* Property) {
 	FString PType = TEXT("<?>");
+	//
+	if (Property==nullptr) {return PType;}
 	//
 	if (Property->IsA(UBoolProperty::StaticClass())) {PType=TEXT("bool"); return PType;}
 	if (Property->IsA(UIntProperty::StaticClass())) {PType=TEXT("int32"); return PType;}
 	if (Property->IsA(UByteProperty::StaticClass())) {PType=TEXT("uint8"); return PType;}
+	if (Property->IsA(UFloatProperty::StaticClass())) {PType=TEXT("float"); return PType;}
+	//
 	if (Property->IsA(UNameProperty::StaticClass())) {PType=TEXT("FName"); return PType;}
 	if (Property->IsA(UTextProperty::StaticClass())) {PType=TEXT("FText"); return PType;}
 	if (Property->IsA(UStrProperty::StaticClass())) {PType=TEXT("FString"); return PType;}
-	if (Property->IsA(UFloatProperty::StaticClass())) {PType=TEXT("float"); return PType;}
 	//
 	if (Property->IsA(UEnumProperty::StaticClass())) {
-		PType=TEXT("EnumType");
+		PType = TEXT("enum");
 		//
 		UEnum* Enum = CastChecked<UEnumProperty>(Property)->GetEnum();
 		PType = FString(TEXT("E"))+Enum->GetName();
 	return PType;}
 	//
-	if (Property->IsA(UObjectProperty::StaticClass())) {
-		PType=TEXT("UObject");
+	if (Property->IsA(UClassProperty::StaticClass())) {
+		PType = TEXT("class");
 		//
-		const UObjectProperty* POBJ = CastChecked<UObjectProperty>(Property);
-		auto OBJ = POBJ->GetDefaultPropertyValue();
+		UClassProperty* PCLS = CastChecked<UClassProperty>(Property);
+		auto CLS = PCLS->GetDefaultPropertyValue();
 		//
-		if (OBJ!=nullptr) {PType=FString(TEXT("U"))+OBJ->GetName();}
+		if (CLS!=nullptr) {PType=FString(TEXT("U"))+CLS->GetName();}
 	return PType;}
 	//
 	if (Property->IsA(UStructProperty::StaticClass())) {
-		const UStructProperty* PStruct = CastChecked<UStructProperty>(Property);
-		PType = TEXT("UScriptStruct");
+		UStructProperty* PStruct = CastChecked<UStructProperty>(Property);
+		PType = TEXT("struct");
 		//
 		if (PStruct->Struct==TBaseStructure<FColor>::Get()) {PType=TEXT("FColor"); return PType;}
 		if (PStruct->Struct==TBaseStructure<FVector>::Get()) {PType=TEXT("FVector"); return PType;}
@@ -2298,76 +2372,96 @@ const FString UMGC_SemanticDB::PropertyToTypeName(const UProperty* Property, con
 		PType = FString(TEXT("F"))+PStruct->Struct->GetName();
 	return PType;}
 	//
+	if (Property->IsA(UObjectProperty::StaticClass())) {
+		PType = TEXT("object");
+		//
+		UObjectProperty* POBJ = CastChecked<UObjectProperty>(Property);
+		auto OBJ = POBJ->GetDefaultPropertyValue();
+		//
+		if (OBJ!=nullptr) {PType=FString(TEXT("U"))+OBJ->GetName();}
+	return PType;}
+	//
 	if (Property->IsA(USetProperty::StaticClass())) {
-		const USetProperty* PSet = CastChecked<USetProperty>(Property);
+		USetProperty* PSet = CastChecked<USetProperty>(Property);
 		//
 		if (PSet->ElementProp && PSet->ElementProp->IsA(UIntProperty::StaticClass())) {PType=TEXT("TSet< int >"); return PType;}
 		if (PSet->ElementProp && PSet->ElementProp->IsA(UBoolProperty::StaticClass())) {PType=TEXT("TSet< bool >"); return PType;}
 		if (PSet->ElementProp && PSet->ElementProp->IsA(UByteProperty::StaticClass())) {PType=TEXT("TSet< uint8 >"); return PType;}
+		if (PSet->ElementProp && PSet->ElementProp->IsA(UFloatProperty::StaticClass())) {PType=TEXT("TSet< float >"); return PType;}
+		//
 		if (PSet->ElementProp && PSet->ElementProp->IsA(UNameProperty::StaticClass())) {PType=TEXT("TSet< FName >"); return PType;}
 		if (PSet->ElementProp && PSet->ElementProp->IsA(UTextProperty::StaticClass())) {PType=TEXT("TSet< FText >"); return PType;}
 		if (PSet->ElementProp && PSet->ElementProp->IsA(UStrProperty::StaticClass())) {PType=TEXT("TSet< FString >"); return PType;}
-		if (PSet->ElementProp && PSet->ElementProp->IsA(UFloatProperty::StaticClass())) {PType=TEXT("TSet< float >"); return PType;}
 		//
 		if (PSet->ElementProp && PSet->ElementProp->IsA(UEnumProperty::StaticClass())) {
-			PType=TEXT("TSet< EnumType >");
+			PType = TEXT("TSet< enum >");
 			//
 			UEnum* Enum = CastChecked<UEnumProperty>(PSet->ElementProp)->GetEnum();
 			PType = FString(TEXT("E"))+Enum->GetName();
 		return PType;}
 		//
-		if (PSet->ElementProp && PSet->ElementProp->IsA(UObjectProperty::StaticClass())) {
-			UObjectProperty* POBJ = CastChecked<UObjectProperty>(PSet->ElementProp);
-			PType=TEXT("TSet< UObject >");
+		if (PSet->ElementProp && PSet->ElementProp->IsA(UClassProperty::StaticClass())) {
+			PType = TEXT("TSet< class >");
 			//
-			auto OBJ = POBJ->GetDefaultPropertyValue();
-			if (OBJ!=nullptr) {PType=FString::Printf(TEXT("TSet< U%s >"),*OBJ->GetName());}
+			UClassProperty* PCLS = CastChecked<UClassProperty>(PSet->ElementProp);
+			auto CLS = PCLS->GetDefaultPropertyValue();
+			//
+			if (CLS!=nullptr) {PType=FString(TEXT("U"))+CLS->GetName();}
 		return PType;}
 		//
 		if (PSet->ElementProp && PSet->ElementProp->IsA(UStructProperty::StaticClass())) {
 			UStructProperty* PStruct = CastChecked<UStructProperty>(PSet->ElementProp);
-			PType = TEXT("TSet< UScriptStruct >");
+			PType = TEXT("TSet< struct >");
 			//
 			if (PStruct->Struct==TBaseStructure<FColor>::Get()) {PType=TEXT("TSet< FColor >"); return PType;}
 			if (PStruct->Struct==TBaseStructure<FVector>::Get()) {PType=TEXT("TSet< FVector >"); return PType;}
 			if (PStruct->Struct==TBaseStructure<FRotator>::Get()) {PType=TEXT("TSet< FRotator >"); return PType;}
-			if (PStruct->Struct==TBaseStructure<FVector2D>::Get()) {PType=TEXT("TSet< Vector2D >"); return PType;}
+			if (PStruct->Struct==TBaseStructure<FVector2D>::Get()) {PType=TEXT("TSet< FVector2D >"); return PType;}
 			if (PStruct->Struct==TBaseStructure<FTransform>::Get()) {PType=TEXT("TSet < FTransform >"); return PType;}
 			if (PStruct->Struct==TBaseStructure<FLinearColor>::Get()) {PType=TEXT("TSet< FLinearColor >"); return PType;}
 			//
 			PType = FString::Printf(TEXT("TSet< F%s >"),*PStruct->Struct->GetName());
 		return PType;}
+		//
+		if (PSet->ElementProp && PSet->ElementProp->IsA(UObjectProperty::StaticClass())) {
+			UObjectProperty* POBJ = CastChecked<UObjectProperty>(PSet->ElementProp);
+			PType = TEXT("TSet< object >");
+			//
+			auto OBJ = POBJ->GetDefaultPropertyValue();
+			if (OBJ!=nullptr) {PType=FString::Printf(TEXT("TSet< U%s >"),*OBJ->GetName());}
+		return PType;}
 	}///
 	//
 	if (Property->IsA(UMapProperty::StaticClass())) {
-		const UMapProperty* PMap = CastChecked<UMapProperty>(Property);
+		UMapProperty* PMap = CastChecked<UMapProperty>(Property);
 		//
 		if (PMap->KeyProp && PMap->KeyProp->IsA(UBoolProperty::StaticClass())) {PType=TEXT("TMap< bool, ... >"); return PType;}
 		if (PMap->KeyProp && PMap->KeyProp->IsA(UIntProperty::StaticClass())) {PType=TEXT("TMap< int32, ... >"); return PType;}
 		if (PMap->KeyProp && PMap->KeyProp->IsA(UByteProperty::StaticClass())) {PType=TEXT("TMap< uint8, ... >"); return PType;}
+		if (PMap->KeyProp && PMap->KeyProp->IsA(UFloatProperty::StaticClass())) {PType=TEXT("TMap< float, ... >"); return PType;}
+		//
 		if (PMap->KeyProp && PMap->KeyProp->IsA(UNameProperty::StaticClass())) {PType=TEXT("TMap< FName, ... >"); return PType;}
 		if (PMap->KeyProp && PMap->KeyProp->IsA(UTextProperty::StaticClass())) {PType=TEXT("TMap< FText, ... >"); return PType;}
-		if (PMap->KeyProp && PMap->KeyProp->IsA(UFloatProperty::StaticClass())) {PType=TEXT("TMap< float, ... >"); return PType;}
 		if (PMap->KeyProp && PMap->KeyProp->IsA(UStrProperty::StaticClass())) {PType=TEXT("TMap< FString, ... >"); return PType;}
 		//
 		if (PMap->KeyProp && PMap->KeyProp->IsA(UEnumProperty::StaticClass())) {
-			PType=TEXT("TMap< EnumType, ... >");
+			PType = TEXT("TMap< enum, ... >");
 			//
 			UEnum* Enum = CastChecked<UEnumProperty>(PMap->KeyProp)->GetEnum();
 			PType = FString(TEXT("E"))+Enum->GetName();
 		return PType;}
 		//
-		if (PMap->KeyProp && PMap->KeyProp->IsA(UObjectProperty::StaticClass())) {
-			UObjectProperty* POBJ = CastChecked<UObjectProperty>(PMap->KeyProp);
-			PType=TEXT("TMap< UObject, ... >");
+		if (PMap->KeyProp && PMap->KeyProp->IsA(UClassProperty::StaticClass())) {
+			UClassProperty* PCLS = CastChecked<UClassProperty>(PMap->KeyProp);
+			PType = TEXT("TMap< class, ... >");
 			//
-			auto OBJ = POBJ->GetDefaultPropertyValue();
-			if (OBJ!=nullptr) {PType=FString::Printf(TEXT("TMap< U%s, ... >"),*OBJ->GetName());}
+			auto CLS = PCLS->GetDefaultPropertyValue();
+			if (CLS!=nullptr) {PType=FString::Printf(TEXT("TMap< U%s, ... >"),*CLS->GetName());}
 		return PType;}
 		//
 		if (PMap->KeyProp && PMap->KeyProp->IsA(UStructProperty::StaticClass())) {
 			UStructProperty* PStruct = CastChecked<UStructProperty>(PMap->KeyProp);
-			PType = TEXT("TMap< UScriptStruct, ... >");
+			PType = TEXT("TMap< struct, ... >");
 			//
 			if (PStruct->Struct==TBaseStructure<FColor>::Get()) {PType=TEXT("TMap< FColor, ... >"); return PType;}
 			if (PStruct->Struct==TBaseStructure<FVector>::Get()) {PType=TEXT("TMap< FVector, ... >"); return PType;}
@@ -2378,50 +2472,75 @@ const FString UMGC_SemanticDB::PropertyToTypeName(const UProperty* Property, con
 			//
 			PType = FString::Printf(TEXT("TMap< F%s >"),*PStruct->Struct->GetName());
 		return PType;}
+		//
+		if (PMap->KeyProp && PMap->KeyProp->IsA(UObjectProperty::StaticClass())) {
+			UObjectProperty* POBJ = CastChecked<UObjectProperty>(PMap->KeyProp);
+			PType = TEXT("TMap< object, ... >");
+			//
+			auto OBJ = POBJ->GetDefaultPropertyValue();
+			if (OBJ!=nullptr) {PType=FString::Printf(TEXT("TMap< U%s, ... >"),*OBJ->GetName());}
+		return PType;}
 	}///
 	//
 	if (Property->IsA(UArrayProperty::StaticClass())) {
-		const UArrayProperty* PArray = CastChecked<UArrayProperty>(Property);
+		UArrayProperty* PArray = CastChecked<UArrayProperty>(Property);
 		//
 		if (PArray->Inner && PArray->Inner->IsA(UBoolProperty::StaticClass())) {PType=TEXT("TArray< bool >"); return PType;}
 		if (PArray->Inner && PArray->Inner->IsA(UIntProperty::StaticClass())) {PType=TEXT("TArray< int32 >"); return PType;}
-		if (PArray->Inner && PArray->Inner->IsA(UNameProperty::StaticClass())) {PType=TEXT("TArray< FName >"); return PType;}
-		if (PArray->Inner && PArray->Inner->IsA(UTextProperty::StaticClass())) {PType=TEXT("TArray< FText >"); return PType;}
 		if (PArray->Inner && PArray->Inner->IsA(UByteProperty::StaticClass())) {PType=TEXT("TArray< uint8 >"); return PType;}
 		if (PArray->Inner && PArray->Inner->IsA(UFloatProperty::StaticClass())) {PType=TEXT("TArray< float >"); return PType;}
+		//
+		if (PArray->Inner && PArray->Inner->IsA(UNameProperty::StaticClass())) {PType=TEXT("TArray< FName >"); return PType;}
+		if (PArray->Inner && PArray->Inner->IsA(UTextProperty::StaticClass())) {PType=TEXT("TArray< FText >"); return PType;}
 		if (PArray->Inner && PArray->Inner->IsA(UStrProperty::StaticClass())) {PType=TEXT("TArray< FString >"); return PType;}
 		//
 		if (PArray->Inner && PArray->Inner->IsA(UEnumProperty::StaticClass())) {
-			PType=TEXT("TArray< EnumType >");
+			PType = TEXT("TArray< enum >");
 			//
 			UEnum* Enum = CastChecked<UEnumProperty>(PArray->Inner)->GetEnum();
 			PType = FString(TEXT("E"))+Enum->GetName();
 		return PType;}
 		//
-		if (PArray->Inner && PArray->Inner->IsA(UObjectProperty::StaticClass())) {
-			UObjectProperty* POBJ = CastChecked<UObjectProperty>(PArray->Inner);
-			PType=TEXT("TArray< UObject >");
+		if (PArray->Inner && PArray->Inner->IsA(UClassProperty::StaticClass())) {
+			UClassProperty* PCLS = CastChecked<UClassProperty>(PArray->Inner);
+			PType = TEXT("TArray< class >");
 			//
-			auto OBJ = POBJ->GetDefaultPropertyValue();
-			if (OBJ!=nullptr) {PType=FString::Printf(TEXT("TArray< U%s, ... >"),*OBJ->GetName());}
+			auto CLS = PCLS->GetDefaultPropertyValue();
+			if (CLS!=nullptr) {PType=FString::Printf(TEXT("TArray< U%s, ... >"),*CLS->GetName());}
 		return PType;}
 		//
 		if (PArray->Inner && PArray->Inner->IsA(UStructProperty::StaticClass())) {
 			UStructProperty* PStruct = CastChecked<UStructProperty>(PArray->Inner);
-			PType = TEXT("TArray< UScriptStruct >");
+			PType = TEXT("TArray< struct >");
 			//
-			if (PStruct->Struct==TBaseStructure<FColor>::Get()) {PType=PType=TEXT("TArray< FColor >"); return PType;}
-			if (PStruct->Struct==TBaseStructure<FVector>::Get()) {PType=PType=TEXT("TArray< FVector >"); return PType;}
-			if (PStruct->Struct==TBaseStructure<FRotator>::Get()) {PType=PType=TEXT("TArray< FRotator >"); return PType;}
-			if (PStruct->Struct==TBaseStructure<FVector2D>::Get()) {PType=PType=TEXT("TArray< FVector2D >"); return PType;}
-			if (PStruct->Struct==TBaseStructure<FTransform>::Get()) {PType=PType=TEXT("TArray< FTransform >"); return PType;}
-			if (PStruct->Struct==TBaseStructure<FLinearColor>::Get()) {PType=PType=TEXT("TArray< FLinearColor >"); return PType;}
+			if (PStruct->Struct==TBaseStructure<FColor>::Get()) {PType=TEXT("TArray< FColor >"); return PType;}
+			if (PStruct->Struct==TBaseStructure<FVector>::Get()) {PType=TEXT("TArray< FVector >"); return PType;}
+			if (PStruct->Struct==TBaseStructure<FRotator>::Get()) {PType=TEXT("TArray< FRotator >"); return PType;}
+			if (PStruct->Struct==TBaseStructure<FVector2D>::Get()) {PType=TEXT("TArray< FVector2D >"); return PType;}
+			if (PStruct->Struct==TBaseStructure<FTransform>::Get()) {PType=TEXT("TArray< FTransform >"); return PType;}
+			if (PStruct->Struct==TBaseStructure<FLinearColor>::Get()) {PType=TEXT("TArray< FLinearColor >"); return PType;}
 			//
 			PType = FString::Printf(TEXT("TArray< F%s >"),*PStruct->Struct->GetName());
+		return PType;}
+		//
+		if (PArray->Inner && PArray->Inner->IsA(UObjectProperty::StaticClass())) {
+			UObjectProperty* POBJ = CastChecked<UObjectProperty>(PArray->Inner);
+			PType=TEXT("TArray< object >");
+			//
+			auto OBJ = POBJ->GetDefaultPropertyValue();
+			if (OBJ!=nullptr) {PType=FString::Printf(TEXT("TArray< U%s, ... >"),*OBJ->GetName());}
 		return PType;}
 	}///
 	//
 	return PType;
+}
+
+bool UMGC_SemanticDB::IsValidTarget(UClass* Class) const {
+	bool IsValid = true;
+	//
+	if (Class->HasAnyClassFlags(CLASS_Deprecated|CLASS_NewerVersionExists)) {IsValid=false;}
+	//
+	return IsValid;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

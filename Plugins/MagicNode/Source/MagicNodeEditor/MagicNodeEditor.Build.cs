@@ -6,6 +6,7 @@ using System.IO;
 public class MagicNodeEditor : ModuleRules {
     public MagicNodeEditor(ReadOnlyTargetRules Target) : base(Target) {
         PrivatePCHHeaderFile = "Public/MagicNodeEditor_Shared.h";
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		bEnforceIWYU = true;
 		//
         PublicDependencyModuleNames.AddRange(

@@ -17,8 +17,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// MGC Parser:: Internal Types
 
-class TASK_MGC_AutoComplete;
-
 enum EMGC_CompilerResult : uint32 {
 	None					=	0		/// No Compilation result.
 	, UnknownException		=	1		/// Compiler Unknown Exceptions.
@@ -35,7 +33,6 @@ enum EMGC_CompilerResult : uint32 {
 /// MGC Parser:: Internal Class
 
 class IKMGC_ScriptParser {
-	friend class TASK_MGC_AutoComplete;
 private:
 	static FClassDefinition ClassPointer;
 	//
@@ -44,16 +41,17 @@ private:
 	static FString Docs;
 protected:
 	void KMGC_InitParser() {
-		IKMGC_ScriptParser::Message.Empty();
-		IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::None,TEXT(""));
-		IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::UnknownException,TEXT("'Unknown Exception' while parsing MGC Script."));
-		IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::InternalError,TEXT("'Internal Compiler Error' while parsing MGC Script."));
-		IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::ParsingFailure,TEXT("'Parsing Failure' while parsing MGC Script; This is usually caused by empty scripts or headers."));
-		IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::InvalidClass,TEXT("'Invalid Class' while parsing MGC Script; This is usually caused by an unknown or self-referenced parent class."));
-		IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::InvalidTemplate,TEXT("'Invalid Template' while parsing MGC Script; This is usually caused by OS limited permissions when reading Content/Template/ directory."));
-		IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::InvalidSyntax,TEXT("'Invalid Syntax' while parsing MGC Script; This is usually caused by invalid or missing 'Execute' function signature."));
-		IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::InvalidOutput,TEXT("'Invalid Output' while parsing MGC Script; This is usually caused by OS limited permissions when writing to Source/Project/MagicNodes/ directory."));
-		IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::Compiled,TEXT("MGC 'Compiled', Script successfully parsed and CPP Class successfully generated."));
+		if (IKMGC_ScriptParser::Message.Num()==0) {
+			IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::None,TEXT("OK"));
+			IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::UnknownException,TEXT("'Unknown Exception' while parsing MGC Script."));
+			IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::InternalError,TEXT("'Internal Compiler Error' while parsing MGC Script."));
+			IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::ParsingFailure,TEXT("'Parsing Failure' while parsing MGC Script; This is usually caused by empty scripts or headers."));
+			IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::InvalidClass,TEXT("'Invalid Class' while parsing MGC Script; This is usually caused by an unknown or self-referenced parent class."));
+			IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::InvalidTemplate,TEXT("'Invalid Template' while parsing MGC Script; This is usually caused by OS limited permissions when reading Content/Template/ directory."));
+			IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::InvalidSyntax,TEXT("'Invalid Syntax' while parsing MGC Script; This is usually caused by invalid or missing 'Execute' function signature."));
+			IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::InvalidOutput,TEXT("'Invalid Output' while parsing MGC Script; This is usually caused by OS limited permissions when writing to Source/Project/MagicNodes/ directory."));
+			IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::Compiled,TEXT("MGC 'Compiled', Script successfully parsed and CPP Class successfully generated."));
+		}///
 	}///
 	//
 	const EMGC_CompilerResult CompileScriptClass(const FString &ScriptName, const FString &Header, const FString &Script, const FString &Types, const FString &ParentClass, const TArray<FString>&Includes, const TArray<FString>&Macros);
@@ -69,10 +67,6 @@ public:
 	//
 	static TMap<uint32,FString>Message;
 public:
-	MAGICNODEKISMET_API static const FString &GetClassDocumentation(const FString &Keyword);
-	MAGICNODEKISMET_API static const bool ParseClassFromHeader(const FString &Header, const FString &Class);
-	MAGICNODEKISMET_API static void AutoComplete(const FString &Owner, const FString &Keyword, TArray<FString>&Results);
-	//
 	static FClassDefinition &GetClassReference(const FString &Keyword);
 	static const FClassDefinition &GetClassInfo(const FString &Keyword);
 	static const FClassRedirector &GetClassRedirector(const FString &Keyword);
@@ -90,6 +84,11 @@ public:
 	//
 	static const FSlateColor GetTypeColor(const FString &Notation);
 	static const FSlateBrush* GetTypeIcon(const FString &Notation);
+public:
+	MAGICNODEKISMET_API static const FString &GetClassDocumentation(const FString &Keyword);
+	MAGICNODEKISMET_API static const bool ParseClassFromHeader(const FString &Header, const FString &Class);
+	MAGICNODEKISMET_API static void AutoComplete(const FString &Owner, const FString &Keyword, TArray<FString>&Results);
+	MAGICNODEKISMET_API static void AutoSuggest(const TArray<FString>&Lines, const FString &Keyword, TArray<FString>&Results);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

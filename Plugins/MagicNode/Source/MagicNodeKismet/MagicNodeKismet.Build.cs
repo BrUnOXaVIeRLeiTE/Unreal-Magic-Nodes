@@ -6,6 +6,7 @@ using System.IO;
 public class MagicNodeKismet : ModuleRules {
     public MagicNodeKismet(ReadOnlyTargetRules Target) : base(Target) {
 		PrivatePCHHeaderFile = "Public/MagicNodeKismet_Shared.h";
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		bEnforceIWYU = true;
 		//
 		PublicDependencyModuleNames.AddRange(

@@ -42,7 +42,7 @@ class UMagicNode;
 /// MGC Runtime:: Node Classes
 
 /// Magic-Node's Runtime Object.
-UCLASS(classGroup=Synaptech, Category="Magic Node", BlueprintType, hideCategories=("Activation","Variable"))
+UCLASS(classGroup="Synaptech", Category="Magic Node", BlueprintType, hideCategories=("Activation","Variable"))
 class MAGICNODERUNTIME_API UMagicNode : public UObject {
 	GENERATED_BODY()
 public:
@@ -77,7 +77,8 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// MGC Object:: Node Script
 
-UCLASS(classGroup=Synaptech, Category="Magic Node", Blueprintable, hideCategories=("Activation","Variable"), meta=(DisplayName="Magic Node Script", ShortTooltip = "It's Magic."))
+/* C++ Scriptable Node for Blueprint Graphs */
+UCLASS(classGroup="Synaptech", Category="Magic Node", Blueprintable, hideCategories=("Activation","Variable"), meta=(DisplayName="Magic Node Script", ShortTooltip = "It's Magic."))
 class MAGICNODERUNTIME_API UMagicNodeScript : public UObject {
 	GENERATED_BODY()
 	//

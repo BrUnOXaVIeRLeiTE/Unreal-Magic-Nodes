@@ -55,10 +55,10 @@ void FKMGC_NodeStyle::Initialize() {
 	const FVector2D Icon22x22(22.f,22.f);
 	const FVector2D Icon32x32(32.f,32.f);
 	const FVector2D Icon40x40(40.f,40.f);
+	const FVector2D Icon48x48(48.f,48.f);
 	const FVector2D Icon64x64(64.f,64.f);
 	const FVector2D Icon128x128(128.f,128.f);
 	//
-	FSlateFontInfo TTF_Source = TTF_FONT(TEXT("UI/SourceCodePro"),12);
 	FSlateFontInfo TTF_Hack = TTF_FONT(TEXT("UI/Hack"),14);
 	//
 	const FTextBlockStyle TBS_CodeStyle = FTextBlockStyle()
@@ -68,14 +68,6 @@ void FKMGC_NodeStyle::Initialize() {
 	.SetColorAndOpacity(FLinearColor::White)
 	.SetShadowOffset(FVector2D::ZeroVector)
 	.SetFont(TTF_Hack);
-	//
-	const FTextBlockStyle TBS_SourceStyle = FTextBlockStyle()
-	.SetHighlightShape(BOX_BRUSH("UI/KMGC_TextHighlight",FMargin(3.f/8.f)))
-	.SetHighlightColor(FLinearColor(FColor(255,175,5,255)))
-	.SetShadowColorAndOpacity(FLinearColor::Black)
-	.SetColorAndOpacity(FLinearColor::White)
-	.SetShadowOffset(FVector2D::ZeroVector)
-	.SetFont(TTF_Source);
 	//
 	//
 	/// Icons:
@@ -89,12 +81,14 @@ void FKMGC_NodeStyle::Initialize() {
 		StyleSet->Set("KMGC.Toolbar.SaveScript", new IMAGE_BRUSH(TEXT("UI/KMGC_Save_40x"),Icon40x40));
 		StyleSet->Set("KMGC.Toolbar.MagicNode", new IMAGE_BRUSH(TEXT("Icons/MagicNode_128x"),Icon40x40));
 		StyleSet->Set("KMGC.Toolbar.ReloadScript", new IMAGE_BRUSH(TEXT("UI/KMGC_Reload_40x"),Icon40x40));
+		//
+		StyleSet->Set("KMGC.Focus", new IMAGE_BRUSH("UI/KMGC_LineFocus_40x",Icon40x40));
+		StyleSet->Set("KMGC.Lines", new IMAGE_BRUSH("UI/KMGC_TextHighlight",Icon40x40));
 	}
 	//
 	/// Text Editor:
 	{
 		StyleSet->Set("KMGC.CodeBlockStyle",TBS_CodeStyle);
-		StyleSet->Set("KMGC.SourceBlockStyle",TBS_SourceStyle);
 		//
 		StyleSet->Set("KMGC.SyntaxHighlight.Processor",FTextBlockStyle(TBS_CodeStyle).SetColorAndOpacity(FLinearColor(FColor(115,115,115,255))));
 		StyleSet->Set("KMGC.SyntaxHighlight.Variable",FTextBlockStyle(TBS_CodeStyle).SetColorAndOpacity(FLinearColor(FColor(255,225,155,255))));

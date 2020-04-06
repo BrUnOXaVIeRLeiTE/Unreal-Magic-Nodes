@@ -22,16 +22,7 @@
 UENUM()
 enum class EType : uint8 {
 	None,
-	Array,
-	Set,
-	Map,
-	Native,
-	Callable,
-	Pure,
-	Const,
-	Event,
-	Delegate,
-	Integer,
+	Int,
 	Byte,
 	Bool,
 	Float,
@@ -39,16 +30,36 @@ enum class EType : uint8 {
 	Text,
 	String,
 	Enum,
+	Class,
 	Struct,
 	Object
+};
+
+UENUM()
+enum class EStack : uint8 {
+	None,
+	Array,
+	Set,
+	Map
+};
+
+UENUM()
+enum class EFunctionFlag : uint8 {
+	None,
+	Pure,
+	Const,
+	Event,
+	Native,
+	Callable,
+	Delegate
 };
 
 UENUM()
 enum class EAccessLevel : uint8 {
 	None,
 	Public,
-	Protected,
 	Private,
+	Protected,
 	Static
 };
 
@@ -79,6 +90,7 @@ struct FPropertyDefinition {
 	GENERATED_USTRUCT_BODY()
 	//
 	UPROPERTY() EType TypeOf;
+	UPROPERTY() EStack StackOf;
 	UPROPERTY() EAccessLevel Access;
 	//
 	UPROPERTY() FString ReturnType;
@@ -106,16 +118,28 @@ struct FPropertyDefinition {
 	//
 	FString TypeToString() const {
 		switch (TypeOf) {
+			case EType::Int: return TEXT("int32"); break;
 			case EType::Bool: return TEXT("bool"); break;
+			case EType::Byte: return TEXT("uint8"); break;
 			case EType::Name: return TEXT("FName"); break;
 			case EType::Text: return TEXT("FText"); break;
-			case EType::Byte: return TEXT("uint8"); break;
-			case EType::Enum: return TEXT("UEnum"); break;
 			case EType::Float: return TEXT("float"); break;
-			case EType::Integer: return TEXT("int32"); break;
 			case EType::String: return TEXT("FString"); break;
+			//
+			case EType::Enum: return TEXT("UEnum"); break;
+			case EType::Class: return TEXT("UClass"); break;
+			case EType::Struct: return TEXT("UStruct"); break;
 			case EType::Object: return TEXT("UObject"); break;
-			case EType::Struct: return TEXT("UScriptStruct"); break;
+		default: break;}
+		//
+		return TEXT("<?>");
+	}///
+	//
+	FString StackToString() const {
+		switch (StackOf) {
+			case EStack::Map: return TEXT("TMap"); break;
+			case EStack::Set: return TEXT("TSet"); break;
+			case EStack::Array: return TEXT("TArray"); break;
 		default: break;}
 		//
 		return TEXT("<?>");
@@ -138,6 +162,8 @@ struct FFunctionDefinition {
 	GENERATED_USTRUCT_BODY()
 	//
 	UPROPERTY() EType TypeOf;
+	UPROPERTY() EStack StackOf;
+	UPROPERTY() EFunctionFlag Flag;
 	UPROPERTY() EAccessLevel Access;
 	//
 	UPROPERTY() FString ReturnType;
@@ -172,13 +198,13 @@ struct FFunctionDefinition {
 	//
 	//
 	FString TypeToString() const {
-		switch (TypeOf) {
-			case EType::Pure: return TEXT("Pure"); break;
-			case EType::Const: return TEXT("Const"); break;
-			case EType::Event: return TEXT("Event"); break;
-			case EType::Native: return TEXT("Native"); break;
-			case EType::Delegate: return TEXT("Event"); break;
-			case EType::Callable: return TEXT("Callable"); break;
+		switch (Flag) {
+			case EFunctionFlag::Pure: return TEXT("Pure"); break;
+			case EFunctionFlag::Const: return TEXT("Const"); break;
+			case EFunctionFlag::Event: return TEXT("Event"); break;
+			case EFunctionFlag::Native: return TEXT("Native"); break;
+			case EFunctionFlag::Delegate: return TEXT("Event"); break;
+			case EFunctionFlag::Callable: return TEXT("Callable"); break;
 		default: break;}
 		//
 		return TEXT("<?>");
@@ -241,13 +267,14 @@ struct FClassRedirector {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// MGC Parser Database Classes:
 
-UCLASS(classGroup=Synaptech, Category="Synaptech")
+UCLASS(classGroup="Synaptech", Category="Synaptech")
 class MAGICNODEKISMET_API UMGC_KeywordDB : public UObject {
 	GENERATED_BODY()
 	//
 	UMGC_KeywordDB();
 public:
 	void PostLoad() override;
+	//
 	void UpdateExtensions();
 	//
 	//
@@ -271,13 +298,14 @@ public:
 	TSet<FString>Extensions;
 };
 
-UCLASS(classGroup=Synaptech, Category="Synaptech")
+UCLASS(classGroup="Synaptech", Category="Synaptech")
 class MAGICNODEKISMET_API UMGC_ClassDB : public UObject {
 	GENERATED_BODY()
 	//
 	UMGC_ClassDB();
 public:
 	void PostLoad() override;
+	//
 	void UpdateExtensions();
 	//
 	//
@@ -293,13 +321,14 @@ public:
 	TSet<FString>Extensions;
 };
 
-UCLASS(classGroup=Synaptech, Category="Synaptech")
+UCLASS(classGroup="Synaptech", Category="Synaptech")
 class MAGICNODEKISMET_API UMGC_FunctionDB : public UObject {
 	GENERATED_BODY()
 	//
 	UMGC_FunctionDB();
 public:
 	void PostLoad() override;
+	//
 	void UpdateExtensions();
 	//
 	//
@@ -311,17 +340,20 @@ public:
 	TSet<FString>Extensions;
 };
 
-UCLASS(classGroup=Synaptech, Category="Synaptech")
+UCLASS(classGroup="Synaptech", Category="Synaptech")
 class MAGICNODEKISMET_API UMGC_SemanticDB : public UObject {
 	GENERATED_BODY()
 	//
 	UMGC_SemanticDB();
 protected:
-	bool IsValidTarget(const UClass* Class) const;
+	bool IsValidTarget(UClass* Class) const;
 public:
 	void UpdateExtensions();
-	void RegisterClassReflection(const UClass* Class, const TCHAR* Prefix);
-	const FString PropertyToTypeName(const UProperty* Property, const UObject* Container);
+	void RegisterEnumReflection(UEnum* Enum);
+	void RegisterStructReflection(UStruct* Struct);
+	void RegisterClassReflection(UClass* Class, FString Prefix);
+	//
+	FString PropertyToTypeName(UProperty* Property);
 	//
 	//
 	/* MGC Default Scripting Keyword Definitions. */

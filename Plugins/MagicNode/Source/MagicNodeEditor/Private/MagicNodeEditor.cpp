@@ -30,11 +30,11 @@ UObject* UMGC_ScriptFactory::FactoryCreateNew(UClass* Class, UObject* InParent, 
 	return NewObject<UMagicNodeScript>(InParent,Class,Name,Flags,Context);
 }
 
-FText FATA_MGCScript::GetAssetDescription(const FAssetData &AssetData) const {
+FText FATA_MagicNode::GetAssetDescription(const FAssetData &AssetData) const {
 	return FText::FromString(FString(TEXT("It's Magic.")));
 }
 
-void FATA_MGCScript::OpenAssetEditor(const TArray<UObject*>&InObjects, TSharedPtr<IToolkitHost>EditWithinLevelEditor) {
+void FATA_MagicNode::OpenAssetEditor(const TArray<UObject*>&InObjects, TSharedPtr<IToolkitHost>EditWithinLevelEditor) {
 	EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
 	//
 	for (auto IT = InObjects.CreateConstIterator(); IT; ++IT) {

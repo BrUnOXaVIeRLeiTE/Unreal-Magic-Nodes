@@ -6,6 +6,7 @@ using System.IO;
 public class MagicNodeRuntime : ModuleRules {
 	public MagicNodeRuntime(ReadOnlyTargetRules Target) : base(Target) {
         PrivatePCHHeaderFile = "Public/MagicNodeRuntime_Shared.h";
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		bEnforceIWYU = true;
 		//
 		PublicDependencyModuleNames.AddRange(

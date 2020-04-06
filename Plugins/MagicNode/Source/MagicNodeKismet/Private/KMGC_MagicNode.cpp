@@ -49,7 +49,7 @@ UKMGC_MagicNode::UKMGC_MagicNode(const FObjectInitializer &ObjectInitializer) : 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 FText UKMGC_MagicNode::GetNodeTitle(ENodeTitleType::Type TType) const {
-	FText Title = NSLOCTEXT("K2Node","KMGC_MagicNode_BaseTitle","Magic Node ...");
+	FText Title = NSLOCTEXT("K2Node","KMGC_MagicNode_BaseTitle","Magic Node (C++)");
 	//
 	if (TType != ENodeTitleType::MenuTitle) {
 		if (GetScriptObject()==nullptr) {return Title;}
@@ -111,7 +111,7 @@ void UKMGC_MagicNode::AllocateDefaultPins() {
 	//
 	PIN_Script->bHidden = true;
 	PIN_Script->bAdvancedView = true;
-	AdvancedPinDisplay = ENodeAdvancedPins::Hidden;
+	///AdvancedPinDisplay = ENodeAdvancedPins::Hidden;
 	//
 	//
 	RuntimeScriptObject.Reset();
@@ -150,6 +150,7 @@ void UKMGC_MagicNode::ExpandNode(FKismetCompilerContext &CompilerContext, UEdGra
 	//
 	//
 	UFunction* Function = ExpandScript(ScriptObject);
+	//
 	if (Function==nullptr) {
 		CompilerContext.MessageLog.Error(*LOCTEXT("KMGC_MagicNode_Function_Error", "[Magic Node]: @@ unable to allocate Executable Function; Consider compiling or hot-reloading the C++ project before binding this node.").ToString(),Self);
 	} else {
@@ -415,7 +416,7 @@ FLinearColor UKMGC_MagicNode::GetNodeTitleColor() const {
 }
 
 FSlateIcon UKMGC_MagicNode::GetIconAndTint(FLinearColor &OutColor) const {
-	static FSlateIcon Icon(TEXT("MagicNodeStyle"),TEXT("ClassIcon.MagicNodeScript"));
+	static FSlateIcon Icon(TEXT("MagicNodeEditorStyle"),TEXT("ClassIcon.MagicNode"));
 	//
 	return Icon;
 }

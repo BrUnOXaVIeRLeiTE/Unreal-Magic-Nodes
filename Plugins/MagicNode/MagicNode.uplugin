@@ -1,13 +1,13 @@
 {
 	"FileVersion": 1,
 	"Version": 1,
-	"VersionName": "0.2.0",
+	"VersionName": "0.3.0",
 	"EngineVersion" : "4.24.0",
 	"FriendlyName": "Magic Node",
 	"Description": "Scriptable Blueprint Nodes for EVERYONE!",
 	"Category": "SYNAPTECH",
 	"CreatedBy": "(C) Bruno Xavier Leite",
-	"CreatedByURL": "http://brunoxavierleite.com",
+	"CreatedByURL": "https://brunoxavierleite.wordpress.com",
 	"DocsURL": "https://brunoxavierleite.wordpress.com/2019/01/16/unreal-magic-nodes-programming/",
 	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/38f49e7411bc47588e0d219758d6b16f",
 	"SupportURL": "mailto:bruno_xavier_@msn.com",
@@ -16,38 +16,38 @@
 	"EnabledByDefault": true,
 	"Installed": true,
 	"Modules": [
-    {
-      "Type": "Runtime",
-      "Name": "MagicNodeRuntime",
-      "LoadingPhase": "PreDefault",
-      "WhitelistPlatforms": [
-        "Android",
-        "Win64",
-        "Win32",
-        "Linux",
-        "Mac",
-        "IOS"
-      ]
-    },
-    {
-      "Type": "Editor",
-      "Name": "MagicNodeKismet",
-      "LoadingPhase": "Default",
-      "WhitelistPlatforms": [
-        "Win64",
-        "Linux",
-        "Mac"
-      ]
-    },
-    {
-      "Type": "Editor",
-      "Name": "MagicNodeEditor",
-      "LoadingPhase": "PostEngineInit",
-      "WhitelistPlatforms": [
-        "Win64",
-        "Linux",
-        "Mac"
-      ]
-    }
+		{
+			"Type": "Runtime",
+			"Name": "MagicNodeRuntime",
+			"LoadingPhase": "PreDefault",
+			"WhitelistPlatforms": [
+				"Android",
+				"Win64",
+				"Win32",
+				"Linux",
+				"Mac",
+				"IOS"
+			]
+		},
+		{
+			"Type": "Editor",
+			"Name": "MagicNodeKismet",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [
+				"Win64",
+				"Linux",
+				"Mac"
+			]
+		},
+		{
+			"Type": "Editor",
+			"Name": "MagicNodeEditor",
+			"LoadingPhase": "PostEngineInit",
+			"WhitelistPlatforms": [
+				"Win64",
+				"Linux",
+				"Mac"
+			]
+		}
 	]
 }

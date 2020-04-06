@@ -7,19 +7,22 @@
 
 #pragma once
 
-#include "MagicNodeRuntime_Shared.h"
-#include "MagicNodeSettings.generated.h"
+#include "Runtime/SlateCore/Public/Styling/SlateStyleRegistry.h"
+#include "Runtime/SlateCore/Public/Styling/SlateStyle.h"
+#include "Editor/UnrealEd/Public/ClassIconFinder.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class UMagicNodeScript;
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// MGC Global Settings
-
-UCLASS(classGroup="Synaptech", Category="Synaptech", config="MagicNode")
-class MAGICNODERUNTIME_API UMGC_Settings : public UObject {
-	GENERATED_BODY()
+class MAGICNODEKISMET_API FKMGC_NodeStyle {
+private:
+	static TSharedPtr<FSlateStyleSet>StyleSet;
+	static FString InContent(const FString &RelativePath, const TCHAR* Extension);
+public:
+	static void Initialize();
+	static void Shutdown();
+	//
+	static FName GetStyleSetName();
+	static TSharedPtr<ISlateStyle>Get();
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

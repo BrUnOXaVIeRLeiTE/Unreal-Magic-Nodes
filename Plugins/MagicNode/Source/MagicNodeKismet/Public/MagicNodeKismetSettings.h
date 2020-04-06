@@ -20,7 +20,7 @@ class UMGC_ClassDB;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// MGC Global Settings
 
-UCLASS(classGroup=Synaptech, Category="Synaptech", config="MagicNode")
+UCLASS(classGroup="Synaptech", Category="Synaptech", config="MagicNode")
 class MAGICNODEKISMET_API UKMGC_Settings : public UObject {
 	GENERATED_BODY()
 	//

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "MGC_TextEditorWidget.h"
+#include "KMGC_TextEditorWidget.h"
 
 #include "Runtime/Slate/Public/Widgets/Layout/SBox.h"
 #include "Runtime/SlateCore/Public/Widgets/SOverlay.h"
@@ -25,16 +25,16 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class FMGC_TextSyntaxHighlighter;
 class UMagicNodeScript;
+class FKMGC_NodeStyle;
 class UMagicNode;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class SMGC_CodeEditorCore : public SCompoundWidget {
 private:
-	TSharedPtr<FMGC_TextSyntaxHighlighter>MARSHALL;
-	TSharedPtr<SMGC_TextEditorWidget>SCRIPT_EDITOR;
+	TSharedPtr<ITextLayoutMarshaller>MARSHALL;
+	TSharedPtr<SKMGC_TextEditorWidget>SCRIPT_EDITOR;
 	TSharedPtr<SListView<TSharedPtr<FString>>>LINE_COUNTER;
 	//
 	TSharedPtr<SScrollBox>VS_SCROLL_BOX;
@@ -62,10 +62,13 @@ public:
 	void Construct(const FArguments &InArgs, UMagicNodeScript* InScriptObject);
 	void Tick(const FGeometry &AllottedGeometry, const double CurrentTime, const float DeltaTime) override;
 	//
+	//
 	//TSharedPtr<SWidget>GetToolBox() const;
 	//TSharedPtr<SWidget>GetNavigationBar() const;
 	//void AddNotification(FNotificationInfo &Info, bool bSuccess);
 	//
+	//
+	bool HasScript() const;
 	//
 	int32 GetLineCount() const;
 	FText GetScriptText() const;
@@ -82,7 +85,9 @@ public:
 	TSharedRef<ITableRow>OnGenerateLineCounter(TSharedPtr<FString>Item, const TSharedRef<STableViewBase>&OwnerTable);
 	//
 	//
+	void UpdateDatabaseSemantics();
 	void UpdateDatabaseReferences();
+	void UpdateTextEditorScriptReference();
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

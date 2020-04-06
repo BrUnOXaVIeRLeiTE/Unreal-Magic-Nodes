@@ -8,7 +8,10 @@
 #pragma once
 
 #include "MGC_CodeEditorCore.h"
-#include "MGC_TextSyntaxHighlighter.h"
+
+#include "KMGC_NodeStyle.h"
+#include "KMGC_NodeWidget.h"
+#include "KMGC_TextSyntaxHighlighter.h"
 
 #include "Runtime/SlateCore/Public/Widgets/SOverlay.h"
 
@@ -149,10 +152,13 @@ void SMGC_CodeEditorCore::Construct(const FArguments &InArgs, UMagicNodeScript* 
 							+SHorizontalBox::Slot()
 							.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
 							[
-								SAssignNew(SCRIPT_EDITOR,SMGC_TextEditorWidget)
+								SAssignNew(SCRIPT_EDITOR,SKMGC_TextEditorWidget)
 								.OnTextChanged(this,&SMGC_CodeEditorCore::OnScriptTextChanged,ETextCommit::Default)
 								.OnTextCommitted(this,&SMGC_CodeEditorCore::OnScriptTextComitted)
-								.IsEnabled(this,&SMGC_CodeEditorCore::IsScriptEditable)
+								//.Visibility(this,&SMGC_CodeEditorCore::GetScriptPanelVisibility)
+								//.OnInvokeSearch(this,&SMGC_CodeEditorCore::OnInvokedSearch)
+								//.OnAutoComplete(this,&SMGC_CodeEditorCore::OnAutoComplete)
+								.IsEnabled(this,&SMGC_CodeEditorCore::HasScript)
 								.Text(this,&SMGC_CodeEditorCore::GetScriptText)
 								.VScrollBar(VS_SCROLL).HScrollBar(HS_SCROLL)
 								.Marshaller(MARSHALL.ToSharedRef())
@@ -203,6 +209,9 @@ void SMGC_CodeEditorCore::Construct(const FArguments &InArgs, UMagicNodeScript* 
 			.Visibility(EVisibility::SelfHitTestInvisible)
 		]*/
 	];//
+	//
+	//
+	UpdateTextEditorScriptReference();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -229,6 +238,10 @@ void SMGC_CodeEditorCore::AddNotification(FNotificationInfo &Info, bool Success)
 }*/
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool SMGC_CodeEditorCore::HasScript() const {
+	return (ScriptObject!=nullptr);
+}
 
 bool SMGC_CodeEditorCore::IsScriptEditable() const {
 	return !ScriptObject->LockSourceCode;
@@ -299,6 +312,12 @@ void SMGC_CodeEditorCore::OnVerticalScroll(float Offset) {
 void SMGC_CodeEditorCore::OnScriptTextChanged(const FText &InText, ETextCommit::Type CommitType) {
 	if (!IsScriptEditable()) {return;}
 	//
+	TArray<FString>Lines;
+	InText.ToString().ParseIntoArrayLines(Lines,false);
+	//
+	FString Subject = SCRIPT_EDITOR->ParseAutoCompleteWord(Lines);
+	SCRIPT_EDITOR->AutoSuggest(Lines);
+	//
 	SetScriptText(InText);
 	SetLineCountList(GetLineCount());
 }
@@ -334,7 +353,7 @@ TSharedRef<ITableRow> SMGC_CodeEditorCore::OnGenerateLineCounter(TSharedPtr<FStr
 			SNew(STextBlock)
 			.Text(FText::FromString(*Item.Get()))
 			.ColorAndOpacity(FSlateColor(FLinearColor(FColor(75,185,245,225))))
-			.Font(FMGC_CodeEditorStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("MGC.CodeBlockStyle").Font)
+			.Font(FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.CodeBlockStyle").Font)
 		]
 	];//
 }
@@ -342,30 +361,49 @@ TSharedRef<ITableRow> SMGC_CodeEditorCore::OnGenerateLineCounter(TSharedPtr<FStr
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SMGC_CodeEditorCore::UpdateDatabaseReferences() {
-	const auto &Settings = GetDefault<UKMGC_Settings>();
+	const auto &_Settings = GetDefault<UKMGC_Settings>();
 	//
+	TArray<UMGC_SemanticDB*>SemanticDB;
 	TArray<UMGC_FunctionDB*>FunctionDB;
 	TArray<UMGC_KeywordDB*>KeywordDB;
 	TArray<UMGC_ClassDB*>ClassDB;
 	//
-	for (auto DB : Settings->KeywordDB.Array()) {
+	for (auto DB : _Settings->KeywordDB.Array()) {
 		if (DB.IsValid()) {KeywordDB.Add(DB.LoadSynchronous());}
 	}///
 	//
-	for (auto DB : Settings->ClassDB.Array()) {
+	for (auto DB : _Settings->ClassDB.Array()) {
 		if (DB.IsValid()) {ClassDB.Add(DB.LoadSynchronous());}
 	}///
 	//
-	for (auto DB : Settings->FunctionDB.Array()) {
+	for (auto DB : _Settings->FunctionDB.Array()) {
 		if (DB.IsValid()) {FunctionDB.Add(DB.LoadSynchronous());}
 	}///
 	//
+	for (auto DB : _Settings->SemanticDB.Array()) {
+		if (DB.IsValid()) {SemanticDB.Add(DB.LoadSynchronous());}
+	}///
 	//
-	MARSHALL = FMGC_TextSyntaxHighlighter::Create(
-		FMGC_TextSyntaxHighlighter::FSyntaxTextStyle(KeywordDB,ClassDB,FunctionDB)
+	//
+	MARSHALL = FKMGC_TextSyntaxHighlighter::Create(
+		FKMGC_TextSyntaxHighlighter::FSyntaxTextStyle(KeywordDB,ClassDB,FunctionDB,SemanticDB)
 	);///
 	//
 	SetLineCountList(GetLineCount());
+}
+
+void SMGC_CodeEditorCore::UpdateDatabaseSemantics() {
+	const auto &_Settings = GetDefault<UKMGC_Settings>();
+	//
+	for (auto DB : _Settings->SemanticDB.Array()) {
+		if (DB.IsValid()) {DB.LoadSynchronous()->UpdateExtensions();}
+	}///
+}
+
+void SMGC_CodeEditorCore::UpdateTextEditorScriptReference() {
+	if (!HasScript()) {return;}
+	//
+	if (SCRIPT_EDITOR.IsValid()) {SCRIPT_EDITOR->SetScriptObject(ScriptObject);}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
