@@ -8,25 +8,43 @@
 #pragma once
 
 #include "MGC_CodeEditorCore.h"
+#include "MagicNodeEditorCommands.h"
+
+#include "Runtime/Core/Public/Misc/Paths.h"
+#include "Runtime/Core/Public/HAL/FileManagerGeneric.h"
+#include "Runtime/CoreUObject/Public/UObject/GCObject.h"
+#include "Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
+
+#include "Runtime/SlateCore/Public/Widgets/SBoxPanel.h"
+#include "Runtime/SlateCore/Public/Widgets/Images/SImage.h"
+
+#include "Runtime/Slate/Public/Widgets/Text/STextBlock.h"
+#include "Runtime/Slate/Public/Widgets/Views/STreeView.h"
+#include "Runtime/Slate/Public/Widgets/Input/SSearchBox.h"
+#include "Runtime/Slate/Public/Widgets/Docking/SDockTab.h"
 
 #include "Editor/UnrealEd/Public/Editor.h"
 #include "Editor/UnrealEd/Public/EditorUndoClient.h"
-#include "Runtime/CoreUObject/Public/UObject/GCObject.h"
 #include "Editor/UnrealEd/Public/Toolkits/IToolkitHost.h"
-#include "Runtime/Slate/Public/Widgets/Docking/SDockTab.h"
 #include "Editor/UnrealEd/Public/Toolkits/AssetEditorToolkit.h"
+
+#include "Developer/DirectoryWatcher/Public/IDirectoryWatcher.h"
+#include "Developer/DirectoryWatcher/Public/DirectoryWatcherModule.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class UMagicNodeScript;
+class FMagicNodeEditor;
 
 struct FCodeEditorTAB {
+	static const FName TAB_TreeView;
 	static const FName TAB_Details;
 	static const FName TAB_Script;
 	static const FName TAB_Header;
 	static const FName TAB_Types;
 };
 
+const FName FCodeEditorTAB::TAB_TreeView(TEXT("MGC_TreeView"));
 const FName FCodeEditorTAB::TAB_Details(TEXT("MGC_Details"));
 const FName FCodeEditorTAB::TAB_Script(TEXT("MGC_Script"));
 const FName FCodeEditorTAB::TAB_Header(TEXT("MGC_Header"));
@@ -34,25 +52,82 @@ const FName FCodeEditorTAB::TAB_Types(TEXT("MGC_Types"));
 
 const FName MGC_APP = FName(TEXT("MGC_CodeEditor"));
 
+static FString ViewerSourcePath("C:/");
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct FSourceTreeNode {
+	FString FullPath;
+	FString Path;
+	//
+	TSharedPtr<FSourceTreeNode>ParentNode;
+	TArray<TSharedPtr<FSourceTreeNode>>ChildNodes;
+	//
+	//
+	bool operator == (const FSourceTreeNode &Other) const {
+		return (
+			(Path==Other.Path) &&
+			(FullPath==Other.FullPath) &&
+			(ChildNodes==Other.ChildNodes) &&
+			(ParentNode.Get()==Other.ParentNode.Get())
+		);///
+	}///
+	//
+	bool operator != (const FSourceTreeNode &Other) const {
+		return !(*this==Other);
+	}///
+	//
+	//
+	TSharedPtr<FSourceTreeNode>FindNode(const FString &Node) {
+		for (const TSharedPtr<FSourceTreeNode>&Ptr : ChildNodes) {
+			if (!Ptr.IsValid()) {continue;}
+			if (Ptr->Path==Node){return Ptr;}
+		}///
+		//
+		return TSharedPtr<FSourceTreeNode>();
+	}///
+};
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// MGC State-Machine Asset Editor Toolkit:
 
 class FMGC_Toolkit : public FAssetEditorToolkit, public FEditorUndoClient, public FGCObject {
 private:
-	/** MGC Script Object being edited. */
+	static FDelegateHandle WatcherHandle;
+	static TArray<TSharedPtr<FSourceTreeNode>>SourceView;
+private:
 	UMagicNodeScript* ScriptObject_Inline;
-	//
-	/** MGC Code Editor Widget. */
 	TSharedPtr<SMGC_CodeEditorCore>MGC_CodeEditor;
+	TArray<TSharedPtr<FSourceTreeNode>>SourceViewSearch;
+	//
+	TSharedPtr<FString>Search;
 protected:
+	TSharedRef<SDockTab>TABSpawn_TreeView(const FSpawnTabArgs &Args);
 	TSharedRef<SDockTab>TABSpawn_Details(const FSpawnTabArgs &Args);
 	TSharedRef<SDockTab>TABSpawn_Script(const FSpawnTabArgs &Args);
 	TSharedRef<SDockTab>TABSpawn_Header(const FSpawnTabArgs &Args);
 	TSharedRef<SDockTab>TABSpawn_Types(const FSpawnTabArgs &Args);
 	//
-	//void ExtendMenu();
-	//void BindCommands();
-	//void ExtendToolbar();
+	TSharedPtr<SSearchBox>SourceViewSearchBox;
+	TSharedPtr<STreeView<TSharedPtr<FSourceTreeNode>>>SourceTreeWidget;
+	TSharedPtr<STreeView<TSharedPtr<FSourceTreeNode>>>SourceSearchWidget;
+	TSharedRef<ITableRow>OnGenerateSourceViewRow(TSharedPtr<FSourceTreeNode>InItem, const TSharedRef<STableViewBase>&OwnerTable);
+	//
+	EVisibility GetSourceTreeViewVisibility() const;
+	EVisibility GetSourceTreeSearchVisibility() const;
+	//
+	void OnClickedSourceViewItem(TSharedPtr<FSourceTreeNode>TreeItem);
+	void OnExpansionChanged(TSharedPtr<FSourceTreeNode>InItem, bool WasExpanded);
+	void OnSelectedSourceViewItem(TSharedPtr<FSourceTreeNode>TreeItem, ESelectInfo::Type SelectInfo);
+	void OnSourceViewCheckStatusChanged(ECheckBoxState NewCheckState, TSharedPtr<FSourceTreeNode>NodeChanged);
+	void OnGetSourceViewChildren(TSharedPtr<FSourceTreeNode>InItem, TArray<TSharedPtr<FSourceTreeNode>>&OutChildren);
+	//
+	void ExtendMenu();
+	void BindCommands();
+	void ExtendToolbar();
+protected:
+	void RebuildDatabases();
+	void LaunchSourceCodeViewer();
 public:
 	FMGC_Toolkit();
 	//
@@ -66,12 +141,10 @@ public:
 	UMagicNodeScript* GET_MGC_Inline() const;
 	//
 	//
-	// IToolkit interface
 	virtual void RegisterTabSpawners(const TSharedRef<FTabManager>&TBManager) override;
 	virtual void UnregisterTabSpawners(const TSharedRef<FTabManager>&TBManager) override;
-	// End of IToolkit interface
 	//
-	// FAssetEditorToolkit
+	//
 	virtual FText GetToolkitName() const override;
 	virtual FName GetToolkitFName() const override;
 	virtual FText GetBaseToolkitName() const override;
@@ -81,11 +154,18 @@ public:
 	virtual FLinearColor GetWorldCentricTabColorScale() const override;
 	virtual void OnToolkitHostingStarted(const TSharedRef<IToolkit>&Toolkit) override;
 	virtual void OnToolkitHostingFinished(const TSharedRef<IToolkit>&Toolkit) override;
-	// End of FAssetEditorToolkit
 	//
-	// FSerializableObject interface
 	virtual void AddReferencedObjects(FReferenceCollector &Collector) override;
-	// End of FSerializableObject interface
+public:
+	void OnSearchChanged(const FText &Filter);
+	void OnProjectDirectoryChanged(const TArray<FFileChangeData> &Data);
+	void OnSearchCommitted(const FText &NewText, ETextCommit::Type CommitInfo);
+public:
+	static void RefreshEngineSourceView();
+	static void RefreshPluginSourceView();
+	static void RefreshProjectSourceView();
+	static bool IsSourceFile(const FString &Path);
+	static int32 SourceViewCount() {return FMGC_Toolkit::SourceView.Num();}
 };
 
 /* /// Graph Notification System::

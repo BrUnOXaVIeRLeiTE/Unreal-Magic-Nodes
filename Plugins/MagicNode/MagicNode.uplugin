@@ -1,7 +1,7 @@
 {
 	"FileVersion": 1,
 	"Version": 1,
-	"VersionName": "0.3.0",
+	"VersionName": "0.3.3",
 	"EngineVersion" : "4.24.0",
 	"FriendlyName": "Magic Node",
 	"Description": "Scriptable Blueprint Nodes for EVERYONE!",

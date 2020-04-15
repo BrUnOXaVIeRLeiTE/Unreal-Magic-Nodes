@@ -13,6 +13,7 @@
 #include "KMGC_NodeWidget.h"
 #include "KMGC_TextSyntaxHighlighter.h"
 
+#include "Runtime/Core/Public/Misc/FileHelper.h"
 #include "Runtime/SlateCore/Public/Widgets/SOverlay.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -21,17 +22,24 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SMGC_CodeEditorCore::SMGC_CodeEditorCore() {}
+SMGC_CodeEditorCore::SMGC_CodeEditorCore() {
+	ExternalFilePath = MakeShareable(new FString());
+	ExternalFileText = MakeShareable(new FString());
+}
+
 SMGC_CodeEditorCore::~SMGC_CodeEditorCore(){}
 
 void SMGC_CodeEditorCore::Construct(const FArguments &InArgs, UMagicNodeScript* InScriptObject) {
 	///NavigationBar = InArgs._GraphNavigationBar;
 	///ToolBox = InArgs._GraphToolBox;
+	//
+	//
 	Source = InArgs._SourceToEdit;
+	ExternalFilePath = MakeShareable(new FString(InArgs._ExternalSourcePath));
 	//
-	//
-	check(InScriptObject);
-	ScriptObject = InScriptObject;
+	if (IsSourceView()) {
+		FFileHelper::LoadFileToString(ExternalFileText.ToSharedRef().Get(),**ExternalFilePath.Get());
+	} else {check(InScriptObject); ScriptObject=InScriptObject;}
 	//
 	UpdateDatabaseReferences();
 	//
@@ -43,7 +51,7 @@ void SMGC_CodeEditorCore::Construct(const FArguments &InArgs, UMagicNodeScript* 
 	//
 	HS_SCROLL = SNew(SScrollBar)
 	.OnUserScrolled(this,&SMGC_CodeEditorCore::OnScriptHorizontalScroll)
-	.Orientation(Orient_Horizontal).AlwaysShowScrollbar(false)
+	.Orientation(Orient_Horizontal).AlwaysShowScrollbar(true)
 	.Thickness(FVector2D(8.f,8.f));
 	//
 	//
@@ -111,7 +119,9 @@ void SMGC_CodeEditorCore::Construct(const FArguments &InArgs, UMagicNodeScript* 
 	}*///
 	//
 	//
-	TSharedPtr<SOverlay>OverlayWidget; this->ChildSlot
+	TSharedPtr<SOverlay>OverlayWidget;
+	//
+	this->ChildSlot
 	[
 		SAssignNew(OverlayWidget,SOverlay)
 		+SOverlay::Slot()
@@ -155,7 +165,6 @@ void SMGC_CodeEditorCore::Construct(const FArguments &InArgs, UMagicNodeScript* 
 								SAssignNew(SCRIPT_EDITOR,SKMGC_TextEditorWidget)
 								.OnTextChanged(this,&SMGC_CodeEditorCore::OnScriptTextChanged,ETextCommit::Default)
 								.OnTextCommitted(this,&SMGC_CodeEditorCore::OnScriptTextComitted)
-								//.Visibility(this,&SMGC_CodeEditorCore::GetScriptPanelVisibility)
 								//.OnInvokeSearch(this,&SMGC_CodeEditorCore::OnInvokedSearch)
 								//.OnAutoComplete(this,&SMGC_CodeEditorCore::OnAutoComplete)
 								.IsEnabled(this,&SMGC_CodeEditorCore::HasScript)
@@ -166,6 +175,32 @@ void SMGC_CodeEditorCore::Construct(const FArguments &InArgs, UMagicNodeScript* 
 								.IsReadOnly(false)
 							]
 						]
+					]
+				]
+			]
+			+SVerticalBox::Slot()
+			.AutoHeight().Padding(0,4,2,0)
+			[
+				SNew(SBorder)
+				.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+				.BorderImage(FEditorStyle::GetBrush("Menu.Background"))
+				.Visibility(this,&SMGC_CodeEditorCore::GetDatabaseWarningVisibility)
+				[
+					SNew(SVerticalBox)
+					+SVerticalBox::Slot()
+					.AutoHeight().Padding(0)
+					[
+						SNew(STextBlock).Margin(FMargin(5,0,0,0))
+						.Text(this,&SMGC_CodeEditorCore::GetDatabaseLoadTooltip)
+						.ColorAndOpacity(FSlateColor(FLinearColor(1.f,0.45f,0.f)))
+					]
+					+SVerticalBox::Slot()
+					.AutoHeight().Padding(2,0,2,0)
+					[
+						SNew(SProgressBar)
+						.BorderPadding(FVector2D::ZeroVector)
+						.Percent(this,&SMGC_CodeEditorCore::GetDatabaseLoad)
+						.FillColorAndOpacity(FSlateColor(FLinearColor(0.5f,0.5f,1.f)))
 					]
 				]
 			]
@@ -212,12 +247,28 @@ void SMGC_CodeEditorCore::Construct(const FArguments &InArgs, UMagicNodeScript* 
 	//
 	//
 	UpdateTextEditorScriptReference();
+	//
+	if (IsSourceView()) {
+		SCRIPT_EDITOR->SetIsReadOnly(true);
+	}///
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SMGC_CodeEditorCore::Tick(const FGeometry &AllottedGeometry, const double CurrentTime, const float DeltaTime) {
-	SetEnabled(IsScriptEditable());
+	if (UMGC_SemanticDB::DBState==EDatabaseState::ASYNCLOADING) {
+		RequestedUpdateDB = true;
+		//
+		if (DatabaseLoad>=1.f) {
+			DatabaseLoad = 0.f;
+		} else {DatabaseLoad+=0.05f;}
+	} else if (RequestedUpdateDB) {
+		UpdateDatabaseReferences();
+		RequestedUpdateDB = false;
+		DatabaseLoad = 0.f;
+		//
+		Invalidate(EInvalidateWidgetReason::Layout);
+	}///
 }
 
 /*TSharedPtr<SWidget> SMGC_CodeEditorCore::GetNavigationBar() const {
@@ -240,29 +291,43 @@ void SMGC_CodeEditorCore::AddNotification(FNotificationInfo &Info, bool Success)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool SMGC_CodeEditorCore::HasScript() const {
+	if (IsSourceView()) {return true;}
+	//
 	return (ScriptObject!=nullptr);
 }
 
+bool SMGC_CodeEditorCore::IsSourceView() const {
+	return (!ExternalFilePath->IsEmpty());
+}
+
 bool SMGC_CodeEditorCore::IsScriptEditable() const {
-	return !ScriptObject->LockSourceCode;
+	if (IsSourceView()) {return false;}
+	//
+	return !(ScriptObject->LockSourceCode);
 }
 
 int32 SMGC_CodeEditorCore::GetLineCount() const {
+	if (IsSourceView()) {return 0;}
+	//
 	TArray<FString>Array;
 	int32 Count = 0;
 	//
-	FString Text = GetScriptText().ToString();
+	const FString Text = GetScriptText().ToString();
 	Count = Text.ParseIntoArray(Array,TEXT("\n"),false);
 	//
 	return Count;
 }
 
 FText SMGC_CodeEditorCore::GetScriptText() const {
+	if (IsSourceView()) {return FText::FromString(*ExternalFileText.Get());}
+	//
 	if (Source==EMGC_CodeSource::Script) {
 		return FText::FromString(ScriptObject->Source.Script);
 	} else if (Source==EMGC_CodeSource::Header) {
 		return FText::FromString(ScriptObject->Source.Header);
-	} return FText::FromString(ScriptObject->Source.Types);
+	}///
+	//
+	return FText::FromString(ScriptObject->Source.Types);
 }
 
 void SMGC_CodeEditorCore::SetLineCountList(const int32 Count) {
@@ -299,8 +364,35 @@ void SMGC_CodeEditorCore::SetScriptText(const FText &NewText) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SMGC_CodeEditorCore::OnScriptHorizontalScroll(float Offset) {}
+bool SMGC_CodeEditorCore::CanBuildDatabase() const {
+	return (UMGC_SemanticDB::DBState==EDatabaseState::READY);
+}
 
+FText SMGC_CodeEditorCore::GetDatabaseLoadTooltip() const {
+	if (DatabaseLoad<=0) {return FText::FromString(TEXT("Loading Unreal Types "));}
+	if (DatabaseLoad>=0.80f) {return FText::FromString(TEXT("Loading Unreal Types .. .. .. .."));}
+	if ((DatabaseLoad>=0.20f)&&(DatabaseLoad<0.40f)) {return FText::FromString(TEXT("Loading Unreal Types .."));}
+	if ((DatabaseLoad>=0.40f)&&(DatabaseLoad<0.60f)) {return FText::FromString(TEXT("Loading Unreal Types .. .."));}
+	if ((DatabaseLoad>=0.60f)&&(DatabaseLoad<0.80f)) {return FText::FromString(TEXT("Loading Unreal Types .. ... .."));}
+	//
+	return FText::FromString(TEXT("Loading Unreal Types ...."));
+}
+
+TOptional<float> SMGC_CodeEditorCore::GetDatabaseLoad() const {
+	return TOptional<float>(DatabaseLoad);
+}
+
+EVisibility SMGC_CodeEditorCore::GetDatabaseWarningVisibility() const {
+	if (UMGC_SemanticDB::DBState==EDatabaseState::ASYNCLOADING) {
+		return EVisibility::Visible;
+	}///
+	//
+	return EVisibility::Collapsed;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void SMGC_CodeEditorCore::OnScriptHorizontalScroll(float Offset) {}
 void SMGC_CodeEditorCore::OnInternalVerticalScroll(float Offset) {
 	VS_SCROLL_BOX->SetScrollOffset(Offset);
 }
@@ -395,15 +487,20 @@ void SMGC_CodeEditorCore::UpdateDatabaseReferences() {
 void SMGC_CodeEditorCore::UpdateDatabaseSemantics() {
 	const auto &_Settings = GetDefault<UKMGC_Settings>();
 	//
+	if (UMGC_SemanticDB::DBState==EDatabaseState::ASYNCLOADING) {return;}
 	for (auto DB : _Settings->SemanticDB.Array()) {
-		if (DB.IsValid()) {DB.LoadSynchronous()->UpdateExtensions();}
+		if (DB.IsValid()) {
+			(new FAutoDeleteAsyncTask<TASK_BuildAutoCompleteData>(DB.LoadSynchronous()))->StartBackgroundTask();
+		}///
 	}///
 }
 
 void SMGC_CodeEditorCore::UpdateTextEditorScriptReference() {
-	if (!HasScript()) {return;}
+	if (IsSourceView()) {return;} if (!HasScript()) {return;}
 	//
-	if (SCRIPT_EDITOR.IsValid()) {SCRIPT_EDITOR->SetScriptObject(ScriptObject);}
+	if (SCRIPT_EDITOR.IsValid()) {
+		SCRIPT_EDITOR->SetScriptObject(ScriptObject);
+	}///
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

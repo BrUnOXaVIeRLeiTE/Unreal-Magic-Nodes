@@ -10,16 +10,18 @@
 #include "MagicNodeRuntime.h"
 #include "KMGC_TextEditorWidget.h"
 
-#include "Runtime/Slate/Public/Widgets/Layout/SBox.h"
 #include "Runtime/SlateCore/Public/Widgets/SOverlay.h"
+#include "Runtime/SlateCore/Public/Widgets/Images/SImage.h"
+
+#include "Runtime/Slate/Public/Widgets/Layout/SBox.h"
 #include "Runtime/Slate/Public/Widgets/Input/SButton.h"
 #include "Runtime/Slate/Public/Widgets/Layout/SBorder.h"
 #include "Runtime/Slate/Public/Widgets/Views/SListView.h"
 #include "Runtime/Slate/Public/Widgets/Input/SCheckBox.h"
 #include "Runtime/Slate/Public/Widgets/Layout/SScrollBar.h"
 #include "Runtime/Slate/Public/Widgets/Layout/SScrollBox.h"
-#include "Runtime/SlateCore/Public/Widgets/Images/SImage.h"
 #include "Runtime/Slate/Public/Widgets/Input/SEditableText.h"
+#include "Runtime/Slate/Public/Widgets/Notifications/SProgressBar.h"
 
 #include "Editor/UnrealEd/Public/FileHelpers.h"
 #include "Editor/GraphEditor/Public/SGraphNode.h"
@@ -61,7 +63,6 @@ private:
 	TSharedPtr<SScrollBar>HSS_SCROLL;
 	TSharedPtr<SScrollBar>HSH_SCROLL;
 	TSharedPtr<SScrollBar>VS_SCROLL;
-	TSharedPtr<SButton>BT_COMPILE;
 	//
 	TArray<TSharedPtr<FString>>AutoCompleteList;
 	TArray<TSharedPtr<FString>>SourceIncludes;
@@ -71,16 +72,18 @@ private:
 	EAutoComplete AutoComplete;
 	ESKMGC_Source Source;
 	//
-	FString SearchText;
 	FString ReplaceText;
+	FString SearchText;
+	FString LastHint;
 	//
 	bool ViewMacros;
 	bool ViewIncludes;
 	bool ViewSearchBox;
 	bool SensitiveSearch;
+	bool RequestedUpdateDB;
 	//
 	float HintTimer;
-	FString LastHint;
+	float DatabaseLoad;
 public:
 	SKMGC_MagicNodeWidget();
 	virtual ~SKMGC_MagicNodeWidget() override;
@@ -92,6 +95,7 @@ public:
 	//
 	//
 	bool HasScript() const;
+	bool CanBuildDatabase() const;
 	bool IsScriptSourceEditable() const;
 	//
 	int32 GetLineCount() const;
@@ -101,11 +105,15 @@ public:
 	FText GetSearchText() const;
 	FText GetReplaceText() const;
 	FText GetCursorLocation() const;
+	FText GetDatabaseLoadTooltip() const;
+	//
 	UObject* GetScriptObject() const;
 	//
 	TArray<FString>GetScriptMacros() const;
 	TArray<FString>GetScriptIncludes() const;
 	ECheckBoxState IsSearchSensitive() const;
+	//
+	TOptional<float>GetDatabaseLoad() const;
 	//
 	//
 	FReply OnClickedCompile();
@@ -119,6 +127,7 @@ public:
 	FReply OnClickedSearchGlass();
 	FReply OnClickedReloadScript();
 	FReply OnClickedViewIncludes();
+	FReply OnClickedBuildDatabase();
 	FReply OnClickedReplaceSearch();
 	FReply OnClickedRemoveMacro(const FString Item);
 	FReply OnClickedRemoveInclude(const FString Item);
@@ -131,10 +140,12 @@ public:
 	EVisibility GetScriptEditorVisibility() const;
 	EVisibility GetAutoCompleteVisibility() const;
 	EVisibility GetIncludesPanelVisibility() const;
+	EVisibility GetDatabaseWarningVisibility() const;
 	//
 	FSlateColor GetTypesIconColor() const;
 	FSlateColor GetScriptIconColor() const;
 	FSlateColor GetHeaderIconColor() const;
+	//
 	const FSlateBrush* GetCompilerIcon() const;
 	//
 	void OnVerticalScroll(float Offset);
@@ -185,12 +196,13 @@ public:
 	//
 	virtual void UpdateGraphNode() override;
 	virtual void CreateBelowWidgetControls(TSharedPtr<SVerticalBox>MainBox) override;
+	virtual void Tick(const FGeometry &AllottedGeometry, const double CurrentTime, const float DeltaTime) override;
 	//
 	virtual bool IsInteractable() const override;
 	virtual bool SupportsKeyboardFocus() const override;
+	//
 	virtual FReply OnKeyDown(const FGeometry &MyGeometry, const FKeyEvent &KeyEvent) override;
 	virtual FReply OnMouseMove(const FGeometry &MyGeometry, const FPointerEvent &MouseEvent) override;
-	virtual void Tick(const FGeometry &AllottedGeometry, const double CurrentTime, const float DeltaTime) override;
 	//
 	//
 	void UpdateDatabaseSemantics();

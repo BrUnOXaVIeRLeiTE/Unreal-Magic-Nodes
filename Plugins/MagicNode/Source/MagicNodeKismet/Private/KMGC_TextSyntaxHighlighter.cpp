@@ -27,7 +27,6 @@ TSharedRef<FKMGC_TextSyntaxHighlighter>FKMGC_TextSyntaxHighlighter::Create(const
 	if (InSyntaxStyle.KeywordDB.Num()>0) {
 		for (UMGC_KeywordDB* DB : InSyntaxStyle.KeywordDB) {
 			if (DB==nullptr) {continue;}
-			DB->UpdateExtensions();
 			//
 			const TSet<FString>Core = DB->ScriptCore;
 			const TSet<FString>Extended = DB->Extensions;
@@ -76,20 +75,6 @@ TSharedRef<FKMGC_TextSyntaxHighlighter>FKMGC_TextSyntaxHighlighter::Create(const
 			for (const FString Typed : Types) {
 				TokenizerRules.Emplace(FSyntaxTokenizer::FRule(Typed));
 			}///
-		}///
-	}///
-	//
-	if (InSyntaxStyle.ClassDB.Num()>0) {
-		for (UMGC_ClassDB* DB : InSyntaxStyle.ClassDB) {
-			if (DB==nullptr) {continue;}
-			DB->UpdateExtensions();
-		}///
-	}///
-	//
-	if (InSyntaxStyle.FunctionDB.Num()>0) {
-		for (UMGC_FunctionDB* DB : InSyntaxStyle.FunctionDB) {
-			if (DB==nullptr) {continue;}
-			DB->UpdateExtensions();
 		}///
 	}///
 	//

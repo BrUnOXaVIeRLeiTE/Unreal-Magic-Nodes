@@ -651,6 +651,7 @@ void UKMGC_MagicNode::ReloadRuntimeScript() {
 void UKMGC_MagicNode::UpdateDatabaseReferences() {
 	const auto &_Settings = GetDefault<UKMGC_Settings>();
 	//
+	if (UMGC_SemanticDB::DBState==EDatabaseState::ASYNCLOADING) {return;}
 	if (_Settings->SemanticDB.Num()==0) {return;}
 	if (!HasScript()) {return;}
 	//

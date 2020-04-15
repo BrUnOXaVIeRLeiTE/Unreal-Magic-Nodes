@@ -11,6 +11,8 @@
 #include "MagicNodeKismet_Shared.h"
 #include "MagicNodeKismetSettings.h"
 
+#include "Runtime/Core/Public/Async/AsyncWork.h"
+#include "Runtime/Core/Public/Async/TaskGraphInterfaces.h"
 #include "Runtime/AssetRegistry/Public/AssetRegistryModule.h"
 #include "Runtime/Projects/Public/Interfaces/IPluginManager.h"
 
@@ -18,6 +20,11 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// MGC Parser Database Types:
+
+enum class EDatabaseState : uint8 {
+	READY,
+	ASYNCLOADING
+};
 
 UENUM()
 enum class EType : uint8 {
@@ -273,11 +280,6 @@ class MAGICNODEKISMET_API UMGC_KeywordDB : public UObject {
 	//
 	UMGC_KeywordDB();
 public:
-	void PostLoad() override;
-	//
-	void UpdateExtensions();
-	//
-	//
 	/* MGC Default Scripting Keywords. */
 	UPROPERTY(Category="Keywords", VisibleAnywhere)
 	TSet<FString>ScriptCore;
@@ -294,7 +296,7 @@ public:
 	UPROPERTY(Category="Keywords", VisibleAnywhere)
 	TSet<FString>Macros;
 	//
-	UPROPERTY(Category="Keywords", EditAnywhere)
+	UPROPERTY(Category="Keywords", VisibleAnywhere)
 	TSet<FString>Extensions;
 };
 
@@ -304,11 +306,6 @@ class MAGICNODEKISMET_API UMGC_ClassDB : public UObject {
 	//
 	UMGC_ClassDB();
 public:
-	void PostLoad() override;
-	//
-	void UpdateExtensions();
-	//
-	//
 	/* MGC Default Scripting Classes. */
 	UPROPERTY(Category="Keywords", VisibleAnywhere)
 	TSet<FString>ScriptCore;
@@ -317,7 +314,7 @@ public:
 	UPROPERTY(Category="Keywords", VisibleAnywhere)
 	TSet<FString>ScriptTypes;
 	//
-	UPROPERTY(Category="Keywords", EditAnywhere)
+	UPROPERTY(Category="Keywords", VisibleAnywhere)
 	TSet<FString>Extensions;
 };
 
@@ -327,16 +324,11 @@ class MAGICNODEKISMET_API UMGC_FunctionDB : public UObject {
 	//
 	UMGC_FunctionDB();
 public:
-	void PostLoad() override;
-	//
-	void UpdateExtensions();
-	//
-	//
 	/* MGC Default Scripting Classes. */
 	UPROPERTY(Category="Keywords", VisibleAnywhere)
 	TSet<FString>ScriptCore;
 	//
-	UPROPERTY(Category="Keywords", EditAnywhere)
+	UPROPERTY(Category="Keywords", VisibleAnywhere)
 	TSet<FString>Extensions;
 };
 
@@ -357,28 +349,45 @@ public:
 	//
 	//
 	/* MGC Default Scripting Keyword Definitions. */
-	UPROPERTY()
+	UPROPERTY(Category="Definitions", VisibleAnywhere)
 	TMap<FString,FKeywordDefinition>KeywordDefinitions;
 	//
 	/* MGC Default Scripting Type Definitions. */
-	UPROPERTY()
+	UPROPERTY(Category="Definitions", VisibleAnywhere)
 	TMap<FString,FKeywordDefinition>TypeDefinitions;
 	//
 	/* MGC Default Scripting Macro Definitions. */
-	UPROPERTY()
+	UPROPERTY(Category="Definitions", VisibleAnywhere)
 	TMap<FString,FKeywordDefinition>MacroDefinitions;
 	//
 	/* MGC Default Scripting Class Definitions. */
-	UPROPERTY()
+	UPROPERTY(Category="Definitions", VisibleAnywhere)
 	TMap<FString,FClassDefinition>ClassDefinitions;
 	//
 	/* MGC Default Scripting Map of Instantiated Classes. */
-	UPROPERTY()
+	UPROPERTY(Category="Definitions", VisibleAnywhere)
 	TMap<FString,FClassRedirector>ClassRedirectors;
 	//
 	/* MGC Important Classes' Documentation. */
-	UPROPERTY(Category="API Reference", EditAnywhere)
+	UPROPERTY(Category="API Reference", VisibleAnywhere)
 	TMap<FString,FString>Documentation;
+public:
+	static EDatabaseState DBState;
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class TASK_BuildAutoCompleteData : public FNonAbandonableTask {
+private:
+	UMGC_SemanticDB* DB;
+public:
+	TASK_BuildAutoCompleteData(UMGC_SemanticDB* InDB){DB=InDB;}
+	//
+	FORCEINLINE TStatId GetStatId() const {
+		RETURN_QUICK_DECLARE_CYCLE_STAT(TASK_BuildAutoCompleteData,STATGROUP_ThreadPoolAsyncTasks);
+	}///
+	//
+	void DoWork() {DB->UpdateExtensions();}
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -85,10 +85,11 @@ public:
 	static const FSlateColor GetTypeColor(const FString &Notation);
 	static const FSlateBrush* GetTypeIcon(const FString &Notation);
 public:
-	MAGICNODEKISMET_API static const FString &GetClassDocumentation(const FString &Keyword);
-	MAGICNODEKISMET_API static const bool ParseClassFromHeader(const FString &Header, const FString &Class);
 	MAGICNODEKISMET_API static void AutoComplete(const FString &Owner, const FString &Keyword, TArray<FString>&Results);
 	MAGICNODEKISMET_API static void AutoSuggest(const TArray<FString>&Lines, const FString &Keyword, TArray<FString>&Results);
+	//
+	MAGICNODEKISMET_API static const FString &GetClassDocumentation(const FString &Keyword);
+	MAGICNODEKISMET_API static const bool ParseClassFromHeader(const FString &Header, const FString &Class);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -15,14 +15,20 @@
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "Framework/MultiBox/MultiBoxExtender.h"
 #include "Editor/LevelEditor/Public/LevelEditor.h"
+#include "Runtime/Slate/Public/Widgets/Docking/SDockTab.h"
 
 #include "ISettingsModule.h"
 #include "ISettingsSection.h"
 #include "ISettingsContainer.h"
+#include "Toolkits/AssetEditorToolkit.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define LOCTEXT_NAMESPACE "Synaptech"
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static const FName TAB("TAB_SourceViewer");
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -30,18 +36,28 @@ class IMagicNodeEditor : public IModuleInterface {
 public:
 	static inline IMagicNodeEditor &Get() {return FModuleManager::LoadModuleChecked<IMagicNodeEditor>("MagicNodeEditor");}
 	static inline bool IsAvailable() {return FModuleManager::Get().IsModuleLoaded("MagicNodeEditor");}
+	//
+	virtual TSharedPtr<FExtensibilityManager>GetMagicNodeEditorToolBarExtensibilityManager() {return nullptr;}
 };
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class FMagicNodeEditor : public IMagicNodeEditor {
 private:
 	TSharedPtr<FExtender>MenuExtender; 
+	TSharedPtr<FExtensibilityManager>ToolBarExtensibilityManager;
+private:
+	TSharedRef<SDockTab>OnSpawnLightSourceViewerTAB(const FSpawnTabArgs &SpawnTabArgs);
 public:
 	static void ExtendMenu(FMenuBuilder &MenuBuilder);
 	static void CreateNewScriptAsset();
+	static void InvokeSourceViewerTAB();
 	//
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 	virtual bool SupportsDynamicReloading() override {return false;}
+public:
+	virtual TSharedPtr<FExtensibilityManager>GetMagicNodeEditorToolBarExtensibilityManager() override {return ToolBarExtensibilityManager;}
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

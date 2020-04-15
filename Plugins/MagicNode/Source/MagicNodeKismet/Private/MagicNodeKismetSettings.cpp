@@ -13,6 +13,7 @@
 UKMGC_Settings::UKMGC_Settings() {
 #if WITH_EDITOR
 	ShowKeywordHints = true;
+	ScanUnrealTypesOnEditorStartup = false;
 	//
 	LoadConfig();
 	//

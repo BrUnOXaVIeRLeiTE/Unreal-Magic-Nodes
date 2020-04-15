@@ -18,7 +18,8 @@ public class MagicNodeEditor : ModuleRules {
                 "InputCore",
                 "CoreUObject",
                 "MagicNodeKismet",
-                "MagicNodeRuntime"
+                "MagicNodeRuntime",
+                "DirectoryWatcher"
             }///
         );//
         //

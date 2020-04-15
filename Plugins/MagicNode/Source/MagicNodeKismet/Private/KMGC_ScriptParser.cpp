@@ -28,6 +28,7 @@ FString IKMGC_ScriptParser::THeader = TEXT("");
 FString IKMGC_ScriptParser::TScript = TEXT("");
 FString IKMGC_ScriptParser::Docs = TEXT("");
 
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const EMGC_CompilerResult IKMGC_ScriptParser::CompileScriptClass(const FString &ScriptName, const FString &Header, const FString &Script, const FString &Types, const FString &ParentClass, const TArray<FString>&Includes, const TArray<FString>&Macros) {
@@ -569,6 +570,8 @@ const bool IKMGC_ScriptParser::BuildAutoComplete(const FClassDefinition &Definit
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void IKMGC_ScriptParser::AutoSuggest(const TArray<FString>&Lines, const FString &Keyword, TArray<FString>&Results) {
+	const auto &MGC_Settings = GetDefault<UKMGC_Settings>();
+	//
 	static const TCHAR* Whitespace[] = {
 		TEXT("\t "),TEXT("\t"),TEXT(" "),
 		TEXT("("),TEXT(")"),TEXT("&"),
@@ -597,8 +600,68 @@ void IKMGC_ScriptParser::AutoSuggest(const TArray<FString>&Lines, const FString 
 				if ((TChar<WIDECHAR>::IsAlpha(CH)||TChar<WIDECHAR>::IsDigit(CH)||CH==TEXT('_'))) {Clean.AppendChar(CH);}
 			}///
 			//
-			if (Keyword.Contains(Clean)||Clean.Len()<=Keyword.Len())
+			if (Keyword.Contains(Clean)||Clean.Len()<Keyword.Len())
 			{continue;} else {Results.AddUnique(Clean);}
+		}///
+		//
+		for (auto DB : MGC_Settings->KeywordDB.Array()) {
+			auto DTB = DB.Get(); if (DTB) {
+			for (const FString &Key : DTB->ScriptCore.Array()) {
+				if (!Key.Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+				//
+				FString Clean;
+				for (const TCHAR &CH : Key) {
+					if ((TChar<WIDECHAR>::IsAlpha(CH)||TChar<WIDECHAR>::IsDigit(CH)||CH==TEXT('_'))) {Clean.AppendChar(CH);}
+				}///
+				//
+				if (Keyword.Contains(Clean)||Clean.Len()<Keyword.Len())
+				{continue;} else {Results.AddUnique(Clean);}
+			}}///
+		}///
+		//
+		for (auto DB : MGC_Settings->ClassDB.Array()) {
+			auto DTB = DB.Get(); if (DTB) {
+			for (const FString &Key : DTB->ScriptCore.Array()) {
+				if (!Key.Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+				//
+				FString Clean;
+				for (const TCHAR &CH : Key) {
+					if ((TChar<WIDECHAR>::IsAlpha(CH)||TChar<WIDECHAR>::IsDigit(CH)||CH==TEXT('_'))) {Clean.AppendChar(CH);}
+				}///
+				//
+				if (Keyword.Contains(Clean)||Clean.Len()<Keyword.Len())
+				{continue;} else {Results.AddUnique(Clean);}
+			}}///
+		}///
+		//
+		for (auto DB : MGC_Settings->FunctionDB.Array()) {
+			auto DTB = DB.Get(); if (DTB) {
+			for (const FString &Key : DTB->ScriptCore.Array()) {
+				if (!Key.Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+				//
+				FString Clean;
+				for (const TCHAR &CH : Key) {
+					if ((TChar<WIDECHAR>::IsAlpha(CH)||TChar<WIDECHAR>::IsDigit(CH)||CH==TEXT('_'))) {Clean.AppendChar(CH);}
+				}///
+				//
+				if (Keyword.Contains(Clean)||Clean.Len()<Keyword.Len())
+				{continue;} else {Results.AddUnique(Clean);}
+			}}///
+		}///
+		//
+		for (auto DB : MGC_Settings->SemanticDB.Array()) {
+			auto DTB = DB.Get(); if (DTB) {
+			for (auto IT = DTB->ClassDefinitions.CreateConstIterator(); IT; ++IT) {
+				if (!IT->Key.Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+				//
+				FString Clean;
+				for (const TCHAR &CH : IT->Key) {
+					if ((TChar<WIDECHAR>::IsAlpha(CH)||TChar<WIDECHAR>::IsDigit(CH)||CH==TEXT('_'))) {Clean.AppendChar(CH);}
+				}///
+				//
+				if (Keyword.Contains(Clean)||Clean.Len()<Keyword.Len())
+				{continue;} else {Results.AddUnique(Clean);}
+			}}///
 		}///
 	}///
 	//

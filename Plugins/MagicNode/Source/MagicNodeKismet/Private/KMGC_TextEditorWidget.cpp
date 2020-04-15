@@ -19,10 +19,9 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SKMGC_TextEditorWidget::Construct(const FArguments &InArgs) {
-	check(InArgs._Marshaller.Get());
-	//
-	SuggestDrawID = 0;
 	SuggestPicked = INDEX_NONE;
+	SuggestDrawID = 0;
+	//
 	VScroll = InArgs._VScrollBar;
 	Marshall = InArgs._Marshaller;
 	OnAutoCompleted = InArgs._OnAutoComplete;
@@ -57,20 +56,22 @@ int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &G
 	const float AllotedWidth = Geometry.GetLocalSize().X;
 	//
 	//
-	for (int32 L=0; L<=CountLines(); L++) {
-		FSlateDrawElement::MakeBox(
-			OutDrawElements,LayerID,
-			Geometry.ToPaintGeometry(FVector2D(0,(LineHeight*L)-EditableTextLayout->GetScrollOffset().Y),FVector2D(AllotedWidth,LineHeight)),
-			FKMGC_NodeStyle::Get().Get()->GetBrush("KMGC.Lines"),
-			DrawEffects,GetLineIndexColor(L)
-		);//
-	} LayerID++;
+	if (!bIsReadOnly.Get()) {
+		for (int32 L=0; L<=(CountLines()); L++) {
+			FSlateDrawElement::MakeBox(
+				OutDrawElements,LayerID,
+				Geometry.ToPaintGeometry(FVector2D(0,(LineHeight*L)-EditableTextLayout->GetScrollOffset().Y),FVector2D(AllotedWidth,LineHeight)),
+				FKMGC_NodeStyle::Get().Get()->GetBrush("KMGC.Lines"),
+				DrawEffects,GetLineIndexColor(L)
+			);//
+		} LayerID++;
+	}///
 	//
 	//
 	LayerID = SMultiLineEditableText::OnPaint(Args,Geometry,CullingRect,OutDrawElements,LayerID,WidgetStyle,ParentEnabled); LayerID++;
 	//
 	//
-	if (VScroll.IsValid()) {
+	if (!bIsReadOnly.Get()) {
 		FSlateDrawElement::MakeBox(
 			OutDrawElements,LayerID,
 			Geometry.ToPaintGeometry(FVector2D(0,(LineHeight*CursorLocation.GetLineIndex())-EditableTextLayout->GetScrollOffset().Y),FVector2D(AllotedWidth,LineHeight)),
@@ -258,12 +259,14 @@ const FLinearColor SKMGC_TextEditorWidget::GetLineIndexColor(int32 Line) const {
 
 FReply SKMGC_TextEditorWidget::OnKeyChar(const FGeometry &Geometry, const FCharacterEvent &CharacterEvent) {
 	const TCHAR CH = CharacterEvent.GetCharacter();
+	FReply Reply = FReply::Unhandled();
 	//
 	if (CH==TEXT('\n')||CH==TEXT('\r')) {
-		return FReply::Handled();
+		if (!GetText().ToString().IsEmpty()) {
+			return FReply::Handled();
+		}///
 	}///
 	//
-	FReply Reply = FReply::Unhandled();
 	if (TChar<WIDECHAR>::IsWhitespace(CH)) {
 		if (!IsTextReadOnly()) {
 			if (CharacterEvent.IsCommandDown()||CharacterEvent.IsControlDown()) {
@@ -358,7 +361,6 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 	//
 	if ((Key==EKeys::Enter)&&HasSuggestion()) {
 		InsertPickedSuggestion();
-		//
 		return FReply::Handled();
 	} else if (Key==EKeys::Enter) {
 		int32 Offset = CursorLocation.GetOffset();
@@ -384,9 +386,9 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 			} else {InsertTextAtCursor(Appended);}
 			//
 			EditableTextLayout->EndEditTransaction();
-		}///
-		//
-		return FReply::Handled();
+			//
+			return FReply::Handled();
+		} else {return (SMultiLineEditableText::OnKeyDown(Geometry,KeyEvent));}
 	}///
 	//
 	if (Key==EKeys::Delete) {
@@ -433,9 +435,7 @@ FReply SKMGC_TextEditorWidget::OnKeyUp(const FGeometry &Geometry, const FKeyEven
 }
 
 FReply SKMGC_TextEditorWidget::OnMouseButtonDown(const FGeometry &Geometry, const FPointerEvent &MouseEvent) {
-	FReply Reply = SMultiLineEditableText::OnMouseButtonDown(Geometry,MouseEvent);
-	//
-	if ((MouseEvent.GetEffectingButton()==EKeys::LeftMouseButton)&&(MouseEvent.IsCommandDown()||MouseEvent.IsControlDown())) {
+	if (!HasSuggestion()&&(MouseEvent.GetEffectingButton()==EKeys::LeftMouseButton)&&(MouseEvent.IsCommandDown()||MouseEvent.IsControlDown())) {
 		EditableTextLayout->SelectWordAt(Geometry,MouseEvent.GetScreenSpacePosition());
 		UnderCursor = GetSelectedText().ToString();
 		//
@@ -453,7 +453,35 @@ FReply SKMGC_TextEditorWidget::OnMouseButtonDown(const FGeometry &Geometry, cons
 		return FReply::Handled();
 	}///
 	//
-	return Reply;
+	if (HasSuggestion()&&(IsMouseWithinCompletionBox)) {
+		InsertPickedSuggestion();
+		return FReply::Handled();
+	} else if(HasSuggestion()&&(!IsMouseWithinCompletionBox)) {
+		SuggestionResults.Empty();
+		KeywordInfo.Empty();
+		//
+		return FReply::Handled();
+	}///
+	//
+	return SMultiLineEditableText::OnMouseButtonDown(Geometry,MouseEvent);
+}
+
+FReply SKMGC_TextEditorWidget::OnMouseMove(const FGeometry &MyGeometry, const FPointerEvent &MouseEvent) {
+	MousePosition = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition());
+	//
+	return (SMultiLineEditableText::OnMouseMove(MyGeometry,MouseEvent));
+}
+
+FReply SKMGC_TextEditorWidget::OnMouseWheel(const FGeometry &MyGeometry, const FPointerEvent &MouseEvent) {
+	if (HasSuggestion()&&(SuggestionResults.Num()>MAX_SUGGESTIONS)) {
+		if (MouseEvent.GetWheelDelta()>0) {
+			SuggestDrawID = FMath::Clamp(SuggestDrawID-1,0,SuggestionResults.Num()-MAX_SUGGESTIONS);
+		} else {
+			SuggestDrawID = FMath::Clamp(SuggestDrawID+1,0,SuggestionResults.Num()-MAX_SUGGESTIONS);
+		}///
+	}///
+	//
+	return (SMultiLineEditableText::OnMouseWheel(MyGeometry,MouseEvent));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -690,7 +718,7 @@ void SKMGC_TextEditorWidget::InsertPickedSuggestion() {
 		int32 I = CursorLocation.GetOffset()-1;
 		TCHAR CH = TEXT('a'); FString Raw;
 		//
-		while ((I>INDEX_NONE)&&(!(TChar<WIDECHAR>::IsWhitespace(CH)||TChar<WIDECHAR>::IsLinebreak(CH)))&&(TChar<WIDECHAR>::IsAlpha(CH)||TChar<WIDECHAR>::IsDigit(CH))) {
+		while ((I>INDEX_NONE)&&(!(TChar<WIDECHAR>::IsWhitespace(CH)||TChar<WIDECHAR>::IsLinebreak(CH)))&&(TChar<WIDECHAR>::IsAlpha(CH)||TChar<WIDECHAR>::IsDigit(CH)||CH==TEXT('_'))) {
 			Offset = FTextLocation(CursorLocation.GetLineIndex(),I);
 			CH = EditableTextLayout->GetCharacterAt(Offset);
 			Raw.AppendChar(CH);
@@ -704,12 +732,15 @@ void SKMGC_TextEditorWidget::InsertPickedSuggestion() {
 	int32 Offset = (CursorLocation.GetOffset()-(AutoCompleteKeyword.Len()+1));
 	if (Offset<=INDEX_NONE) {Offset=0;}
 	//
+	EditableTextLayout->ClearSelection();
 	if (SuggestionResults.IsValidIndex(SuggestPicked)) {
 		EditableTextLayout->BeginEditTransation();
 		//
 		GoToLineColumn(CursorLocation.GetLineIndex(),Offset);
-		InsertTextAtCursor(SuggestionResults[SuggestPicked]);
+		EditableTextLayout->JumpTo(ETextLocation::EndOfLine,ECursorAction::SelectText);
+		EditableTextLayout->DeleteSelectedText();
 		//
+		InsertTextAtCursor(SuggestionResults[SuggestPicked]);
 		EditableTextLayout->EndEditTransaction();
 	}///
 	//
@@ -791,7 +822,6 @@ const FSlateBrush* SKMGC_TextEditorWidget::GetSuggestionIcon(const FString &Keyw
 			//
 			const FPropertyDefinition &PropInfo = IKMGC_ScriptParser::GetPropertyInfo(ScriptObject->GetRuntimeScriptClass(),Keyword);
 			if (PropInfo!=IKMGC_ScriptParser::NOPropertyInfo) {
-				///Brush = FEditorStyle::GetBrush(TEXT("BlueprintEditor.AddNewVariableButton"));
 				switch (PropInfo.StackOf) {
 					case EStack::Set: {Brush=FEditorStyle::GetBrush(TEXT("Kismet.VariableList.SetTypeIcon"));} break;
 					case EStack::Array: {Brush=FEditorStyle::GetBrush(TEXT("Kismet.VariableList.ArrayTypeIcon"));} break;

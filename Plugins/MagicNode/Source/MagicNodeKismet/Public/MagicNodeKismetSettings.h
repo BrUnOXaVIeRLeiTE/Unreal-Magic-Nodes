@@ -45,6 +45,12 @@ public:
 	//
 	UPROPERTY(Category="MGC Node Editor", config, EditDefaultsOnly)
 	bool ShowKeywordHints;
+	//
+	//
+	/* If enabled, the auto-complete system will search for Unreal Types on Editor launch.
+	The list of types is HUGE and Editor startup could increase by several minutes with this activated. */
+	UPROPERTY(Category="MGC Code Completion", config, EditDefaultsOnly)
+	bool ScanUnrealTypesOnEditorStartup;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

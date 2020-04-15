@@ -45,10 +45,16 @@ private:
 	//TSharedPtr<SWidget>NavigationBar;
 	//TSharedPtr<SWidget>ToolBox;
 	//
-	TArray<TSharedPtr<FString>>LineCount;
-	EMGC_CodeSource Source;
-	//
 	UMagicNodeScript* ScriptObject;
+private:
+	EMGC_CodeSource Source;
+	TArray<TSharedPtr<FString>>LineCount;
+	//
+	TSharedPtr<FString>ExternalFilePath;
+	TSharedPtr<FString>ExternalFileText;
+	//
+	float DatabaseLoad;
+	bool RequestedUpdateDB;
 public:
 	SMGC_CodeEditorCore();
 	~SMGC_CodeEditorCore();
@@ -56,6 +62,7 @@ public:
 	SLATE_BEGIN_ARGS(SMGC_CodeEditorCore)
 	{}//
 		SLATE_ARGUMENT(EMGC_CodeSource,SourceToEdit)
+		SLATE_ARGUMENT(FString,ExternalSourcePath)
 	SLATE_END_ARGS()
 	//
 	//
@@ -69,10 +76,12 @@ public:
 	//
 	//
 	bool HasScript() const;
+	bool IsSourceView() const;
+	bool IsScriptEditable() const;
+	bool CanBuildDatabase() const;
 	//
 	int32 GetLineCount() const;
 	FText GetScriptText() const;
-	bool IsScriptEditable() const;
 	//
 	void OnVerticalScroll(float Offset);
 	void SetLineCountList(const int32 Count);
@@ -83,6 +92,11 @@ public:
 	void OnScriptTextComitted(const FText &NewText, ETextCommit::Type CommitInfo);
 	void OnSelectedLineCounterItem(TSharedPtr<FString>Item, ESelectInfo::Type SelectInfo);
 	TSharedRef<ITableRow>OnGenerateLineCounter(TSharedPtr<FString>Item, const TSharedRef<STableViewBase>&OwnerTable);
+	//
+	//
+	FText GetDatabaseLoadTooltip() const;
+	TOptional<float>GetDatabaseLoad() const;
+	EVisibility GetDatabaseWarningVisibility() const;
 	//
 	//
 	void UpdateDatabaseSemantics();

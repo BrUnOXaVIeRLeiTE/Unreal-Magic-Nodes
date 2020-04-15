@@ -57,6 +57,7 @@
 #include "Runtime/Engine/Classes/Engine/LevelScriptActor.h"									//ALevelScriptActor
 #include "Runtime/Engine/Classes/Engine/Light.h"											//ALight
 #include "Runtime/Engine/Classes/Engine/DirectionalLight.h"									//ADirectionalLight
+#include "Runtime/Engine/Classes/GameFramework/PlayerController.h"							//APlayerController
 #include "Runtime/Engine/Classes/Engine/PointLight.h"										//APointLight
 #include "Runtime/Engine/Classes/Engine/RectLight.h"										//ARectLight
 #include "Runtime/Engine/Classes/Engine/SpotLight.h"										//ASpotLight
@@ -174,10 +175,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 UMGC_KeywordDB::UMGC_KeywordDB() {
-	ScriptCore.Empty();
-	Operators.Empty();
-	Macros.Empty();
-	//
 	ScriptCore.Add(TEXT("void"));
 	ScriptCore.Add(TEXT("alignas"));
 	ScriptCore.Add(TEXT("alignof"));
@@ -572,62 +569,9 @@ UMGC_KeywordDB::UMGC_KeywordDB() {
 	Macros.Add(TEXT("IMGC"));
 }
 
-void UMGC_KeywordDB::PostLoad() {
-	Super::PostLoad();
-	//
-	bool Cleanup = false;
-	//
-	for (int32 I=0; I<ScriptCore.Num(); I++) {
-		const auto Keyword = ScriptCore.Array()[I];
-		if (Extensions.Contains(Keyword)) {Cleanup=true; break;}
-	}///
-	//
-	for (int32 I=0; I<Operators.Num(); I++) {
-		const auto Operator = Operators.Array()[I];
-		if (Extensions.Contains(Operator)) {Cleanup=true; break;}
-	}///
-	//
-	if (Cleanup) {
-		for (int32 I=0; I<ScriptCore.Num(); I++) {
-			const auto Keyword = ScriptCore.Array()[I];
-			if (Extensions.Contains(Keyword)) {
-				Extensions.Remove(Keyword);
-			}///
-		}///
-		//
-		for (int32 I=0; I<Operators.Num(); I++) {
-			const auto Operator = Operators.Array()[I];
-			if (Extensions.Contains(Operator)) {
-				Extensions.Remove(Operator);
-			}///
-		}///
-		//
-		//
-		for (int32 I=Extensions.Num(); I!=0; --I) {
-			if (!Extensions.Array().IsValidIndex(I)) {continue;}
-			//
-			FString Extension = Extensions.Array()[I];
-			if (Extension.IsEmpty()) {Extensions.Remove(Extension);}
-			if (Extension.IsNumeric()) {Extensions.Remove(Extension);}
-		}///
-	}///
-}
-
-void UMGC_KeywordDB::UpdateExtensions() {
-	for (int32 I=Extensions.Num(); I!=0; --I) {
-		if (!Extensions.Array().IsValidIndex(I)) {continue;}
-		//
-		FString Extension = Extensions.Array()[I];
-		if (Extension.IsEmpty()) {Extensions.Remove(Extension);}
-		if (Extension.IsNumeric()) {Extensions.Remove(Extension);}
-	}///
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 UMGC_ClassDB::UMGC_ClassDB() {
-	ScriptCore.Empty();
-	//
 	ScriptCore.Add(TEXT("UClass"));
 	ScriptCore.Add(TEXT("UObject"));
 	ScriptCore.Add(TEXT("UStruct"));
@@ -684,53 +628,11 @@ UMGC_ClassDB::UMGC_ClassDB() {
 	ScriptTypes.Add(TEXT("TSharedPtr"));
 	ScriptTypes.Add(TEXT("TSharedRef"));
 	ScriptTypes.Add(TEXT("TSubclassOf"));
-	//
-	//
-	UpdateExtensions();
-}
-
-void UMGC_ClassDB::PostLoad() {
-	Super::PostLoad();
-	//
-	bool Cleanup = false;
-	//
-	for (int32 I=0; I<ScriptCore.Num(); I++) {
-		const auto Keyword = ScriptCore.Array()[I];
-		if (Extensions.Contains(Keyword)) {Cleanup=true; break;}
-	}///
-	//
-	if (Cleanup) {
-		for (int32 I=0; I<ScriptCore.Num(); I++) {
-			const auto Keyword = ScriptCore.Array()[I];
-			if (Extensions.Contains(Keyword)) {
-				Extensions.Remove(Keyword);
-			}///
-		}///
-		//
-		for (int32 I=Extensions.Num()-1; I!=0; --I) {
-			if (!Extensions.Array().IsValidIndex(I)) {continue;}
-			//
-			FString Extension = Extensions.Array()[I];
-			if (Extension.IsEmpty()) {Extensions.Remove(Extension);}
-			if (Extension.IsNumeric()) {Extensions.Remove(Extension);}
-		}///
-	}///
-}
-
-void UMGC_ClassDB::UpdateExtensions() {
-	for (TObjectIterator<UStruct>IT; IT; ++IT) {
-		FString Target = IT->GetName();
-		//
-		if (IT->IsA(UClass::StaticClass())) {Extensions.Add(FString(TEXT("U"))+Target); continue;}
-		if (IT->IsA(UStruct::StaticClass())) {Extensions.Add(FString(TEXT("F"))+Target); continue;}
-	}///
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 UMGC_FunctionDB::UMGC_FunctionDB() {
-	ScriptCore.Empty();
-	//
 	ScriptCore.Add(TEXT("Run"));
 	ScriptCore.Add(TEXT("Stop"));
 	ScriptCore.Add(TEXT("Awake"));
@@ -757,53 +659,11 @@ UMGC_FunctionDB::UMGC_FunctionDB() {
 	}///
 }
 
-void UMGC_FunctionDB::PostLoad() {
-	Super::PostLoad();
-	//
-	bool Cleanup = false;
-	//
-	for (int32 I=0; I<ScriptCore.Num(); I++) {
-		const auto Keyword = ScriptCore.Array()[I];
-		if (Extensions.Contains(Keyword)) {Cleanup=true; break;}
-	}///
-	//
-	if (Cleanup) {
-		for (int32 I=0; I<ScriptCore.Num(); I++) {
-			const auto Keyword = ScriptCore.Array()[I];
-			if (Extensions.Contains(Keyword)) {
-				Extensions.Remove(Keyword);
-			}///
-		}///
-		//
-		for (int32 I=Extensions.Num()-1; I!=0; --I) {
-			if (!Extensions.Array().IsValidIndex(I)) {continue;}
-			//
-			FString Extension = Extensions.Array()[I];
-			if (Extension.IsEmpty()) {Extensions.Remove(Extension);}
-			if (Extension.IsNumeric()) {Extensions.Remove(Extension);}
-		}///
-	}///
-}
-
-void UMGC_FunctionDB::UpdateExtensions() {
-	for (TObjectIterator<UClass>IT; IT; ++IT) {
-		if (IT->ClassDefaultObject==nullptr) {continue;}
-		//
-		for (TFieldIterator<UFunction>FIT(IT->ClassDefaultObject->GetClass(),EFieldIteratorFlags::ExcludeSuper); FIT; ++FIT) {
-			const FString Target = FIT->GetName();
-			//
-			if (ScriptCore.Contains(Target)) {continue;}
-			//
-			Extensions.Add(Target);
-		}///
-	}///
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+EDatabaseState UMGC_SemanticDB::DBState = EDatabaseState::READY;
+
 UMGC_SemanticDB::UMGC_SemanticDB() {
-	KeywordDefinitions.Empty();
-	//
 	FKeywordDefinition KDefinition;
 	FString Keyword;
 	//
@@ -1145,7 +1005,6 @@ UMGC_SemanticDB::UMGC_SemanticDB() {
 	//
 	//
 	FKeywordDefinition TDefinition;
-	TypeDefinitions.Empty();
 	//
 	Keyword = TEXT("UObject");
 	TDefinition.Info = TEXT("Native Type.\n\nThe base class of all objects.");
@@ -1310,7 +1169,6 @@ UMGC_SemanticDB::UMGC_SemanticDB() {
 	//
 	//
 	FKeywordDefinition MDefinition;
-	MacroDefinitions.Empty();
 	//
 	Keyword = TEXT("IMGC");
 	MDefinition.Info = TEXT("MGC Macro.\n\nRegisters the 'Execute' function signature that allows this Node to be compiled and executed at runtime.");
@@ -1789,6 +1647,7 @@ UMGC_SemanticDB::UMGC_SemanticDB() {
 	RegisterClassReflection(AGameSession::StaticClass(),TEXT("A"));
 	RegisterClassReflection(AGameStateBase::StaticClass(),TEXT("A"));
 	RegisterClassReflection(AGameState::StaticClass(),TEXT("A"));
+	RegisterClassReflection(APlayerController::StaticClass(),TEXT("A"));
 	RegisterClassReflection(APlayerState::StaticClass(),TEXT("A"));
 	RegisterClassReflection(AServerStatReplicator::StaticClass(),TEXT("A"));
 	RegisterClassReflection(ASkyLight::StaticClass(),TEXT("A"));
@@ -1914,46 +1773,21 @@ UMGC_SemanticDB::UMGC_SemanticDB() {
 	RegisterClassReflection(UTimelineComponent::StaticClass(),TEXT("U"));
 	//
 	//
-	for (TObjectIterator<UField>IT; IT; ++IT) {
-		///if (IT->IsA(UProperty::StaticClass())) {continue;}
-		if (IT->IsA(UClass::StaticClass())&&IsValidTarget(Cast<UClass>(*IT))) {
-			UClass* Class = CastChecked<UClass>(*IT);
-			RegisterClassReflection(Class,TEXT("U"));
-		} else if (IT->IsA(UStruct::StaticClass())) {
-			UStruct* Struct = CastChecked<UStruct>(*IT);
-			RegisterStructReflection(Struct);
-		}/* else if (IT->IsA(UEnum::StaticClass())) {
-			UEnum* Enum = CastChecked<UEnum>(*IT);
-			RegisterEnumReflection(Enum);
-		}*///
-	}///
+	const auto &Settings = GetDefault<UKMGC_Settings>();
+	if (!Settings->ScanUnrealTypesOnEditorStartup) {return;}
 	//
-	//
-	UpdateExtensions();
+	/*(new FAutoDeleteAsyncTask<TASK_BuildAutoCompleteData>(this))->StartSynchronousTask();*/
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void UMGC_SemanticDB::UpdateExtensions() {
-	for (TObjectIterator<UMagicNode>IT; IT; ++IT) {
-		RegisterClassReflection(IT->GetClass(),TEXT("U"));
-		//
-		FClassRedirector CR;
-		CR.ObjectName = IT->GetName();
-		CR.ObjectClass = FString(TEXT("U"))+(IT->GetClass()->GetName());
-		//
-		ClassRedirectors.Add(IT->GetName(),CR);
-	}///
-	//
-	for (TObjectIterator<UEnum>IT; IT; ++IT) {
-		///RegisterEnumReflection((*IT)); // @TOO SLOW!!
-		//
-		FClassRedirector CR;
-		CR.ObjectName = IT->GetName();
-		CR.ObjectClass = FString(TEXT("E"))+((*IT)->GetName());
-		//
-		ClassRedirectors.Add((*IT)->GetName(),CR);
-	}///
+	if (UMGC_SemanticDB::DBState==EDatabaseState::ASYNCLOADING) {return;}
+	UMGC_SemanticDB::DBState = EDatabaseState::ASYNCLOADING;
 	//
 	for (TObjectIterator<UClass>IT; IT; ++IT) {
+		if (!IsValidTarget(*IT)) {continue;}
+		//
 		RegisterClassReflection((*IT),TEXT("U"));
 		//
 		FClassRedirector CR;
@@ -1972,6 +1806,16 @@ void UMGC_SemanticDB::UpdateExtensions() {
 		FClassRedirector CR;
 		CR.ObjectName = IT->GetName();
 		CR.ObjectClass = FString(TEXT("F"))+((*IT)->GetName());
+		//
+		ClassRedirectors.Add((*IT)->GetName(),CR);
+	}///
+	//
+	for (TObjectIterator<UEnum>IT; IT; ++IT) {
+		RegisterEnumReflection((*IT));
+		//
+		FClassRedirector CR;
+		CR.ObjectName = IT->GetName();
+		CR.ObjectClass = (*IT)->GetName();
 		//
 		ClassRedirectors.Add((*IT)->GetName(),CR);
 	}///
@@ -2001,7 +1845,7 @@ void UMGC_SemanticDB::UpdateExtensions() {
 		if (IT->IsA(UClass::StaticClass())) {continue;}
 		if (IT->IsA(AActor::StaticClass())) {continue;}
 		if (IT->IsA(UStruct::StaticClass())) {continue;}
-		///if (IT->IsA(UProperty::StaticClass())) {continue;}
+		if (IT->IsA(UMagicNode::StaticClass())) {continue;}
 		if (IT->IsA(UActorComponent::StaticClass())) {continue;}
 		//
 		RegisterClassReflection(IT->GetClass(),TEXT("U"));
@@ -2013,24 +1857,39 @@ void UMGC_SemanticDB::UpdateExtensions() {
 		ClassRedirectors.Add(IT->GetName(),CR);
 	}///
 	//
+	for (TObjectIterator<UMagicNode>IT; IT; ++IT) {
+		RegisterClassReflection(IT->GetClass(),TEXT("U"));
+		//
+		FClassRedirector CR;
+		CR.ObjectName = IT->GetName();
+		CR.ObjectClass = FString(TEXT("U"))+(IT->GetClass()->GetName());
+		//
+		ClassRedirectors.Add(IT->GetName(),CR);
+	}///
 	//
-	FClassRedirector CR_Scale;
-	CR_Scale.ObjectName = TEXT("Scale");
-	CR_Scale.ObjectClass = TEXT("FVector");
-	CR_Scale.OwnerClass = TEXT("FTransform");
-	ClassRedirectors.Add(CR_Scale.ObjectName,CR_Scale);
 	//
-	FClassRedirector CR_Location;
-	CR_Location.ObjectName = TEXT("Location");
-	CR_Location.ObjectClass = TEXT("FVector");
-	CR_Location.OwnerClass = TEXT("FTransform");
-	ClassRedirectors.Add(CR_Location.ObjectName,CR_Location);
+	{
+		FClassRedirector CR_Scale;
+		CR_Scale.ObjectName = TEXT("Scale");
+		CR_Scale.ObjectClass = TEXT("FVector");
+		CR_Scale.OwnerClass = TEXT("FTransform");
+		ClassRedirectors.Add(CR_Scale.ObjectName,CR_Scale);
+		//
+		FClassRedirector CR_Location;
+		CR_Location.ObjectName = TEXT("Location");
+		CR_Location.ObjectClass = TEXT("FVector");
+		CR_Location.OwnerClass = TEXT("FTransform");
+		ClassRedirectors.Add(CR_Location.ObjectName,CR_Location);
+		//
+		FClassRedirector CR_Rotation;
+		CR_Rotation.ObjectName = TEXT("Rotation");
+		CR_Rotation.ObjectClass = TEXT("FRotator");
+		CR_Rotation.OwnerClass = TEXT("FTransform");
+		ClassRedirectors.Add(CR_Rotation.ObjectName,CR_Rotation);
+	}
 	//
-	FClassRedirector CR_Rotation;
-	CR_Rotation.ObjectName = TEXT("Rotation");
-	CR_Rotation.ObjectClass = TEXT("FRotator");
-	CR_Rotation.OwnerClass = TEXT("FTransform");
-	ClassRedirectors.Add(CR_Rotation.ObjectName,CR_Rotation);
+	//
+	UMGC_SemanticDB::DBState = EDatabaseState::READY;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2177,15 +2036,12 @@ void UMGC_SemanticDB::RegisterClassReflection(UClass* Class, FString Prefix) {
 	const auto &Settings = GetDefault<UKMGC_Settings>();
 	if (Settings->ClassDB.Num()>=1) {
 		UMGC_ClassDB* ClassDB = Settings->ClassDB.Array()[0].Get();
-		if (ClassDB==nullptr) {return;}
-		//
-		ClassDB->Extensions.Add(ClassName);
+		if (ClassDB) {ClassDB->Extensions.Add(ClassName);}
 	}///
 }
 
 void UMGC_SemanticDB::RegisterEnumReflection(UEnum* Enum) {
-	FString EnumName = FString(TEXT("E"))+Enum->GetName();
-	//
+	const FString EnumName = Enum->GetName();
 	const FString CHint = Enum->GetMetaData(TEXT("MgcHint"));
 	const FString CMeta = Enum->GetMetaData(TEXT("ToolTip"));
 	const FString CParent = TEXT("UEnum");
@@ -2211,9 +2067,7 @@ void UMGC_SemanticDB::RegisterEnumReflection(UEnum* Enum) {
 	const auto &Settings = GetDefault<UKMGC_Settings>();
 	if (Settings->ClassDB.Num()>=1) {
 		UMGC_ClassDB* ClassDB = Settings->ClassDB.Array()[0].Get();
-		if (ClassDB==nullptr) {return;}
-		//
-		ClassDB->Extensions.Add(EnumName);
+		if (ClassDB) {ClassDB->Extensions.Add(EnumName);}
 	}///
 }
 
@@ -2320,9 +2174,7 @@ void UMGC_SemanticDB::RegisterStructReflection(UStruct* Struct) {
 	const auto &Settings = GetDefault<UKMGC_Settings>();
 	if (Settings->ClassDB.Num()>=1) {
 		UMGC_ClassDB* ClassDB = Settings->ClassDB.Array()[0].Get();
-		if (ClassDB==nullptr) {return;}
-		//
-		ClassDB->Extensions.Add(StructName);
+		if (ClassDB) {ClassDB->Extensions.Add(StructName);}
 	}///
 }
 

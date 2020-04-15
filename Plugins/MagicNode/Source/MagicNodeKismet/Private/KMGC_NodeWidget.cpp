@@ -34,15 +34,28 @@ void SKMGC_MagicNodeWidget::Tick(const FGeometry &AllottedGeometry, const double
 	SGraphNode::Tick(AllottedGeometry,CurrentTime,DeltaTime);
 	//
 	HintTimer = (HintTimer>=15.f) ? 0.f : (HintTimer+0.5f);
+	//
+	if (UMGC_SemanticDB::DBState==EDatabaseState::ASYNCLOADING) {
+		RequestedUpdateDB = true;
+		//
+		if (DatabaseLoad>=1.f) {
+			DatabaseLoad = 0.f;
+		} else {DatabaseLoad+=0.05f;}
+	} else if (RequestedUpdateDB) {
+		UpdateDatabaseReferences();
+		RequestedUpdateDB = false;
+		DatabaseLoad = 0.f;
+		//
+		Invalidate(EInvalidateWidgetReason::Layout);
+	}///
 }
 
 void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>MainBox) {
 	UpdateDatabaseReferences();
 	//
-	//
-	ViewSearchBox = false;
-	Source = ESKMGC_Source::Header;
 	AutoComplete = EAutoComplete::Off;
+	Source = ESKMGC_Source::Header;
+	ViewSearchBox = false;
 	//
 	SetLineCountList(GetLineCount());
 	SetMacrosList(GetScriptMacros());
@@ -76,7 +89,8 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 	.VAlign(VAlign_Top).HAlign(HAlign_Fill)
 	[
 	SNew(SHorizontalBox)
-	+SHorizontalBox::Slot().HAlign(HAlign_Fill)
+	+SHorizontalBox::Slot()
+	.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
 	[
 		SNew(SBorder).Padding(1)
 		.Visibility(this,&SKMGC_MagicNodeWidget::GetScriptEditorVisibility)
@@ -214,7 +228,7 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 				]
 			]
 			+SVerticalBox::Slot()
-			.FillHeight(1.0f).Padding(10,5,10,5)
+			.FillHeight(1.f).Padding(10,5,10,5)
 			[
 				SNew(SHorizontalBox)
 				+SHorizontalBox::Slot()
@@ -258,7 +272,8 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 						]
 					]
 				]
-				+SHorizontalBox::Slot().HAlign(HAlign_Fill)
+				+SHorizontalBox::Slot()
+				.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
 				[
 					SNew(SOverlay)
 					+SOverlay::Slot()
@@ -334,8 +349,11 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 										.OnTextChanged(this,&SKMGC_MagicNodeWidget::OnTypesTextChanged,ETextCommit::Default)
 										.OnTextCommitted(this,&SKMGC_MagicNodeWidget::OnTypesTextComitted)
 										.Visibility(this,&SKMGC_MagicNodeWidget::GetTypesPanelVisibility)
+										.OnInvokeSearch(this,&SKMGC_MagicNodeWidget::OnInvokedSearch)
+										.OnAutoComplete(this,&SKMGC_MagicNodeWidget::OnAutoComplete)
 										.IsEnabled(this,&SKMGC_MagicNodeWidget::HasScript)
 										.Text(this,&SKMGC_MagicNodeWidget::GetTypesText)
+										.VScrollBar(VS_SCROLL).HScrollBar(HSH_SCROLL)
 										.Marshaller(MARSHALL.ToSharedRef())
 										.CanKeyboardFocus(true)
 										.IsReadOnly(false)
@@ -475,6 +493,7 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 				+SHorizontalBox::Slot().AutoWidth().Padding(0,0,5,0)
 				[
 					SNew(SButton)
+					.ToolTipText(LOCTEXT("KMGC_Compile","Generates node's native C++ classes to compile (C++ binary target)."))
 					.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedCompile)
 					.ButtonStyle(FEditorStyle::Get(),"FlatButton.DarkGrey")
 					.ForegroundColor(FSlateColor::UseForeground())
@@ -487,6 +506,7 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 				+SHorizontalBox::Slot().AutoWidth().Padding(0,0,5,0)
 				[
 					SNew(SButton)
+					.ToolTipText(LOCTEXT("KMGC_ReloadScript","Rebuilds this node's pins (if there was a successful C++ compilation)."))
 					.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedReloadScript)
 					.ButtonStyle(FEditorStyle::Get(),"FlatButton.DarkGrey")
 					.ForegroundColor(FSlateColor::UseForeground())
@@ -499,6 +519,7 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 				+SHorizontalBox::Slot().AutoWidth().Padding(0,0,5,0)
 				[
 					SNew(SButton)
+					.ToolTipText(LOCTEXT("KMGC_SaveScript","Saves this node's source code (NOT in compiled form)."))
 					.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedSaveScript)
 					.ButtonStyle(FEditorStyle::Get(),"FlatButton.DarkGrey")
 					.ForegroundColor(FSlateColor::UseForeground())
@@ -506,6 +527,46 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 					[
 						SNew(SImage)
 						.Image(FKMGC_NodeStyle::Get()->GetBrush(TEXT("KMGC.Toolbar.SaveScript")))
+					]
+				]
+				+SHorizontalBox::Slot().AutoWidth().Padding(0,0,5,0)
+				[
+					SNew(SButton)
+					.ToolTipText(LOCTEXT("KMGC_BuildDatabase","The auto-complete system will search for Unreal Types.\nThe list of types is HUGE and this process may take several minutes to complete!"))
+					.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedBuildDatabase)
+					.IsEnabled(this,&SKMGC_MagicNodeWidget::CanBuildDatabase)
+					.ButtonStyle(FEditorStyle::Get(),"FlatButton.DarkGrey")
+					.ForegroundColor(FSlateColor::UseForeground())
+					.VAlign(VAlign_Center).HAlign(HAlign_Left)
+					[
+						SNew(SImage)
+						.Image(FKMGC_NodeStyle::Get()->GetBrush(TEXT("KMGC.Toolbar.Database")))
+					]
+				]
+			]
+			+SVerticalBox::Slot()
+			.AutoHeight().Padding(10,0,10,5)
+			[
+				SNew(SBorder)
+				.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+				.BorderImage(FEditorStyle::GetBrush("Menu.Background"))
+				.Visibility(this,&SKMGC_MagicNodeWidget::GetDatabaseWarningVisibility)
+				[
+					SNew(SVerticalBox)
+					+SVerticalBox::Slot()
+					.AutoHeight().Padding(0)
+					[
+						SNew(STextBlock).Margin(FMargin(5,0,0,0))
+						.Text(this,&SKMGC_MagicNodeWidget::GetDatabaseLoadTooltip)
+						.ColorAndOpacity(FSlateColor(FLinearColor(1.f,0.45f,0.f)))
+					]
+					+SVerticalBox::Slot()
+					.AutoHeight().Padding(2,0,2,0)
+					[
+						SNew(SProgressBar)
+						.BorderPadding(FVector2D::ZeroVector)
+						.Percent(this,&SKMGC_MagicNodeWidget::GetDatabaseLoad)
+						.FillColorAndOpacity(FSlateColor(FLinearColor(0.5f,0.5f,1.f)))
 					]
 				]
 			]
@@ -558,6 +619,11 @@ void SKMGC_MagicNodeWidget::UpdateGraphNode() {
 void SKMGC_MagicNodeWidget::UpdateDatabaseReferences() {
 	const auto &_Settings = GetDefault<UKMGC_Settings>();
 	//
+	if (HasScript()) {
+		UKMGC_MagicNode* KNode = (CastChecked<UKMGC_MagicNode>(GraphNode));
+		KNode->UpdateDatabaseReferences();
+	}///
+	//
 	TArray<UMGC_SemanticDB*>SemanticDB;
 	TArray<UMGC_FunctionDB*>FunctionDB;
 	TArray<UMGC_KeywordDB*>KeywordDB;
@@ -585,18 +651,16 @@ void SKMGC_MagicNodeWidget::UpdateDatabaseReferences() {
 	);///
 	//
 	SetLineCountList(GetLineCount());
-	//
-	if (HasScript()) {
-		UKMGC_MagicNode* KNode = (CastChecked<UKMGC_MagicNode>(GraphNode));
-		KNode->UpdateDatabaseReferences();
-	}///
 }
 
 void SKMGC_MagicNodeWidget::UpdateDatabaseSemantics() {
 	const auto &_Settings = GetDefault<UKMGC_Settings>();
 	//
+	if (UMGC_SemanticDB::DBState==EDatabaseState::ASYNCLOADING) {return;}
 	for (auto DB : _Settings->SemanticDB.Array()) {
-		if (DB.IsValid()) {DB.LoadSynchronous()->UpdateExtensions();}
+		if (DB.IsValid()) {
+			(new FAutoDeleteAsyncTask<TASK_BuildAutoCompleteData>(DB.LoadSynchronous()))->StartBackgroundTask();
+		}///
 	}///
 }
 
@@ -605,11 +669,13 @@ void SKMGC_MagicNodeWidget::UpdateTextEditorScriptReference() {
 	//
 	if (HEADER_EDITOR.IsValid()) {HEADER_EDITOR->SetScriptObject(Script);}
 	if (SCRIPT_EDITOR.IsValid()) {SCRIPT_EDITOR->SetScriptObject(Script);}
+	if (TYPES_EDITOR.IsValid()) {TYPES_EDITOR->SetScriptObject(Script);}
 }
 
 void SKMGC_MagicNodeWidget::UpdateTextEditorScriptReference(UMagicNodeScript* Script) {
 	if (HEADER_EDITOR.IsValid()) {HEADER_EDITOR->SetScriptObject(Script);}
 	if (SCRIPT_EDITOR.IsValid()) {SCRIPT_EDITOR->SetScriptObject(Script);}
+	if (TYPES_EDITOR.IsValid()) {TYPES_EDITOR->SetScriptObject(Script);}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -624,6 +690,10 @@ bool SKMGC_MagicNodeWidget::SupportsKeyboardFocus() const {
 
 bool SKMGC_MagicNodeWidget::HasScript() const {
 	return (GetScriptObject()!=nullptr);
+}
+
+bool SKMGC_MagicNodeWidget::CanBuildDatabase() const {
+	return (UMGC_SemanticDB::DBState==EDatabaseState::READY);
 }
 
 bool SKMGC_MagicNodeWidget::IsScriptSourceEditable() const {
@@ -752,6 +822,10 @@ void SKMGC_MagicNodeWidget::SetErrorMessage(const FString &NewError) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+TOptional<float> SKMGC_MagicNodeWidget::GetDatabaseLoad() const {
+	return TOptional<float>(DatabaseLoad);
+}
+
 UObject* SKMGC_MagicNodeWidget::GetScriptObject() const {
 	if (GraphNode==nullptr) {return nullptr;}
 	//
@@ -798,6 +872,28 @@ FText SKMGC_MagicNodeWidget::GetReplaceText() const {
 	return FText::FromString(ReplaceText);
 }
 
+FText SKMGC_MagicNodeWidget::GetCursorLocation() const {
+	if (!HEADER_EDITOR.IsValid()||!SCRIPT_EDITOR.IsValid()) {return FText();}
+	//
+	if (Source==ESKMGC_Source::Header) {
+		return FText::FromString(FString::Printf(TEXT("Ln: %i  |  Col: %i"),HEADER_EDITOR->GetCursorLocation().GetLineIndex()+1,HEADER_EDITOR->GetCursorLocation().GetOffset()+1));
+	} else if (Source==ESKMGC_Source::Script) {
+		return FText::FromString(FString::Printf(TEXT("Ln: %i  |  Col: %i"),SCRIPT_EDITOR->GetCursorLocation().GetLineIndex()+1,SCRIPT_EDITOR->GetCursorLocation().GetOffset()+1));
+	}///
+	//
+	return FText();
+}
+
+FText SKMGC_MagicNodeWidget::GetDatabaseLoadTooltip() const {
+	if (DatabaseLoad<=0) {return FText::FromString(TEXT("Loading Unreal Types "));}
+	if (DatabaseLoad>=0.80f) {return FText::FromString(TEXT("Loading Unreal Types .. .. .. .."));}
+	if ((DatabaseLoad>=0.20f)&&(DatabaseLoad<0.40f)) {return FText::FromString(TEXT("Loading Unreal Types .."));}
+	if ((DatabaseLoad>=0.40f)&&(DatabaseLoad<0.60f)) {return FText::FromString(TEXT("Loading Unreal Types .. .."));}
+	if ((DatabaseLoad>=0.60f)&&(DatabaseLoad<0.80f)) {return FText::FromString(TEXT("Loading Unreal Types .. ... .."));}
+	//
+	return FText::FromString(TEXT("Loading Unreal Types ...."));
+}
+
 TArray<FString>SKMGC_MagicNodeWidget::GetScriptIncludes() const {
 	if (!HasScript()) {return TArray<FString>();}
 	//
@@ -812,18 +908,6 @@ TArray<FString> SKMGC_MagicNodeWidget::GetScriptMacros() const {
 	UMagicNodeScript* Script = (CastChecked<UKMGC_MagicNode>(GraphNode))->GetScriptObject();
 	//
 	return Script->Source.Macros;
-}
-
-FText SKMGC_MagicNodeWidget::GetCursorLocation() const {
-	if (!HEADER_EDITOR.IsValid()||!SCRIPT_EDITOR.IsValid()) {return FText();}
-	//
-	if (Source==ESKMGC_Source::Header) {
-		return FText::FromString(FString::Printf(TEXT("Ln: %i  |  Col: %i"),HEADER_EDITOR->GetCursorLocation().GetLineIndex()+1,HEADER_EDITOR->GetCursorLocation().GetOffset()+1));
-	} else if (Source==ESKMGC_Source::Script) {
-		return FText::FromString(FString::Printf(TEXT("Ln: %i  |  Col: %i"),SCRIPT_EDITOR->GetCursorLocation().GetLineIndex()+1,SCRIPT_EDITOR->GetCursorLocation().GetOffset()+1));
-	}///
-	//
-	return FText();
 }
 
 EVisibility SKMGC_MagicNodeWidget::GetScriptEditorVisibility() const {
@@ -868,6 +952,14 @@ EVisibility SKMGC_MagicNodeWidget::GetAutoCompleteVisibility() const {
 	return EVisibility::Collapsed;
 }
 
+EVisibility SKMGC_MagicNodeWidget::GetDatabaseWarningVisibility() const {
+	if (UMGC_SemanticDB::DBState==EDatabaseState::ASYNCLOADING) {
+		return EVisibility::Visible;
+	}///
+	//
+	return EVisibility::Collapsed;
+}
+
 EVisibility SKMGC_MagicNodeWidget::GetIncludesPanelVisibility() const {
 	if (ViewIncludes && SourceIncludes.Num()>=1) {return EVisibility::Visible;}
 	//
@@ -905,20 +997,18 @@ FSlateColor SKMGC_MagicNodeWidget::GetTypesIconColor() const {
 }
 
 int32 SKMGC_MagicNodeWidget::GetLineCount() const {
+	TArray<FString>Array;
 	int32 Count = 0;
 	//
 	if (Source==ESKMGC_Source::Header) {
-		for (const TCHAR &CH : GetHeaderText().ToString().GetCharArray()) {
-			if (CH==TEXT('\n')) {Count++;}
-		}///
+		const FString Text = GetHeaderText().ToString();
+		Count = Text.ParseIntoArray(Array,TEXT("\n"),false);
 	} else if (Source==ESKMGC_Source::Script) {
-		for (const TCHAR &CH : GetScriptText().ToString().GetCharArray()) {
-			if (CH==TEXT('\n')) {Count++;}
-		}///
+		const FString Text = GetScriptText().ToString();
+		Count = Text.ParseIntoArray(Array,TEXT("\n"),false);
 	} else if (Source==ESKMGC_Source::Types) {
-		for (const TCHAR &CH : GetTypesText().ToString().GetCharArray()) {
-			if (CH==TEXT('\n')) {Count++;}
-		}///
+		const FString Text = GetTypesText().ToString();
+		Count = Text.ParseIntoArray(Array,TEXT("\n"),false);
 	}///
 	//
 	return Count;
@@ -1011,7 +1101,25 @@ void SKMGC_MagicNodeWidget::OnHeaderTextChanged(const FText &InText, ETextCommit
 void SKMGC_MagicNodeWidget::OnTypesTextChanged(const FText &InText, ETextCommit::Type CommitType) {
 	if (!IsScriptSourceEditable()) {return;}
 	//
+	//
+	TArray<FString>Lines;
+	InText.ToString().ParseIntoArrayLines(Lines,false);
+	//
+	if (AutoComplete==EAutoComplete::Active) {
+		FString Subject = TYPES_EDITOR->ParseAutoCompleteWord(Lines,true);
+		if (AutoCompleteList.Num()>=1) {OnAdvanceAutoComplete(Subject);}
+		else {TYPES_EDITOR->AutoCompleteSubject(Subject);}
+	} else {
+		FString Subject = TYPES_EDITOR->ParseAutoCompleteWord(Lines);
+		//
+		if (TYPES_EDITOR->IsAutoComplete(Subject)) {
+			TYPES_EDITOR->AutoCompleteSubject(Subject);
+		} else {TYPES_EDITOR->AutoSuggest(Lines);}
+	}///
+	//
+	//
 	SetTypesText(InText);
+	SetLineCountList(GetLineCount());
 }
 
 void SKMGC_MagicNodeWidget::OnSearchTextChanged(const FText &InText, ETextCommit::Type CommitType) {
@@ -1038,6 +1146,7 @@ void SKMGC_MagicNodeWidget::OnTypesTextComitted(const FText &NewText, ETextCommi
 	if (!IsScriptSourceEditable()) {return;}
 	//
 	SetTypesText(NewText);
+	SetLineCountList(GetLineCount());
 }
 
 void SKMGC_MagicNodeWidget::OnIncludeTextComitted(const FText &NewText, ETextCommit::Type CommitInfo, const FString Old) {
@@ -1290,6 +1399,12 @@ FReply SKMGC_MagicNodeWidget::OnClickedSaveScript() {
 	if (Package->IsDirty()) {
 		FEditorFileUtils::PromptForCheckoutAndSave(PackagesToSave,true,false);
 	}///
+	//
+	return FReply::Handled();
+}
+
+FReply SKMGC_MagicNodeWidget::OnClickedBuildDatabase() {
+	UpdateDatabaseSemantics();
 	//
 	return FReply::Handled();
 }

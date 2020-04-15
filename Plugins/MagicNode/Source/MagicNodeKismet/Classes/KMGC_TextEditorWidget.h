@@ -47,7 +47,7 @@ enum class EAutoSuggest : uint8 {
 	Function
 };
 
-#define MAX_SUGGESTIONS 15
+#define MAX_SUGGESTIONS 16
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -55,12 +55,13 @@ class MAGICNODEKISMET_API SKMGC_TextEditorWidget : public SMultiLineEditableText
 private:
 	TWeakObjectPtr<UMagicNodeScript>ScriptObject;
 	//
+	float LineHeight;
 	int32 SuggestPicked;
 	int32 SuggestDrawID;
 	//
-	bool LockedSuggestion;
 	bool KeyboardFocus;
-	float LineHeight;
+	bool LockedSuggestion;
+	bool IsMouseWithinCompletionBox;
 protected:
 	TSharedPtr<ITextLayoutMarshaller>Marshall;
 	TSharedPtr<FSlateFontMeasure>FontMeasure;
@@ -81,6 +82,7 @@ protected:
 	//
 	FVector2D CompletionBoxSize;
 	FVector2D CompletionBoxPos;
+	FVector2D MousePosition;
 	//
 	FGeometry LastTickGeometry;
 protected:
@@ -111,6 +113,8 @@ public:
 	virtual bool SupportsKeyboardFocus() const override {return KeyboardFocus;}
 	virtual FReply OnKeyUp(const FGeometry &Geometry, const FKeyEvent &KeyEvent) override;
 	virtual FReply OnKeyDown(const FGeometry &Geometry, const FKeyEvent &KeyEvent) override;
+	virtual FReply OnMouseMove(const FGeometry &MyGeometry, const FPointerEvent &MouseEvent) override;
+	virtual FReply OnMouseWheel(const FGeometry &MyGeometry, const FPointerEvent &MouseEvent) override;
 	virtual FReply OnKeyChar(const FGeometry &Geometry, const FCharacterEvent &CharacterEvent) override;
 	virtual FReply OnMouseButtonDown(const FGeometry &Geometry, const FPointerEvent &MouseEvent) override;
 	//

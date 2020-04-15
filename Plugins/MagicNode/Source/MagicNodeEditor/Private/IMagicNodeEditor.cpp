@@ -7,9 +7,13 @@
 
 #include "IMagicNodeEditor.h"
 
-#include "MagicNodeEditor_Shared.h"
-#include "MagicNodeEditorStyle.h"
+#include "MGC_Toolkit.h"
+#include "MGC_CodeEditorCore.h"
+
 #include "MagicNodeEditor.h"
+#include "MagicNodeEditorStyle.h"
+#include "MagicNodeEditor_Shared.h"
+#include "MagicNodeEditorCommands.h"
 
 #include "Developer/AssetTools/Public/IAssetTools.h"
 
@@ -20,8 +24,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void FMagicNodeEditor::StartupModule() {
-	FMagicNodeEditorStyle::Initialize();
-	//
+	ToolBarExtensibilityManager = MakeShareable(new FExtensibilityManager);
 	//
 	IAssetTools &AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 	SY_AssetCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Synaptech")),LOCTEXT("SynaptechCategory","Synaptech"));
@@ -31,16 +34,35 @@ void FMagicNodeEditor::StartupModule() {
 		AssetTools.RegisterAssetTypeActions(ACT_MGC);
 	}
 	//
+	FMagicNodeEditorStyle::Initialize();
+	FMagicNodeEditorCommands::Register();
 	//
 	MenuExtender = MakeShareable(new FExtender());
 	MenuExtender->AddMenuExtension("FileProject",EExtensionHook::After,TSharedPtr<FUICommandList>(),FMenuExtensionDelegate::CreateStatic(&FMagicNodeEditor::ExtendMenu));
 	//
 	FLevelEditorModule &LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 	LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(MenuExtender);
+	//
+	//
+	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(TAB,FOnSpawnTab::CreateRaw(this,&FMagicNodeEditor::OnSpawnLightSourceViewerTAB))
+	.SetDisplayName(LOCTEXT("MMC_SourceViewer","Source View"))
+	.SetMenuType(ETabSpawnerMenuType::Hidden);
+	//
+	//
+	if (FMGC_Toolkit::SourceViewCount()==0) {
+		FMGC_Toolkit::RefreshEngineSourceView();
+		FMGC_Toolkit::RefreshPluginSourceView();
+		FMGC_Toolkit::RefreshProjectSourceView();
+	}///
 }
 
 void FMagicNodeEditor::ShutdownModule() {
+	ToolBarExtensibilityManager.Reset();
+	//
 	FMagicNodeEditorStyle::Shutdown();
+	FMagicNodeEditorCommands::Unregister();
+	//
+	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(TAB);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -54,6 +76,32 @@ void FMagicNodeEditor::ExtendMenu(FMenuBuilder &MenuBuilder) {
 		FSlateIcon(FMagicNodeEditorStyle::Get().Get()->GetStyleSetName(),"ClassIcon.MagicNode"),
 		FUIAction(FExecuteAction::CreateStatic(&FMagicNodeEditor::CreateNewScriptAsset))
 	);///
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+TSharedRef<SDockTab> FMagicNodeEditor::OnSpawnLightSourceViewerTAB(const FSpawnTabArgs &SpawnTabArgs) {
+	TSharedRef<SDockTab>VIEW = SNew(SDockTab).TabRole(ETabRole::NomadTab);
+	//
+	VIEW->SetTabIcon(FMagicNodeEditorStyle::Get()->GetBrush(TEXT("MagicNodeEditor.OpenSourceCodeViewer.Small")));
+	VIEW->SetContent(
+		SNew(SMGC_CodeEditorCore,nullptr)
+		.ExternalSourcePath(ViewerSourcePath)
+		.SourceToEdit(EMGC_CodeSource::Script)
+	);//
+	//
+	return VIEW;
+}
+
+void FMagicNodeEditor::InvokeSourceViewerTAB() {
+	TSharedRef<SDockTab>VIEW = FGlobalTabmanager::Get()->InvokeTab(TAB);
+	//
+	VIEW->SetTabIcon(FMagicNodeEditorStyle::Get()->GetBrush(TEXT("MagicNodeEditor.OpenSourceCodeViewer.Small")));
+	VIEW->SetContent(
+		SNew(SMGC_CodeEditorCore,nullptr)
+		.ExternalSourcePath(ViewerSourcePath)
+		.SourceToEdit(EMGC_CodeSource::Script)
+	);//
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
