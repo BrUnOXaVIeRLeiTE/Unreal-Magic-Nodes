@@ -21,6 +21,7 @@
 #include "Runtime/Slate/Public/Widgets/Layout/SScrollBar.h"
 #include "Runtime/Slate/Public/Widgets/Layout/SScrollBox.h"
 #include "Runtime/Slate/Public/Widgets/Input/SEditableText.h"
+#include "Runtime/Slate/Public/Widgets/Input/SEditableTextBox.h"
 #include "Runtime/Slate/Public/Widgets/Notifications/SProgressBar.h"
 
 #include "Editor/UnrealEd/Public/FileHelpers.h"
@@ -95,6 +96,7 @@ public:
 	//
 	//
 	bool HasScript() const;
+	bool CanCompileScript() const;
 	bool CanBuildDatabase() const;
 	bool IsScriptSourceEditable() const;
 	//
@@ -111,9 +113,9 @@ public:
 	//
 	TArray<FString>GetScriptMacros() const;
 	TArray<FString>GetScriptIncludes() const;
-	ECheckBoxState IsSearchSensitive() const;
 	//
 	TOptional<float>GetDatabaseLoad() const;
+	ECheckBoxState IsSearchSensitive() const;
 	//
 	//
 	FReply OnClickedCompile();
@@ -155,7 +157,7 @@ public:
 	void OnInternalVerticalScroll(float Offset);
 	void OnInternalAutoCompleteScroll(float Offset);
 	//
-	void OnInvokedSearch();
+	void OnInvokedSearch(bool DoSearch);
 	void OnAdvanceAutoComplete(const FString &Search);
 	void OnAutoComplete(const TArray<FString>&Results);
 	void OnSearchSensitiveChanged(ECheckBoxState NewState);

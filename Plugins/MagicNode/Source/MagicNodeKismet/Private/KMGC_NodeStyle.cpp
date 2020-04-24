@@ -78,6 +78,7 @@ void FKMGC_NodeStyle::Initialize() {
 		StyleSet->Set("KMGC.Toolbar.H", new IMAGE_BRUSH(TEXT("UI/KMGC_H_22x"),Icon22x22));
 		StyleSet->Set("KMGC.Toolbar.T", new IMAGE_BRUSH(TEXT("UI/KMGC_T_22x"),Icon22x22));
 		StyleSet->Set("KMGC.Toolbar.CPP", new IMAGE_BRUSH(TEXT("UI/KMGC_CPP_22x"),Icon22x22));
+		StyleSet->Set("KMGC.Toolbar.Compile", new IMAGE_BRUSH(TEXT("UI/KMGC_Compile_40x"),Icon40x40));
 		StyleSet->Set("KMGC.Toolbar.SaveScript", new IMAGE_BRUSH(TEXT("UI/KMGC_Save_40x"),Icon40x40));
 		StyleSet->Set("KMGC.Toolbar.Database", new IMAGE_BRUSH(TEXT("UI/KMGC_Database_40x"),Icon40x40));
 		StyleSet->Set("KMGC.Toolbar.MagicNode", new IMAGE_BRUSH(TEXT("Icons/MagicNode_128x"),Icon40x40));

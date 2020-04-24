@@ -24,7 +24,7 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-DECLARE_DELEGATE(FOnInvokeSearchEvent);
+DECLARE_DELEGATE_OneParam(FOnInvokeSearchEvent,bool);
 DECLARE_DELEGATE_OneParam(FOnAutoCompleteEvent,const TArray<FString>&);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -47,7 +47,7 @@ enum class EAutoSuggest : uint8 {
 	Function
 };
 
-#define MAX_SUGGESTIONS 16
+#define MAX_SUGGESTIONS 20
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -111,6 +111,7 @@ public:
 	virtual int32 OnPaint(const FPaintArgs &Args, const FGeometry &Geometry, const FSlateRect &CullingRect, FSlateWindowElementList &OutDrawElements, int32 LayerID, const FWidgetStyle &WidgetStyle, bool ParentEnabled) const override;
 	//
 	virtual bool SupportsKeyboardFocus() const override {return KeyboardFocus;}
+	//
 	virtual FReply OnKeyUp(const FGeometry &Geometry, const FKeyEvent &KeyEvent) override;
 	virtual FReply OnKeyDown(const FGeometry &Geometry, const FKeyEvent &KeyEvent) override;
 	virtual FReply OnMouseMove(const FGeometry &MyGeometry, const FPointerEvent &MouseEvent) override;
@@ -153,6 +154,9 @@ public:
 	const FLinearColor GetSuggestionColor(const FString &Keyword) const;
 public:
 	void SetScriptObject(UMagicNodeScript* Script);
+	//
+	void BeginEditTransaction();
+	void EndEditTransaction();
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

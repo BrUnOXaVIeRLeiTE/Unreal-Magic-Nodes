@@ -8,6 +8,7 @@
 #include "IMagicNodeEditor.h"
 
 #include "MGC_Toolkit.h"
+#include "MGC_SearchFiles.h"
 #include "MGC_CodeEditorCore.h"
 
 #include "MagicNodeEditor.h"
@@ -44,8 +45,12 @@ void FMagicNodeEditor::StartupModule() {
 	LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(MenuExtender);
 	//
 	//
-	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(TAB,FOnSpawnTab::CreateRaw(this,&FMagicNodeEditor::OnSpawnLightSourceViewerTAB))
-	.SetDisplayName(LOCTEXT("MMC_SourceViewer","Source View"))
+	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(TABSV,FOnSpawnTab::CreateRaw(this,&FMagicNodeEditor::OnSpawnSourceCodeViewerTAB))
+	.SetDisplayName(LOCTEXT("MGC_SourceViewer","Source View"))
+	.SetMenuType(ETabSpawnerMenuType::Hidden);
+	//
+	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(TABSS,FOnSpawnTab::CreateRaw(this,&FMagicNodeEditor::OnSpawnSourceCodeSearchTAB))
+	.SetDisplayName(LOCTEXT("MGC_SourceSearch","Search in Files"))
 	.SetMenuType(ETabSpawnerMenuType::Hidden);
 	//
 	//
@@ -62,7 +67,8 @@ void FMagicNodeEditor::ShutdownModule() {
 	FMagicNodeEditorStyle::Shutdown();
 	FMagicNodeEditorCommands::Unregister();
 	//
-	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(TAB);
+	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(TABSV);
+	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(TABSS);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -80,7 +86,7 @@ void FMagicNodeEditor::ExtendMenu(FMenuBuilder &MenuBuilder) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-TSharedRef<SDockTab> FMagicNodeEditor::OnSpawnLightSourceViewerTAB(const FSpawnTabArgs &SpawnTabArgs) {
+TSharedRef<SDockTab> FMagicNodeEditor::OnSpawnSourceCodeViewerTAB(const FSpawnTabArgs &SpawnTabArgs) {
 	TSharedRef<SDockTab>VIEW = SNew(SDockTab).TabRole(ETabRole::NomadTab);
 	//
 	VIEW->SetTabIcon(FMagicNodeEditorStyle::Get()->GetBrush(TEXT("MagicNodeEditor.OpenSourceCodeViewer.Small")));
@@ -93,15 +99,30 @@ TSharedRef<SDockTab> FMagicNodeEditor::OnSpawnLightSourceViewerTAB(const FSpawnT
 	return VIEW;
 }
 
-void FMagicNodeEditor::InvokeSourceViewerTAB() {
-	TSharedRef<SDockTab>VIEW = FGlobalTabmanager::Get()->InvokeTab(TAB);
+void FMagicNodeEditor::InvokeSourceCodeViewerTAB(const FTextLocation &Location) {
+	TSharedRef<SDockTab>VIEW = FGlobalTabmanager::Get()->InvokeTab(TABSV);
+	//
+	TSharedRef<SMGC_CodeEditorCore>EDIT=SNew(SMGC_CodeEditorCore,nullptr)
+	.SourceToEdit(EMGC_CodeSource::Script).ExternalSourcePath(ViewerSourcePath);
 	//
 	VIEW->SetTabIcon(FMagicNodeEditorStyle::Get()->GetBrush(TEXT("MagicNodeEditor.OpenSourceCodeViewer.Small")));
-	VIEW->SetContent(
-		SNew(SMGC_CodeEditorCore,nullptr)
-		.ExternalSourcePath(ViewerSourcePath)
-		.SourceToEdit(EMGC_CodeSource::Script)
-	);//
+	VIEW->SetContent(EDIT); EDIT->GoToTextLocation(Location);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+TSharedRef<SDockTab> FMagicNodeEditor::OnSpawnSourceCodeSearchTAB(const FSpawnTabArgs &SpawnTabArgs) {
+	TSharedRef<SDockTab>SEARCH = SNew(SDockTab).TabRole(ETabRole::NomadTab);
+	//
+	SEARCH->SetTabIcon(FMagicNodeEditorStyle::Get()->GetBrush(TEXT("MagicNodeEditor.OpenSourceCodeSearch.Small")));
+	SEARCH->SetContent(SNew(SMGC_SearchFiles));
+	//
+	return SEARCH;
+}
+
+void FMagicNodeEditor::InvokeSourceCodeSearchTAB() {
+	TSharedRef<SDockTab>SEARCH = FGlobalTabmanager::Get()->InvokeTab(TABSS);
+	SEARCH->SetContent(SNew(SMGC_SearchFiles));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

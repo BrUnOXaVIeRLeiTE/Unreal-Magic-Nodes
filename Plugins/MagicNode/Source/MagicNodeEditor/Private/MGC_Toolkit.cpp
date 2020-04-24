@@ -14,15 +14,17 @@
 
 #include "Editor/KismetWidgets/Public/SSingleObjectDetailsPanel.h"
 
+#include "Editor/UnrealEd/Public/SourceCodeNavigation.h"
+#include "Editor/LevelEditor/Public/LevelEditorActions.h"
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define LOCTEXT_NAMESPACE "Synaptech"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// MGC State-Machine Toolkit Constructors:
+/// MGC Toolkit Constructors:
 
 FDelegateHandle FMGC_Toolkit::WatcherHandle = FDelegateHandle();
-TArray<TSharedPtr<FSourceTreeNode>>FMGC_Toolkit::SourceView = TArray<TSharedPtr<FSourceTreeNode>>();
 
 FMGC_Toolkit::FMGC_Toolkit() {
 	static FDirectoryWatcherModule &DirectoryWatcherModule = FModuleManager::LoadModuleChecked<FDirectoryWatcherModule>(TEXT("DirectoryWatcher"));
@@ -45,7 +47,7 @@ FMGC_Toolkit::FMGC_Toolkit() {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// MGC State-Machine Details Native API:
+/// MGC Details Native API:
 
 class SMGC_PropertyTab : public SSingleObjectDetailsPanel {
 private:
@@ -66,7 +68,7 @@ public:
 	}///
 	//
 	virtual UObject* GetObjectToObserve() const override {
-		return CodeEditor.Pin()->GET_MGC_Inline();
+		return CodeEditor.Pin()->GET();
 	}///
 	//
 	virtual TSharedRef<SWidget>PopulateSlot(TSharedRef<SWidget>PropertyEditorWidget) override {
@@ -80,9 +82,9 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// MGC State-Machine Toolkit Native API:
+/// MGC Toolkit API:
 
-void FMGC_Toolkit::INIT_CodeEditor(const EToolkitMode::Type Mode, const TSharedPtr<IToolkitHost>&InitToolkitHost, UMagicNodeScript* ScriptObject) {
+void FMGC_Toolkit::INIT(const EToolkitMode::Type Mode, const TSharedPtr<IToolkitHost>&InitToolkitHost, UMagicNodeScript* ScriptObject) {
 	GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->CloseOtherEditors(ScriptObject,this);
 	//
 	ScriptObject_Inline = ScriptObject;
@@ -90,14 +92,6 @@ void FMGC_Toolkit::INIT_CodeEditor(const EToolkitMode::Type Mode, const TSharedP
 	//
 	ScriptObject_Inline->SetFlags(RF_Transactional);
 	GEditor->RegisterForUndo(this);
-	//
-	//
-	/*FTileMapEditorCommands::Register();
-	BindCommands();*/
-	//
-	/*ToolBoxWidget = SNew(SBorder)
-		.BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
-		.Padding(0.f);*/
 	//
 	//
 	const TSharedRef<FTabManager::FLayout>FCodeEditorLayout = FTabManager::NewLayout("MGC_CodeEditorLayout_V0022")
@@ -165,7 +159,7 @@ void FMGC_Toolkit::INIT_CodeEditor(const EToolkitMode::Type Mode, const TSharedP
 	//
 	//
 	if (SourceTreeWidget.IsValid()) {
-		for (const TSharedPtr<FSourceTreeNode>&Node : FMGC_Toolkit::SourceView) {
+		for (const TSharedPtr<FSourceTreeNode>&Node : GlobalSourceTreeView) {
 			SourceTreeWidget->SetItemExpansion(Node,true);
 		}///
 	}///
@@ -175,7 +169,7 @@ void FMGC_Toolkit::INIT_CodeEditor(const EToolkitMode::Type Mode, const TSharedP
 	}///
 }
 
-void FMGC_Toolkit::SET_MGC_Inline(UMagicNodeScript* NewScriptObject) {
+void FMGC_Toolkit::SET(UMagicNodeScript* NewScriptObject) {
 	if ((NewScriptObject!=ScriptObject_Inline)&&(NewScriptObject!=nullptr)) {
 		UMagicNodeScript* OldScriptObject = ScriptObject_Inline;
 		ScriptObject_Inline = NewScriptObject;
@@ -185,7 +179,7 @@ void FMGC_Toolkit::SET_MGC_Inline(UMagicNodeScript* NewScriptObject) {
 	}///
 }
 
-UMagicNodeScript* FMGC_Toolkit::GET_MGC_Inline() const {
+UMagicNodeScript* FMGC_Toolkit::GET() const {
 	return ScriptObject_Inline;
 }
 
@@ -329,7 +323,7 @@ TSharedRef<SDockTab> FMGC_Toolkit::TABSpawn_TreeView(const FSpawnTabArgs &Args) 
 					.OnExpansionChanged(this,&FMGC_Toolkit::OnExpansionChanged)
 					.OnGenerateRow(this,&FMGC_Toolkit::OnGenerateSourceViewRow)
 					.OnGetChildren(this,&FMGC_Toolkit::OnGetSourceViewChildren)
-					.TreeItemsSource(&FMGC_Toolkit::SourceView)
+					.TreeItemsSource(&GlobalSourceTreeView)
 					.SelectionMode(ESelectionMode::Single)
 				]
 			]
@@ -444,10 +438,16 @@ void FMGC_Toolkit::ExtendMenu() {
 void FMGC_Toolkit::BindCommands() {
 	const FMagicNodeEditorCommands &Commands = FMagicNodeEditorCommands::Get();
 	const TSharedRef<FUICommandList>&UICommandList = GetToolkitCommands();
-	//
 	{
 		UICommandList->MapAction(Commands.OpenSourceCodeViewer,FExecuteAction::CreateSP(this,&FMGC_Toolkit::LaunchSourceCodeViewer));
+		UICommandList->MapAction(Commands.OpenSourceCodeSearch,FExecuteAction::CreateSP(this,&FMGC_Toolkit::LaunchSourceCodeSearch));
 		UICommandList->MapAction(Commands.BuildDatabase,FExecuteAction::CreateSP(this,&FMGC_Toolkit::RebuildDatabases));
+		//
+		UICommandList->MapAction(
+			Commands.Compile,
+			FExecuteAction::CreateSP(this,&FMGC_Toolkit::CompileScript),
+			FCanExecuteAction::CreateStatic(&FLevelEditorActionCallbacks::Recompile_CanExecute)
+		);///
 	}
 }
 
@@ -457,9 +457,18 @@ void FMGC_Toolkit::ExtendToolbar() {
 			ToolbarBuilder.BeginSection("Command");
 			{
 				ToolbarBuilder.AddToolBarButton(FMagicNodeEditorCommands::Get().OpenSourceCodeViewer);
+				ToolbarBuilder.AddToolBarButton(FMagicNodeEditorCommands::Get().OpenSourceCodeSearch);
 				ToolbarBuilder.AddToolBarButton(FMagicNodeEditorCommands::Get().BuildDatabase);
 			}
 			ToolbarBuilder.EndSection();
+			//
+			if (FSourceCodeNavigation::IsCompilerAvailable()) {
+				ToolbarBuilder.BeginSection("Compile");
+				{
+					ToolbarBuilder.AddToolBarButton(FMagicNodeEditorCommands::Get().Compile);
+				}
+				ToolbarBuilder.EndSection();
+			}///
 		}///
 	};//
 	//
@@ -469,6 +478,7 @@ void FMGC_Toolkit::ExtendToolbar() {
 		FToolBarExtensionDelegate::CreateStatic(&Local::FillToolbar)
 	);//
 	//
+	//
 	AddToolbarExtender(ToolbarExtender);
  	IMagicNodeEditor* EditorModule = &FModuleManager::LoadModuleChecked<IMagicNodeEditor>("MagicNodeEditor");
  	AddToolbarExtender(EditorModule->GetMagicNodeEditorToolBarExtensibilityManager()->GetAllExtenders());
@@ -477,13 +487,68 @@ void FMGC_Toolkit::ExtendToolbar() {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void FMGC_Toolkit::LaunchSourceCodeViewer() {
-	FMagicNodeEditor::InvokeSourceViewerTAB();
+	FMagicNodeEditor::InvokeSourceCodeViewerTAB(FTextLocation());
+}
+
+void FMGC_Toolkit::LaunchSourceCodeSearch() {
+	FMagicNodeEditor::InvokeSourceCodeSearchTAB();
 }
 
 void FMGC_Toolkit::RebuildDatabases() {
 	if (MGC_CodeEditor.IsValid()) {
 		MGC_CodeEditor->UpdateDatabaseSemantics();
 	}///
+}
+
+void FMGC_Toolkit::CompileProject() {
+	if (FSourceCodeNavigation::IsCompilerAvailable()) {
+		FLevelEditorActionCallbacks::RecompileGameCode_Clicked();
+	}///
+}
+
+void FMGC_Toolkit::CompileScript() {
+	if (GET()==nullptr) {return;}
+	//
+	EMGC_CompilerResult CompilerResult = CompileScriptClass(
+		GET()->GetName(),
+		GET()->Source.Header,
+		GET()->Source.Script,
+		GET()->Source.Types,
+		GetParentClass(),
+		GET()->Source.Includes,
+		GET()->Source.Macros
+	);///
+	//
+	if (CompilerResult != EMGC_CompilerResult::None) {
+		switch (CompilerResult) {
+			case EMGC_CompilerResult::Compiled:
+			{
+				LOG_MGC(EMGCSeverity::Info,Message[(uint32)CompilerResult]);
+				//
+				if (GEditor) {
+					GEditor->PlayEditorSound(TEXT("/Engine/EditorSounds/Notifications/CompileSuccess_Cue.CompileSuccess_Cue"));
+				} CompileProject();
+			} break;
+			case EMGC_CompilerResult::ParsingFailure:
+			{
+				LOG_MGC(EMGCSeverity::Warning,Message[(uint32)CompilerResult]);
+				//
+				if (GEditor) {
+					GEditor->PlayEditorSound(TEXT("/Engine/EditorSounds/Notifications/CompileFailed_Cue.CompileFailed_Cue"));
+				} CompileProject();
+			} break;
+			default:
+			{
+				LOG_MGC(EMGCSeverity::Error,Message[(uint32)CompilerResult]);
+				//
+				if (GEditor) {
+					GEditor->PlayEditorSound(TEXT("/Engine/EditorSounds/Notifications/CompileFailed_Cue.CompileFailed_Cue"));
+				}///
+			}///
+		break;}
+	}///
+	//
+	UpdateDatabaseReferences();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -511,9 +576,8 @@ void FMGC_Toolkit::OnClickedSourceViewItem(TSharedPtr<FSourceTreeNode>TreeItem) 
 	//
 	if (IsSourceFile(TreeItem->FullPath)) {
 		ViewerSourcePath = TreeItem->FullPath;
-		//
 		LaunchSourceCodeViewer();
-	}///
+	} else {SourceTreeWidget->SetItemExpansion(TreeItem,true);}
 }
 
 void FMGC_Toolkit::OnSelectedSourceViewItem(TSharedPtr<FSourceTreeNode>TreeItem, ESelectInfo::Type SelectInfo) {
@@ -551,11 +615,11 @@ void FMGC_Toolkit::RefreshEngineSourceView() {
 	RootNode->Path = TEXT("UNREAL"); RootNode->FullPath = RootPath;
 	//
 	TSharedRef<FSourceTreeNode>OldRoot = RootNode.ToSharedRef();
-	for (const TSharedPtr<FSourceTreeNode>&Old : FMGC_Toolkit::SourceView) {
+	for (const TSharedPtr<FSourceTreeNode>&Old : GlobalSourceTreeView) {
 		if (Old->Path==RootNode->Path) {OldRoot=Old.ToSharedRef(); break;}
-	} FMGC_Toolkit::SourceView.Remove(OldRoot);
+	} GlobalSourceTreeView.Remove(OldRoot);
 	//
-	FMGC_Toolkit::SourceView.Add(RootNode);
+	GlobalSourceTreeView.Add(RootNode);
 	TSharedRef<FSourceTreeNode>ParentNode = RootNode.ToSharedRef();
 	//
 	for (FString &Path : EngineSource) {
@@ -609,11 +673,11 @@ void FMGC_Toolkit::RefreshPluginSourceView() {
 	RootNode->Path = TEXT("PLUGINS"); RootNode->FullPath = RootPath;
 	//
 	TSharedRef<FSourceTreeNode>OldRoot = RootNode.ToSharedRef();
-	for (const TSharedPtr<FSourceTreeNode>&Old : FMGC_Toolkit::SourceView) {
+	for (const TSharedPtr<FSourceTreeNode>&Old : GlobalSourceTreeView) {
 		if (Old->Path==RootNode->Path) {OldRoot=Old.ToSharedRef(); break;}
-	} FMGC_Toolkit::SourceView.Remove(OldRoot);
+	} GlobalSourceTreeView.Remove(OldRoot);
 	//
-	FMGC_Toolkit::SourceView.Add(RootNode);
+	GlobalSourceTreeView.Add(RootNode);
 	TSharedRef<FSourceTreeNode>ParentNode = RootNode.ToSharedRef();
 	//
 	for (FString &Path : PluginSource) {
@@ -666,11 +730,11 @@ void FMGC_Toolkit::RefreshProjectSourceView() {
 	RootNode->Path = TEXT("PROJECT"); RootNode->FullPath = RootPath;
 	//
 	TSharedRef<FSourceTreeNode>OldRoot = RootNode.ToSharedRef();
-	for (const TSharedPtr<FSourceTreeNode>&Old : FMGC_Toolkit::SourceView) {
+	for (const TSharedPtr<FSourceTreeNode>&Old : GlobalSourceTreeView) {
 		if (Old->Path==RootNode->Path) {OldRoot=Old.ToSharedRef(); break;}
-	} FMGC_Toolkit::SourceView.Remove(OldRoot);
+	} GlobalSourceTreeView.Remove(OldRoot);
 	//
-	FMGC_Toolkit::SourceView.Add(RootNode);
+	GlobalSourceTreeView.Add(RootNode);
 	TSharedRef<FSourceTreeNode>ParentNode = RootNode.ToSharedRef();
 	//
 	for (FString &Path : ProjectSource) {
@@ -702,6 +766,35 @@ void FMGC_Toolkit::RefreshProjectSourceView() {
 		}///
 		//
 		ParentNode = RootNode.ToSharedRef();
+	}///
+}
+
+void FMGC_Toolkit::UpdateDatabaseReferences() {
+	const auto &_Settings = GetDefault<UKMGC_Settings>();
+	//
+	if (UMGC_SemanticDB::DBState==EDatabaseState::ASYNCLOADING) {return;}
+	if (_Settings->SemanticDB.Num()==0) {return;}
+	//
+	UMGC_SemanticDB* SemanticDB = _Settings->SemanticDB.Array()[0].Get();
+	UMagicNodeScript* Script = GET();
+	//
+	if (SemanticDB==nullptr) {return;}
+	if (Script==nullptr) {return;}
+	//
+	if (Script->RefreshRuntimeScriptClass()) {
+		SemanticDB->RegisterClassReflection(Script->GetRuntimeScriptClass(),TEXT("U"));
+		//
+		FString Name=Script->GetName();
+		Name.RemoveFromEnd(TEXT("_C"));
+		Name.RemoveFromStart(TEXT("Default__"));
+		//
+		FClassRedirector CR;
+		CR.ObjectName = Name;
+		CR.ObjectClass = FString(TEXT("U"))+(Script->GetRuntimeScriptClass()->GetName());
+		SemanticDB->ClassRedirectors.Add(CR.ObjectName,CR);
+		//
+		FString Class = FString::Printf(TEXT("U%s"),*Script->GetRuntimeScriptClass()->GetName());
+		IKMGC_ScriptParser::ParseClassFromHeader(Script->Source.Header,Class);
 	}///
 }
 
@@ -766,10 +859,10 @@ FText FMGC_Toolkit::GetToolkitName() const {
 	const bool DirtyState = ScriptObject_Inline->GetOutermost()->IsDirty();
 	//
 	FFormatNamedArguments Args;
-	Args.Add(TEXT("FsmName"),FText::FromString(ScriptObject_Inline->GetName()));
+	Args.Add(TEXT("MgcName"),FText::FromString(ScriptObject_Inline->GetName()));
 	Args.Add(TEXT("DirtyState"),(DirtyState)?FText::FromString(TEXT("*")):FText::GetEmpty());
 	//
-	return FText::Format(LOCTEXT("MGC_CodeEditor.Label","{FsmName}{DirtyState}"),Args);
+	return FText::Format(LOCTEXT("MGC_CodeEditor.Label","{MgcName}{DirtyState}"),Args);
 }
 
 FText FMGC_Toolkit::GetToolkitToolTipText() const {
@@ -790,11 +883,22 @@ FLinearColor FMGC_Toolkit::GetWorldCentricTabColorScale() const {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+FString FMGC_Toolkit::GetParentClass() const {
+	if (GET()==nullptr) {return FString();}
+	//
+	FString Name = GET()->ParentClass->GetName();
+	Name.RemoveFromEnd(TEXT("_C"));
+	//
+	return Name;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void FMGC_Toolkit::OnSearchChanged(const FText &Filter) {
 	Search = MakeShared<FString>(Filter.ToString());
 	SourceViewSearch.Empty();
 	//
-	for (const TSharedPtr<FSourceTreeNode>&Node : FMGC_Toolkit::SourceView) {
+	for (const TSharedPtr<FSourceTreeNode>&Node : GlobalSourceTreeView) {
 		if (Node->Path.Contains(**Search.Get())) {
 			SourceViewSearch.Add(Node);
 		}///
@@ -822,6 +926,12 @@ void FMGC_Toolkit::OnSearchChanged(const FText &Filter) {
 						for (const TSharedPtr<FSourceTreeNode>&N5 : N4->ChildNodes) {
 							if (N5->Path.Contains(**Search.Get())) {
 								SourceViewSearch.Add(N5);
+							}///
+							//
+							for (const TSharedPtr<FSourceTreeNode>&N6 : N5->ChildNodes) {
+								if (N6->Path.Contains(**Search.Get())) {
+									SourceViewSearch.Add(N6);
+								}///
 							}///
 						}///
 					}///
@@ -853,16 +963,8 @@ void FMGC_Toolkit::OnProjectDirectoryChanged(const TArray<FFileChangeData> &Data
 	}///
 }
 
-void FMGC_Toolkit::OnToolkitHostingStarted(const TSharedRef<IToolkit>&Toolkit) {
-	/*TSharedPtr<SWidget>InlineContent = Toolkit->GetInlineContent();
-	if (InlineContent.IsValid()) {
-		??->SetContent(InlineContent.ToSharedRef());
-	}*/
-}
-
-void FMGC_Toolkit::OnToolkitHostingFinished(const TSharedRef<IToolkit>&Toolkit) {
-	//??->SetContent(SNullWidget::NullWidget);
-}
+void FMGC_Toolkit::OnToolkitHostingStarted(const TSharedRef<IToolkit>&Toolkit) {}
+void FMGC_Toolkit::OnToolkitHostingFinished(const TSharedRef<IToolkit>&Toolkit){}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

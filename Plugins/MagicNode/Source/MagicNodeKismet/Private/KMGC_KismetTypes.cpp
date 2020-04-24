@@ -7,6 +7,8 @@
 
 #include "KMGC_KismetTypes.h"
 
+#include "Editor/BlueprintGraph/Public/BlueprintNodeSpawner.h"
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// MGC Parser Default Reflected Classes:
 
@@ -1776,7 +1778,7 @@ UMGC_SemanticDB::UMGC_SemanticDB() {
 	const auto &Settings = GetDefault<UKMGC_Settings>();
 	if (!Settings->ScanUnrealTypesOnEditorStartup) {return;}
 	//
-	/*(new FAutoDeleteAsyncTask<TASK_BuildAutoCompleteData>(this))->StartSynchronousTask();*/
+	(new FAutoDeleteAsyncTask<TASK_BuildAutoCompleteData>(this))->StartSynchronousTask();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1798,8 +1800,9 @@ void UMGC_SemanticDB::UpdateExtensions() {
 	}///
 	//
 	for (TObjectIterator<UStruct>IT; IT; ++IT) {
-		if (IT->IsA(UClass::StaticClass())) {continue;}
 		if (IT->IsA(UFunction::StaticClass())) {continue;}
+		if (IT->IsA(UClass::StaticClass())) {continue;}
+		if (IT->GetName().Len()>56) {continue;}
 		//
 		RegisterStructReflection((*IT));
 		//
@@ -1841,12 +1844,15 @@ void UMGC_SemanticDB::UpdateExtensions() {
 	}///
 	//
 	for (TObjectIterator<UObject>IT; IT; ++IT) {
+		if (!IT->HasAllFlags(RF_ClassDefaultObject|RF_ArchetypeObject|RF_DefaultSubObject)) {continue;}
+		//
 		if (IT->IsA(UEnum::StaticClass())) {continue;}
 		if (IT->IsA(UClass::StaticClass())) {continue;}
 		if (IT->IsA(AActor::StaticClass())) {continue;}
 		if (IT->IsA(UStruct::StaticClass())) {continue;}
 		if (IT->IsA(UMagicNode::StaticClass())) {continue;}
 		if (IT->IsA(UActorComponent::StaticClass())) {continue;}
+		if (IT->IsA(UBlueprintNodeSpawner::StaticClass())) {continue;}
 		//
 		RegisterClassReflection(IT->GetClass(),TEXT("U"));
 		//
@@ -1895,10 +1901,9 @@ void UMGC_SemanticDB::UpdateExtensions() {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void UMGC_SemanticDB::RegisterClassReflection(UClass* Class, FString Prefix) {
-	FString ClassName = Prefix+Class->GetName();
+	FString ClassName = Prefix + Class->GetName();
 	//
 	if (Class->HasAnyClassFlags(CLASS_Hidden)) {return;}
-	if (Class->HasAnyClassFlags(CLASS_Abstract)) {return;}
 	if (Class->HasAnyClassFlags(CLASS_Deprecated)) {return;}
 	if (Class->HasAnyClassFlags(CLASS_NewerVersionExists)) {return;}
 	//
@@ -1921,6 +1926,8 @@ void UMGC_SemanticDB::RegisterClassReflection(UClass* Class, FString Prefix) {
 		FPropertyDefinition PropDefinition;
 		PropDefinition.ReturnType = PropertyToTypeName(Property)+FString(TEXT(" "))+PropName;
 		PropDefinition.Access = EAccessLevel::Public;
+		PropDefinition.StackOf = EStack::None;
+		PropDefinition.TypeOf = EType::None;
 		PropDefinition.Tooltip = PMeta;
 		PropDefinition.Hint = PHint;
 		//
@@ -2097,6 +2104,8 @@ void UMGC_SemanticDB::RegisterStructReflection(UStruct* Struct) {
 		FPropertyDefinition PropDefinition;
 		PropDefinition.ReturnType = PropertyToTypeName(Property)+FString(TEXT(" "))+PropName;
 		PropDefinition.Access = EAccessLevel::Public;
+		PropDefinition.StackOf = EStack::None;
+		PropDefinition.TypeOf = EType::None;
 		PropDefinition.Tooltip = PMeta;
 		PropDefinition.Hint = PHint;
 		//

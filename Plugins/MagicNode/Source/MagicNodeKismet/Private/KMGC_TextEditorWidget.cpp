@@ -102,7 +102,7 @@ int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &G
 				DrawEffects,FLinearColor::White
 			);//
 			//
-			for (int32 I=SuggestDrawID; I<(SuggestDrawID+MAX_SUGGESTIONS); I++) {
+			for (int32 I=SuggestDrawID; I<(SuggestDrawID+MAX_SUGGESTIONS); ++I) {
 				if (SuggestionResults.IsValidIndex(I)) {
 					const float LineFraction = LineHeight/1.5f;
 					//
@@ -122,7 +122,7 @@ int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &G
 						OutDrawElements,LayerID,
 						Geometry.ToPaintGeometry(TextPos,FVector2D(BoxSize.X,LineHeight)),
 						SuggestionResults[I],FCoreStyle::GetDefaultFontStyle("Bold",12),
-						DrawEffects,FLinearColor::White
+						DrawEffects,GetSuggestionColor(SuggestionResults[I])
 					);//
 				}///
 			}///
@@ -223,6 +223,7 @@ void SKMGC_TextEditorWidget::OnTextCursorMoved(const FTextLocation &NewPosition)
 void SKMGC_TextEditorWidget::GoToLineColumn(int32 Line, int32 Column) {
 	FTextLocation Location(Line,Column);
 	//
+	ScrollTo(Location);
 	GoTo(Location);
 }
 
@@ -307,9 +308,9 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 	FKey Key = KeyEvent.GetKey();
 	//
 	if ((Key==EKeys::F)&&(KeyEvent.IsCommandDown()||KeyEvent.IsControlDown())) {
-		if (OnInvokedSearch.IsBound()) {
-			OnInvokedSearch.Execute();
-		} return FReply::Handled();
+		OnInvokedSearch.ExecuteIfBound(true);
+		//
+		return FReply::Handled();
 	}///
 	//
 	if ((Key==EKeys::Up)&&HasSuggestion()) {
@@ -327,9 +328,9 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 	if ((Key==EKeys::Down)&&HasSuggestion()) {
 		SuggestPicked += 1;
 		//
-		if (SuggestPicked>(MAX_SUGGESTIONS-1)) {
+		/*if (SuggestPicked>(MAX_SUGGESTIONS-1)) {
 			SuggestDrawID = FMath::Clamp(SuggestDrawID+1,0,(SuggestionResults.Num()-1)-MAX_SUGGESTIONS);
-		} SuggestPicked = FMath::Clamp(SuggestPicked,0,FMath::Min<int32>(SuggestionResults.Num()-1,(MAX_SUGGESTIONS-1)));
+		}*/ SuggestPicked = FMath::Clamp(SuggestPicked,0,FMath::Min<int32>(SuggestionResults.Num()-1,(MAX_SUGGESTIONS-1)));
 		//
 		GetKeywordInfo();
 		//
@@ -417,6 +418,7 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 	if ((Key==EKeys::Escape||Key==EKeys::BackSpace)&&HasAutoComplete()) {
 		AutoCompleteResults.Empty();
 		//
+		OnInvokedSearch.ExecuteIfBound(false);
 		OnAutoCompleted.ExecuteIfBound(AutoCompleteResults);
 		//
 		return FReply::Handled();
@@ -435,6 +437,8 @@ FReply SKMGC_TextEditorWidget::OnKeyUp(const FGeometry &Geometry, const FKeyEven
 }
 
 FReply SKMGC_TextEditorWidget::OnMouseButtonDown(const FGeometry &Geometry, const FPointerEvent &MouseEvent) {
+	OnInvokedSearch.ExecuteIfBound(false);
+	//
 	if (!HasSuggestion()&&(MouseEvent.GetEffectingButton()==EKeys::LeftMouseButton)&&(MouseEvent.IsCommandDown()||MouseEvent.IsControlDown())) {
 		EditableTextLayout->SelectWordAt(Geometry,MouseEvent.GetScreenSpacePosition());
 		UnderCursor = GetSelectedText().ToString();
@@ -692,7 +696,7 @@ void SKMGC_TextEditorWidget::AutoSuggest(const TArray<FString>&Lines) {
 		CompletionBoxSize.Y = FMath::Clamp(SuggestionResults.Num()*LineHeight,0.f,LineHeight*MAX_SUGGESTIONS);
 		//
 		for (auto &Suggestion : SuggestionResults) {
-			const float Width = FontMeasure->Measure(Suggestion,FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.CodeBlockStyle").Font).X+(MAX_SUGGESTIONS+16);
+			const float Width = FontMeasure->Measure(Suggestion,FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.CodeBlockStyle").Font).X + MAX_SUGGESTIONS;
 			if (Width>CompletionBoxSize.X) {CompletionBoxSize.X=Width;}
 		}///
 		//
@@ -703,7 +707,7 @@ void SKMGC_TextEditorWidget::AutoSuggest(const TArray<FString>&Lines) {
 }
 
 const bool SKMGC_TextEditorWidget::HasSuggestion() const {
-	return (SuggestionResults.Num()>0);
+	return ((SuggestionResults.Num()>0)&&(AutoCompleteKeyword.Len()>2));
 }
 
 void SKMGC_TextEditorWidget::InsertPickedSuggestion() {
@@ -728,7 +732,6 @@ void SKMGC_TextEditorWidget::InsertPickedSuggestion() {
 		AutoCompleteKeyword.ReverseString();
 	}///
 	//
-	AutoCleanup(AutoCompleteKeyword);
 	int32 Offset = (CursorLocation.GetOffset()-(AutoCompleteKeyword.Len()+1));
 	if (Offset<=INDEX_NONE) {Offset=0;}
 	//
@@ -870,6 +873,18 @@ const FLinearColor SKMGC_TextEditorWidget::GetSuggestionColor(const FString &Key
 
 void SKMGC_TextEditorWidget::SetScriptObject(UMagicNodeScript* Script) {
 	ScriptObject = Script;
+}
+
+void SKMGC_TextEditorWidget::BeginEditTransaction() {
+	if (!EditableTextLayout.IsValid()) {return;}
+	//
+	EditableTextLayout->BeginEditTransation();
+}
+
+void SKMGC_TextEditorWidget::EndEditTransaction() {
+	if (!EditableTextLayout.IsValid()) {return;}
+	//
+	EditableTextLayout->EndEditTransaction();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

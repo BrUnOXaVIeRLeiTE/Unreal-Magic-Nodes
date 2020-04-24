@@ -21,6 +21,9 @@
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "BlueprintActionDatabaseRegistrar.h"
 
+#include "Editor/UnrealEd/Public/SourceCodeNavigation.h"
+#include "Editor/LevelEditor/Public/LevelEditorActions.h"
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct UKMGC_MagicNodeHelper {
@@ -562,6 +565,16 @@ void UKMGC_MagicNode::SetTooltip(const FString &New) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+bool UKMGC_MagicNode::CanCompileProject() const {
+	return FLevelEditorActionCallbacks::Recompile_CanExecute();
+}
+
+void UKMGC_MagicNode::CompileProject() {
+	if (FSourceCodeNavigation::IsCompilerAvailable()) {
+		FLevelEditorActionCallbacks::RecompileGameCode_Clicked();
+	}///
+}
+
 void UKMGC_MagicNode::CompileScript() {
 	UMagicNodeScript* ScriptObject = GetScriptObject();
 	//
@@ -578,7 +591,6 @@ void UKMGC_MagicNode::CompileScript() {
 	return;}
 	//
 	CompilerResult = CompileScriptClass(ScriptObject->GetName(),GetHeaderText(),GetScriptText(),GetTypesText(),GetParentClass(),GetIncludes(),GetMacros());
-	//
 	if (CompilerResult != EMGC_CompilerResult::None) {
 		switch (CompilerResult) {
 			case EMGC_CompilerResult::Compiled:
@@ -590,7 +602,7 @@ void UKMGC_MagicNode::CompileScript() {
 				//
 				if (GEditor) {
 					GEditor->PlayEditorSound(TEXT("/Engine/EditorSounds/Notifications/CompileSuccess_Cue.CompileSuccess_Cue"));
-				}///
+				} CompileProject();
 			} break;
 			case EMGC_CompilerResult::ParsingFailure:
 			{
@@ -602,7 +614,7 @@ void UKMGC_MagicNode::CompileScript() {
 				//
 				if (GEditor) {
 					GEditor->PlayEditorSound(TEXT("/Engine/EditorSounds/Notifications/CompileFailed_Cue.CompileFailed_Cue"));
-				}///
+				} CompileProject();
 			} break;
 			default:
 			{

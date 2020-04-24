@@ -26,7 +26,9 @@ public:
 	virtual void RegisterCommands() override;
 public:
 	TSharedPtr<FUICommandInfo>OpenSourceCodeViewer;
+	TSharedPtr<FUICommandInfo>OpenSourceCodeSearch;
 	TSharedPtr<FUICommandInfo>BuildDatabase;
+	TSharedPtr<FUICommandInfo>Compile;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

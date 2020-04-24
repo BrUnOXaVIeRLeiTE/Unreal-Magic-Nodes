@@ -28,7 +28,8 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static const FName TAB("TAB_SourceViewer");
+static const FName TABSV("TAB_SourceViewer");
+static const FName TABSS("TAB_SourceSearch");
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -47,11 +48,13 @@ private:
 	TSharedPtr<FExtender>MenuExtender; 
 	TSharedPtr<FExtensibilityManager>ToolBarExtensibilityManager;
 private:
-	TSharedRef<SDockTab>OnSpawnLightSourceViewerTAB(const FSpawnTabArgs &SpawnTabArgs);
+	TSharedRef<SDockTab>OnSpawnSourceCodeViewerTAB(const FSpawnTabArgs &SpawnTabArgs);
+	TSharedRef<SDockTab>OnSpawnSourceCodeSearchTAB(const FSpawnTabArgs &SpawnTabArgs);
 public:
 	static void ExtendMenu(FMenuBuilder &MenuBuilder);
+	static void InvokeSourceCodeViewerTAB(const FTextLocation &Location);
+	static void InvokeSourceCodeSearchTAB();
 	static void CreateNewScriptAsset();
-	static void InvokeSourceViewerTAB();
 	//
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;

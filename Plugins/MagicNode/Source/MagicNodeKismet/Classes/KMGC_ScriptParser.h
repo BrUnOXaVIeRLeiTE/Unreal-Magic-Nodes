@@ -17,7 +17,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// MGC Parser:: Internal Types
 
-enum EMGC_CompilerResult : uint32 {
+enum MAGICNODEKISMET_API EMGC_CompilerResult : uint32 {
 	None					=	0		/// No Compilation result.
 	, UnknownException		=	1		/// Compiler Unknown Exceptions.
 	, InternalError			=	2		/// Compiler Internal Error.
@@ -54,7 +54,7 @@ protected:
 		}///
 	}///
 	//
-	const EMGC_CompilerResult CompileScriptClass(const FString &ScriptName, const FString &Header, const FString &Script, const FString &Types, const FString &ParentClass, const TArray<FString>&Includes, const TArray<FString>&Macros);
+	MAGICNODEKISMET_API const EMGC_CompilerResult CompileScriptClass(const FString &ScriptName, const FString &Header, const FString &Script, const FString &Types, const FString &ParentClass, const TArray<FString>&Includes, const TArray<FString>&Macros);
 protected:
 	static const bool BuildAutoComplete(const FClassDefinition &Definition, TArray<FString>&Results);
 	static const bool ParseHeaderIsland(const FString &Class, const FString &Island, FClassDefinition &ClassInfo, EAccessLevel &Level);
@@ -65,7 +65,7 @@ public:
 	static const FClassRedirector NORedirector;
 	static const FClassDefinition NOClassInfo;
 	//
-	static TMap<uint32,FString>Message;
+	MAGICNODEKISMET_API static TMap<uint32,FString>Message;
 public:
 	static FClassDefinition &GetClassReference(const FString &Keyword);
 	static const FClassDefinition &GetClassInfo(const FString &Keyword);
@@ -82,8 +82,8 @@ public:
 	static const FFunctionDefinition &GetFunctionInfo(const UClass* FromClass, const FString &Keyword);
 	static const FFunctionDefinition &GetFunctionInfo(const FString &FromClass, const FString &Keyword);
 	//
-	static const FSlateColor GetTypeColor(const FString &Notation);
-	static const FSlateBrush* GetTypeIcon(const FString &Notation);
+	MAGICNODEKISMET_API static const FSlateColor GetTypeColor(const FString &Notation);
+	MAGICNODEKISMET_API static const FSlateBrush* GetTypeIcon(const FString &Notation);
 public:
 	MAGICNODEKISMET_API static void AutoComplete(const FString &Owner, const FString &Keyword, TArray<FString>&Results);
 	MAGICNODEKISMET_API static void AutoSuggest(const TArray<FString>&Lines, const FString &Keyword, TArray<FString>&Results);

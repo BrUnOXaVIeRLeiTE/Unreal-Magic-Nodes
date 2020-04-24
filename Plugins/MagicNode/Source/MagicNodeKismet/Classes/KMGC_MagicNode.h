@@ -39,6 +39,8 @@ protected:
 	FText NodeTooltip;
 	//
 	void ScriptPinChanged();
+protected:
+	void CompileProject();
 public:
 	virtual void ExpandNode(FKismetCompilerContext &CompilerContext, UEdGraph* SourceGraph) override;
 	virtual UFunction* ExpandScript(const UMagicNodeScript* Script);
@@ -68,6 +70,7 @@ public:
 	//
 	//
 	bool HasScript() const;
+	bool CanCompileProject() const;
 	bool IsDefaultPin(UEdGraphPin* Pin);
 	bool IsDefaultParam(const UProperty* Param);
 	void CreatePinsForScript(UFunction* Function=nullptr);

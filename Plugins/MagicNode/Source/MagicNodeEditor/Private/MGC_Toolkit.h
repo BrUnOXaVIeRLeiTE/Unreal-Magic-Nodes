@@ -7,6 +7,9 @@
 
 #pragma once
 
+#include "KMGC_ScriptParser.h"
+
+#include "MGC_SearchFiles.h"
 #include "MGC_CodeEditorCore.h"
 #include "MagicNodeEditorCommands.h"
 
@@ -36,6 +39,8 @@
 class UMagicNodeScript;
 class FMagicNodeEditor;
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 struct FCodeEditorTAB {
 	static const FName TAB_TreeView;
 	static const FName TAB_Details;
@@ -43,6 +48,8 @@ struct FCodeEditorTAB {
 	static const FName TAB_Header;
 	static const FName TAB_Types;
 };
+
+static FString ViewerSourcePath("C:/");
 
 const FName FCodeEditorTAB::TAB_TreeView(TEXT("MGC_TreeView"));
 const FName FCodeEditorTAB::TAB_Details(TEXT("MGC_Details"));
@@ -52,49 +59,12 @@ const FName FCodeEditorTAB::TAB_Types(TEXT("MGC_Types"));
 
 const FName MGC_APP = FName(TEXT("MGC_CodeEditor"));
 
-static FString ViewerSourcePath("C:/");
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct FSourceTreeNode {
-	FString FullPath;
-	FString Path;
-	//
-	TSharedPtr<FSourceTreeNode>ParentNode;
-	TArray<TSharedPtr<FSourceTreeNode>>ChildNodes;
-	//
-	//
-	bool operator == (const FSourceTreeNode &Other) const {
-		return (
-			(Path==Other.Path) &&
-			(FullPath==Other.FullPath) &&
-			(ChildNodes==Other.ChildNodes) &&
-			(ParentNode.Get()==Other.ParentNode.Get())
-		);///
-	}///
-	//
-	bool operator != (const FSourceTreeNode &Other) const {
-		return !(*this==Other);
-	}///
-	//
-	//
-	TSharedPtr<FSourceTreeNode>FindNode(const FString &Node) {
-		for (const TSharedPtr<FSourceTreeNode>&Ptr : ChildNodes) {
-			if (!Ptr.IsValid()) {continue;}
-			if (Ptr->Path==Node){return Ptr;}
-		}///
-		//
-		return TSharedPtr<FSourceTreeNode>();
-	}///
-};
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// MGC State-Machine Asset Editor Toolkit:
 
-class FMGC_Toolkit : public FAssetEditorToolkit, public FEditorUndoClient, public FGCObject {
+class FMGC_Toolkit : public IKMGC_ScriptParser, public FAssetEditorToolkit, public FEditorUndoClient, public FGCObject {
 private:
 	static FDelegateHandle WatcherHandle;
-	static TArray<TSharedPtr<FSourceTreeNode>>SourceView;
 private:
 	UMagicNodeScript* ScriptObject_Inline;
 	TSharedPtr<SMGC_CodeEditorCore>MGC_CodeEditor;
@@ -126,19 +96,21 @@ protected:
 	void BindCommands();
 	void ExtendToolbar();
 protected:
+	void CompileProject();
 	void RebuildDatabases();
 	void LaunchSourceCodeViewer();
+	void LaunchSourceCodeSearch();
+public:
+	void CompileScript();
+public:
+	FString GetParentClass() const;
 public:
 	FMGC_Toolkit();
 	//
 	//
-	void INIT_CodeEditor(const EToolkitMode::Type Mode, const TSharedPtr<IToolkitHost>&InitToolkitHost, UMagicNodeScript* ScriptObject);
-	//
-	/** Sets the State-Machine being edited. */
-	void SET_MGC_Inline(UMagicNodeScript* NewScriptObject);
-	//
-	/** Gets the State-Machine being edited. */
-	UMagicNodeScript* GET_MGC_Inline() const;
+	UMagicNodeScript* GET() const;
+	void SET(UMagicNodeScript* NewScriptObject);
+	void INIT(const EToolkitMode::Type Mode, const TSharedPtr<IToolkitHost>&InitToolkitHost, UMagicNodeScript* ScriptObject);
 	//
 	//
 	virtual void RegisterTabSpawners(const TSharedRef<FTabManager>&TBManager) override;
@@ -152,6 +124,7 @@ public:
 	virtual FString GetDocumentationLink() const override;
 	virtual FString GetWorldCentricTabPrefix() const override;
 	virtual FLinearColor GetWorldCentricTabColorScale() const override;
+	//
 	virtual void OnToolkitHostingStarted(const TSharedRef<IToolkit>&Toolkit) override;
 	virtual void OnToolkitHostingFinished(const TSharedRef<IToolkit>&Toolkit) override;
 	//
@@ -164,8 +137,11 @@ public:
 	static void RefreshEngineSourceView();
 	static void RefreshPluginSourceView();
 	static void RefreshProjectSourceView();
+	//
+	void UpdateDatabaseReferences();
+	//
 	static bool IsSourceFile(const FString &Path);
-	static int32 SourceViewCount() {return FMGC_Toolkit::SourceView.Num();}
+	static int32 SourceViewCount() {return GlobalSourceTreeView.Num();}
 };
 
 /* /// Graph Notification System::

@@ -68,11 +68,17 @@ void FMagicNodeEditorStyle::Initialize() {
 	StyleSet->Set("SourceView.Object", new PLUGIN_BRUSH(TEXT("Icons/Object_16x"),Icon16x16));
 	StyleSet->Set("SourceView.Text", new PLUGIN_BRUSH(TEXT("Icons/Text_16x"),Icon16x16));
 	//
-	StyleSet->Set("MagicNodeEditor.OpenSourceCodeViewer", new PLUGIN_BRUSH(TEXT("UI/KMGC_SourceCode_40x"),Icon40x40));
-	StyleSet->Set("MagicNodeEditor.OpenSourceCodeViewer.Small", new PLUGIN_BRUSH(TEXT("UI/KMGC_SourceCode_40x"),Icon20x20));
+	StyleSet->Set("MagicNodeEditor.Compile", new PLUGIN_BRUSH(TEXT("UI/KMGC_Compile_40x"),Icon40x40));
+	StyleSet->Set("MagicNodeEditor.Compile.Small", new PLUGIN_BRUSH(TEXT("UI/KMGC_Compile_40x"),Icon20x20));
 	//
 	StyleSet->Set("MagicNodeEditor.BuildDatabase", new PLUGIN_BRUSH(TEXT("UI/KMGC_Database_40x"),Icon40x40));
 	StyleSet->Set("MagicNodeEditor.BuildDatabase.Small", new PLUGIN_BRUSH(TEXT("UI/KMGC_Database_40x"),Icon20x20));
+	//
+	StyleSet->Set("MagicNodeEditor.OpenSourceCodeViewer", new PLUGIN_BRUSH(TEXT("UI/KMGC_SourceCode_40x"),Icon40x40));
+	StyleSet->Set("MagicNodeEditor.OpenSourceCodeViewer.Small", new PLUGIN_BRUSH(TEXT("UI/KMGC_SourceCode_40x"),Icon20x20));
+	//
+	StyleSet->Set("MagicNodeEditor.OpenSourceCodeSearch", new PLUGIN_BRUSH(TEXT("UI/KMGC_FindFiles_40x"),Icon40x40));
+	StyleSet->Set("MagicNodeEditor.OpenSourceCodeSearch.Small", new PLUGIN_BRUSH(TEXT("UI/KMGC_FindFiles_40x"),Icon20x20));
 	//
 	//
 	FSlateStyleRegistry::RegisterSlateStyle(*StyleSet.Get());

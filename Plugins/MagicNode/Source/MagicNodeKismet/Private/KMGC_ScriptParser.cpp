@@ -587,12 +587,12 @@ void IKMGC_ScriptParser::AutoSuggest(const TArray<FString>&Lines, const FString 
 	//
 	for (const FString &Item : Lines) {
 		if (!Item.Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
-		//
 		TArray<FString>Line;
 		int32 Nums = UE_ARRAY_COUNT(Whitespace);	
 		Item.ParseIntoArray(Line,Whitespace,Nums,true);
 		//
 		for (const FString &Key : Line) {
+			if (Results.Num()>=MAX_SUGGESTIONS) {return;}
 			if (!Key.Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
 			//
 			FString Clean;
@@ -603,72 +603,124 @@ void IKMGC_ScriptParser::AutoSuggest(const TArray<FString>&Lines, const FString 
 			if (Keyword.Contains(Clean)||Clean.Len()<Keyword.Len())
 			{continue;} else {Results.AddUnique(Clean);}
 		}///
-		//
-		for (auto DB : MGC_Settings->KeywordDB.Array()) {
-			auto DTB = DB.Get(); if (DTB) {
-			for (const FString &Key : DTB->ScriptCore.Array()) {
-				if (!Key.Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+	}///
+	//
+	for (auto DB : MGC_Settings->KeywordDB.Array()) {
+		auto DTB = DB.Get(); if (DTB) {
+			for (auto IT=DTB->ScriptCore.CreateConstIterator(); IT; ++IT) {
+				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
 				//
-				FString Clean;
-				for (const TCHAR &CH : Key) {
-					if ((TChar<WIDECHAR>::IsAlpha(CH)||TChar<WIDECHAR>::IsDigit(CH)||CH==TEXT('_'))) {Clean.AppendChar(CH);}
-				}///
+				if (!IT->Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+				if (Keyword.Contains((*IT),ESearchCase::CaseSensitive)||IT->Len()<Keyword.Len())
+				{continue;} else {Results.AddUnique(*IT);}
+			}///
+			//
+			for (auto IT=DTB->Macros.CreateConstIterator(); IT; ++IT) {
+				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
 				//
-				if (Keyword.Contains(Clean)||Clean.Len()<Keyword.Len())
-				{continue;} else {Results.AddUnique(Clean);}
-			}}///
+				if (!IT->Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+				if (Keyword.Contains((*IT),ESearchCase::CaseSensitive)||IT->Len()<Keyword.Len())
+				{continue;} else {Results.AddUnique(*IT);}
+			}///
+			//
+			for (auto IT=DTB->Processors.CreateConstIterator(); IT; ++IT) {
+				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
+				//
+				if (!IT->Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+				if (Keyword.Contains((*IT),ESearchCase::CaseSensitive)||IT->Len()<Keyword.Len())
+				{continue;} else {Results.AddUnique(*IT);}
+			}///
+			//
+			for (auto IT=DTB->Extensions.CreateConstIterator(); IT; ++IT) {
+				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
+				//
+				if (!IT->Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+				if (Keyword.Contains((*IT),ESearchCase::CaseSensitive)||IT->Len()<Keyword.Len())
+				{continue;} else {Results.AddUnique(*IT);}
+			}///
 		}///
-		//
-		for (auto DB : MGC_Settings->ClassDB.Array()) {
-			auto DTB = DB.Get(); if (DTB) {
-			for (const FString &Key : DTB->ScriptCore.Array()) {
-				if (!Key.Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+	}///
+	//
+	for (auto DB : MGC_Settings->ClassDB.Array()) {
+		auto DTB = DB.Get(); if (DTB) {
+			for (auto IT=DTB->ScriptCore.CreateConstIterator(); IT; ++IT) {
+				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
 				//
-				FString Clean;
-				for (const TCHAR &CH : Key) {
-					if ((TChar<WIDECHAR>::IsAlpha(CH)||TChar<WIDECHAR>::IsDigit(CH)||CH==TEXT('_'))) {Clean.AppendChar(CH);}
-				}///
+				if (!IT->Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+				if (Keyword.Contains((*IT),ESearchCase::CaseSensitive)||IT->Len()<Keyword.Len())
+				{continue;} else {Results.AddUnique(*IT);}
+			}///
+			//
+			for (auto IT=DTB->ScriptTypes.CreateConstIterator(); IT; ++IT) {
+				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
 				//
-				if (Keyword.Contains(Clean)||Clean.Len()<Keyword.Len())
-				{continue;} else {Results.AddUnique(Clean);}
-			}}///
+				if (!IT->Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+				if (Keyword.Contains((*IT),ESearchCase::CaseSensitive)||IT->Len()<Keyword.Len())
+				{continue;} else {Results.AddUnique(*IT);}
+			}///
+			//
+			for (auto IT=DTB->Extensions.CreateConstIterator(); IT; ++IT) {
+				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
+				//
+				if (!IT->Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+				if (Keyword.Contains((*IT),ESearchCase::CaseSensitive)||IT->Len()<Keyword.Len())
+				{continue;} else {Results.AddUnique(*IT);}
+			}///
 		}///
-		//
-		for (auto DB : MGC_Settings->FunctionDB.Array()) {
-			auto DTB = DB.Get(); if (DTB) {
-			for (const FString &Key : DTB->ScriptCore.Array()) {
-				if (!Key.Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+	}///
+	//
+	for (auto DB : MGC_Settings->FunctionDB.Array()) {
+		auto DTB = DB.Get(); if (DTB) {
+			for (auto IT=DTB->ScriptCore.CreateConstIterator(); IT; ++IT) {
+				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
 				//
-				FString Clean;
-				for (const TCHAR &CH : Key) {
-					if ((TChar<WIDECHAR>::IsAlpha(CH)||TChar<WIDECHAR>::IsDigit(CH)||CH==TEXT('_'))) {Clean.AppendChar(CH);}
-				}///
+				if (!IT->Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+				if (Keyword.Contains((*IT),ESearchCase::CaseSensitive)||IT->Len()<Keyword.Len())
+				{continue;} else {Results.AddUnique(*IT);}
+			}///
+			//
+			for (auto IT=DTB->Extensions.CreateConstIterator(); IT; ++IT) {
+				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
 				//
-				if (Keyword.Contains(Clean)||Clean.Len()<Keyword.Len())
-				{continue;} else {Results.AddUnique(Clean);}
-			}}///
+				if (!IT->Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+				if (Keyword.Contains((*IT),ESearchCase::CaseSensitive)||IT->Len()<Keyword.Len())
+				{continue;} else {Results.AddUnique(*IT);}
+			}///
 		}///
-		//
-		for (auto DB : MGC_Settings->SemanticDB.Array()) {
-			auto DTB = DB.Get(); if (DTB) {
-			for (auto IT = DTB->ClassDefinitions.CreateConstIterator(); IT; ++IT) {
+	}///
+	//
+	for (auto DB : MGC_Settings->SemanticDB.Array()) {
+		auto DTB = DB.Get(); if (DTB) {
+			for (auto IT=DTB->ClassDefinitions.CreateConstIterator(); IT; ++IT) {
+				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
+				//
 				if (!IT->Key.Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+				if (Keyword.Contains(IT->Key,ESearchCase::CaseSensitive)||IT->Key.Len()<Keyword.Len())
+				{continue;} else {Results.AddUnique(IT->Key);}
+			}///
+			//
+			for (auto IT=DTB->ClassRedirectors.CreateConstIterator(); IT; ++IT) {
+				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
 				//
-				FString Clean;
-				for (const TCHAR &CH : IT->Key) {
-					if ((TChar<WIDECHAR>::IsAlpha(CH)||TChar<WIDECHAR>::IsDigit(CH)||CH==TEXT('_'))) {Clean.AppendChar(CH);}
-				}///
+				if (!IT->Key.Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+				if (Keyword.Contains(IT->Key,ESearchCase::CaseSensitive)||IT->Key.Len()<Keyword.Len())
+				{continue;} else {Results.AddUnique(IT->Key);}
+			}///
+			//
+			for (auto IT=DTB->MacroDefinitions.CreateConstIterator(); IT; ++IT) {
+				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
 				//
-				if (Keyword.Contains(Clean)||Clean.Len()<Keyword.Len())
-				{continue;} else {Results.AddUnique(Clean);}
-			}}///
+				if (!IT->Key.Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
+				if (Keyword.Contains(IT->Key,ESearchCase::CaseSensitive)||IT->Key.Len()<Keyword.Len())
+				{continue;} else {Results.AddUnique(IT->Key);}
+			}///
 		}///
 	}///
 	//
 	Results.Sort();
 	//
 	if (Results.Num()==0) {
-		//@ToDo: Search C++/H files , need a real "File Explorer" tree view.
+		//@ToDo: Search C++/H files...
 	}///
 }
 

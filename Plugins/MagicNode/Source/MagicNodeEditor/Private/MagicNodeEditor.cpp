@@ -31,7 +31,7 @@ UObject* UMGC_ScriptFactory::FactoryCreateNew(UClass* Class, UObject* InParent, 
 }
 
 FText FATA_MagicNode::GetAssetDescription(const FAssetData &AssetData) const {
-	return FText::FromString(FString(TEXT("It's Magic.")));
+	return FText::FromString(FString(TEXT("'Magic Nodes' programming system.")));
 }
 
 void FATA_MagicNode::OpenAssetEditor(const TArray<UObject*>&InObjects, TSharedPtr<IToolkitHost>EditWithinLevelEditor) {
@@ -40,7 +40,7 @@ void FATA_MagicNode::OpenAssetEditor(const TArray<UObject*>&InObjects, TSharedPt
 	for (auto IT = InObjects.CreateConstIterator(); IT; ++IT) {
 		if (UMagicNodeScript* ScriptObject = Cast<UMagicNodeScript>(*IT)) {
 			TSharedRef<FMGC_Toolkit>MGC_CodeEditor(new FMGC_Toolkit());
-			MGC_CodeEditor->INIT_CodeEditor(Mode,EditWithinLevelEditor,ScriptObject);
+			MGC_CodeEditor->INIT(Mode,EditWithinLevelEditor,ScriptObject);
 		}///
 	}///
 }

@@ -88,369 +88,372 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 	MainBox->AddSlot()
 	.VAlign(VAlign_Top).HAlign(HAlign_Fill)
 	[
-	SNew(SHorizontalBox)
-	+SHorizontalBox::Slot()
-	.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-	[
-		SNew(SBorder).Padding(1)
-		.Visibility(this,&SKMGC_MagicNodeWidget::GetScriptEditorVisibility)
-		.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
-		.ColorAndOpacity(FLinearColor(1.f,1.f,1.f,0.8f))
+		SNew(SHorizontalBox)
+		+SHorizontalBox::Slot()
+		.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
 		[
-			SNew(SVerticalBox)
-			+SVerticalBox::Slot()
-			.AutoHeight().Padding(10,5,10,5)
-			[
-				SNew(SHorizontalBox)
-				+SHorizontalBox::Slot().HAlign(HAlign_Fill)
-				[
-					SAssignNew(SCRIPT_PICKER,SContentReference)
-					.AssetReference(this,&SKMGC_MagicNodeWidget::GetScriptObject)
-					.OnSetReference(this,&SKMGC_MagicNodeWidget::SetScriptObject)
-					.AssetPickerSizeOverride(FVector2D(540.f,360.f))
-					.AllowedClass(UMagicNodeScript::StaticClass())
-					.ShowFindInBrowserButton(true)
-					.AllowClearingReference(true)
-					.AllowSelectingNewAsset(true)
-					.ShowToolsButton(false)
-					.WidthOverride(400.f)
-				]
-			]
-			+SVerticalBox::Slot()
-			.AutoHeight().Padding(10,0,10,0)
+			SNew(SBorder).Padding(1)
+			.Visibility(this,&SKMGC_MagicNodeWidget::GetScriptEditorVisibility)
+			.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
+			.ColorAndOpacity(FLinearColor(1.f,1.f,1.f,0.8f))
 			[
 				SNew(SVerticalBox)
-				+SVerticalBox::Slot().AutoHeight()
+				+SVerticalBox::Slot()
+				.AutoHeight().Padding(10,5,10,5)
 				[
 					SNew(SHorizontalBox)
-					+SHorizontalBox::Slot().AutoWidth()
-					.VAlign(VAlign_Center).HAlign(HAlign_Left)
+					+SHorizontalBox::Slot().HAlign(HAlign_Fill)
 					[
-						SNew(SBorder)
-						.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-						.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
-						[
-							SNew(SButton)
-							.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedAddInclude)
-							.ButtonStyle(FEditorStyle::Get(),"NoBorder")
-							.VAlign(VAlign_Center).HAlign(HAlign_Center)
-							[
-								SNew(SImage)
-								.Image(FEditorStyle::GetBrush("Plus"))
-							]
-						]
-					]
-					+SHorizontalBox::Slot()
-					.VAlign(VAlign_Center).HAlign(HAlign_Fill)
-					[
-						SNew(SBorder)
-						.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-						.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
-						[
-							SNew(SButton)
-							.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedViewIncludes)
-							.ButtonStyle(FEditorStyle::Get(),"NoBorder")
-							.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-							[
-								SNew(STextBlock).Margin(FMargin(5,0,0,0))
-								.Text(LOCTEXT("KMGC_IncludesPanel","# Includes"))
-								.ColorAndOpacity(FSlateColor(FLinearColor(FColor(155,155,155,225))))
-							]
-						]
+						SAssignNew(SCRIPT_PICKER,SContentReference)
+						.AssetReference(this,&SKMGC_MagicNodeWidget::GetScriptObject)
+						.OnSetReference(this,&SKMGC_MagicNodeWidget::SetScriptObject)
+						.AssetPickerSizeOverride(FVector2D(540.f,360.f))
+						.AllowedClass(UMagicNodeScript::StaticClass())
+						.ShowFindInBrowserButton(true)
+						.AllowClearingReference(true)
+						.AllowSelectingNewAsset(true)
+						.ShowToolsButton(false)
+						.WidthOverride(400.f)
 					]
 				]
-				+SVerticalBox::Slot().AutoHeight()
-				[
-					SNew(SBorder)
-					.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-					.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
-					.Visibility(this,&SKMGC_MagicNodeWidget::GetIncludesPanelVisibility)
-					[
-						SAssignNew(INCLUDES_LIST,SListView<TSharedPtr<FString>>)
-						.OnGenerateRow(this,&SKMGC_MagicNodeWidget::OnGenerateIncludes)
-						.ScrollbarVisibility(EVisibility::Hidden)
-						.SelectionMode(ESelectionMode::Single)
-						.ListItemsSource(&SourceIncludes)
-					]
-				]
-				+SVerticalBox::Slot().AutoHeight()
-				[
-					SNew(SHorizontalBox)
-					+SHorizontalBox::Slot().AutoWidth()
-					.VAlign(VAlign_Center).HAlign(HAlign_Left)
-					[
-						SNew(SBorder)
-						.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-						.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
-						[
-							SNew(SButton)
-							.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedAddMacro)
-							.ButtonStyle(FEditorStyle::Get(),"NoBorder")
-							.VAlign(VAlign_Center).HAlign(HAlign_Center)
-							[
-								SNew(SImage)
-								.Image(FEditorStyle::GetBrush("Plus"))
-							]
-						]
-					]
-					+SHorizontalBox::Slot()
-					.VAlign(VAlign_Center).HAlign(HAlign_Fill)
-					[
-						SNew(SBorder)
-						.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-						.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
-						[
-							SNew(SButton)
-							.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedViewMacros)
-							.ButtonStyle(FEditorStyle::Get(),"NoBorder")
-							.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-							[
-								SNew(STextBlock).Margin(FMargin(5,0,0,0))
-								.Text(LOCTEXT("KMGC_MacrosPanel","[] Macros"))
-								.ColorAndOpacity(FSlateColor(FLinearColor(FColor(155,155,155,225))))
-							]
-						]
-					]
-				]
-				+SVerticalBox::Slot().AutoHeight()
-				[
-					SNew(SBorder)
-					.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-					.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
-					.Visibility(this,&SKMGC_MagicNodeWidget::GetMacrosPanelVisibility)
-					[
-						SAssignNew(MACROS_LIST,SListView<TSharedPtr<FString>>)
-						.OnGenerateRow(this,&SKMGC_MagicNodeWidget::OnGenerateMacros)
-						.ScrollbarVisibility(EVisibility::Hidden)
-						.SelectionMode(ESelectionMode::Single)
-						.ListItemsSource(&SourceMacros)
-					]
-				]
-			]
-			+SVerticalBox::Slot()
-			.FillHeight(1.f).Padding(10,5,10,5)
-			[
-				SNew(SHorizontalBox)
-				+SHorizontalBox::Slot()
-				.HAlign(HAlign_Left).AutoWidth()
+				+SVerticalBox::Slot()
+				.AutoHeight().Padding(10,0,10,0)
 				[
 					SNew(SVerticalBox)
-					+SVerticalBox::Slot()
-					.AutoHeight().Padding(-32,0,0,4)
+					+SVerticalBox::Slot().AutoHeight()
 					[
-						SNew(SButton)
-						.ButtonColorAndOpacity(this,&SKMGC_MagicNodeWidget::GetHeaderIconColor)
-						.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedHeaderIcon)
-						.VAlign(VAlign_Top).HAlign(HAlign_Left)
-						[
-							SNew(SImage)
-							.Image(FKMGC_NodeStyle::Get()->GetBrush(TEXT("KMGC.Toolbar.H")))
-						]
-					]
-					+SVerticalBox::Slot()
-					.AutoHeight().Padding(-32,0,0,4)
-					[
-						SNew(SButton)
-						.ButtonColorAndOpacity(this,&SKMGC_MagicNodeWidget::GetScriptIconColor)
-						.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedScriptIcon)
-						.VAlign(VAlign_Top).HAlign(HAlign_Left)
-						[
-							SNew(SImage)
-							.Image(FKMGC_NodeStyle::Get()->GetBrush(TEXT("KMGC.Toolbar.CPP")))
-						]
-					]
-					+SVerticalBox::Slot()
-					.AutoHeight().Padding(-32,0,0,4)
-					[
-						SNew(SButton)
-						.ButtonColorAndOpacity(this,&SKMGC_MagicNodeWidget::GetTypesIconColor)
-						.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedTypesIcon)
-						.VAlign(VAlign_Top).HAlign(HAlign_Left)
-						[
-							SNew(SImage)
-							.Image(FKMGC_NodeStyle::Get()->GetBrush(TEXT("KMGC.Toolbar.T")))
-						]
-					]
-				]
-				+SHorizontalBox::Slot()
-				.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-				[
-					SNew(SOverlay)
-					+SOverlay::Slot()
-					.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-					[
-						SNew(SBox)
-						.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-						.MinDesiredWidth(400.f).MinDesiredHeight(250.f)
-						.MaxDesiredHeight(1250.f).MaxDesiredWidth(1500.f)
+						SNew(SHorizontalBox)
+						+SHorizontalBox::Slot().AutoWidth()
+						.VAlign(VAlign_Center).HAlign(HAlign_Left)
 						[
 							SNew(SBorder)
 							.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-							.BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
+							.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
 							[
-								SAssignNew(VS_SCROLL_BOX,SScrollBox)
-								.OnUserScrolled(this,&SKMGC_MagicNodeWidget::OnVerticalScroll)
-								.Orientation(EOrientation::Orient_Vertical)
-								.ScrollBarThickness(FVector2D(8.f,8.f))
-								+SScrollBox::Slot()
+								SNew(SButton)
+								.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedAddInclude)
+								.ButtonStyle(FEditorStyle::Get(),"NoBorder")
+								.VAlign(VAlign_Center).HAlign(HAlign_Center)
 								[
-									SNew(SHorizontalBox)
-									+SHorizontalBox::Slot()
-									.VAlign(VAlign_Fill).HAlign(HAlign_Left).AutoWidth()
-									[
-										SNew(SBorder)
-										.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-										.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
-										[
-											SAssignNew(LINE_COUNTER,SListView<TSharedPtr<FString>>)
-											.OnSelectionChanged(this,&SKMGC_MagicNodeWidget::OnSelectedLineCounterItem)
-											.OnGenerateRow(this,&SKMGC_MagicNodeWidget::OnGenerateLineCounter)
-											.ScrollbarVisibility(EVisibility::Collapsed)
-											.ListItemsSource(&LineCount).ItemHeight(14)
-											.SelectionMode(ESelectionMode::Single)
-										]
-									]
-									+SHorizontalBox::Slot()
-									.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-									[
-										SAssignNew(SCRIPT_EDITOR,SKMGC_TextEditorWidget)
-										.OnTextChanged(this,&SKMGC_MagicNodeWidget::OnScriptTextChanged,ETextCommit::Default)
-										.OnTextCommitted(this,&SKMGC_MagicNodeWidget::OnScriptTextComitted)
-										.Visibility(this,&SKMGC_MagicNodeWidget::GetScriptPanelVisibility)
-										.OnInvokeSearch(this,&SKMGC_MagicNodeWidget::OnInvokedSearch)
-										.OnAutoComplete(this,&SKMGC_MagicNodeWidget::OnAutoComplete)
-										.IsEnabled(this,&SKMGC_MagicNodeWidget::HasScript)
-										.Text(this,&SKMGC_MagicNodeWidget::GetScriptText)
-										.VScrollBar(VS_SCROLL).HScrollBar(HSS_SCROLL)
-										.Marshaller(MARSHALL.ToSharedRef())
-										.CanKeyboardFocus(true)
-										.IsReadOnly(false)
-									]
-									+SHorizontalBox::Slot()
-									.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-									[
-										SAssignNew(HEADER_EDITOR,SKMGC_TextEditorWidget)
-										.OnTextChanged(this,&SKMGC_MagicNodeWidget::OnHeaderTextChanged,ETextCommit::Default)
-										.OnTextCommitted(this,&SKMGC_MagicNodeWidget::OnHeaderTextComitted)
-										.Visibility(this,&SKMGC_MagicNodeWidget::GetHeaderPanelVisibility)
-										.OnInvokeSearch(this,&SKMGC_MagicNodeWidget::OnInvokedSearch)
-										.OnAutoComplete(this,&SKMGC_MagicNodeWidget::OnAutoComplete)
-										.IsEnabled(this,&SKMGC_MagicNodeWidget::HasScript)
-										.Text(this,&SKMGC_MagicNodeWidget::GetHeaderText)
-										.VScrollBar(VS_SCROLL).HScrollBar(HSH_SCROLL)
-										.Marshaller(MARSHALL.ToSharedRef())
-										.CanKeyboardFocus(true)
-										.IsReadOnly(false)
-									]
-									+SHorizontalBox::Slot()
-									.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-									[
-										SAssignNew(TYPES_EDITOR,SKMGC_TextEditorWidget)
-										.OnTextChanged(this,&SKMGC_MagicNodeWidget::OnTypesTextChanged,ETextCommit::Default)
-										.OnTextCommitted(this,&SKMGC_MagicNodeWidget::OnTypesTextComitted)
-										.Visibility(this,&SKMGC_MagicNodeWidget::GetTypesPanelVisibility)
-										.OnInvokeSearch(this,&SKMGC_MagicNodeWidget::OnInvokedSearch)
-										.OnAutoComplete(this,&SKMGC_MagicNodeWidget::OnAutoComplete)
-										.IsEnabled(this,&SKMGC_MagicNodeWidget::HasScript)
-										.Text(this,&SKMGC_MagicNodeWidget::GetTypesText)
-										.VScrollBar(VS_SCROLL).HScrollBar(HSH_SCROLL)
-										.Marshaller(MARSHALL.ToSharedRef())
-										.CanKeyboardFocus(true)
-										.IsReadOnly(false)
-									]
+									SNew(SImage)
+									.Image(FEditorStyle::GetBrush("Plus"))
+								]
+							]
+						]
+						+SHorizontalBox::Slot()
+						.VAlign(VAlign_Center).HAlign(HAlign_Fill)
+						[
+							SNew(SBorder)
+							.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+							.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
+							[
+								SNew(SButton)
+								.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedViewIncludes)
+								.ButtonStyle(FEditorStyle::Get(),"NoBorder")
+								.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+								[
+									SNew(STextBlock).Margin(FMargin(5,0,0,0))
+									.Text(LOCTEXT("KMGC_IncludesPanel","# Includes"))
+									.ColorAndOpacity(FSlateColor(FLinearColor(FColor(155,155,155,225))))
 								]
 							]
 						]
 					]
-					+SOverlay::Slot()
-					.VAlign(VAlign_Top).HAlign(HAlign_Right)
+					+SVerticalBox::Slot().AutoHeight()
 					[
-						SNew(SBox)
+						SNew(SBorder)
 						.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-						.WidthOverride(250.f).HeightOverride(80.f)
-						.Visibility(this,&SKMGC_MagicNodeWidget::GetSearchBoxVisibility)
+						.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
+						.Visibility(this,&SKMGC_MagicNodeWidget::GetIncludesPanelVisibility)
+						[
+							SAssignNew(INCLUDES_LIST,SListView<TSharedPtr<FString>>)
+							.OnGenerateRow(this,&SKMGC_MagicNodeWidget::OnGenerateIncludes)
+							.ScrollbarVisibility(EVisibility::Hidden)
+							.SelectionMode(ESelectionMode::Single)
+							.ListItemsSource(&SourceIncludes)
+						]
+					]
+					+SVerticalBox::Slot().AutoHeight()
+					[
+						SNew(SHorizontalBox)
+						+SHorizontalBox::Slot().AutoWidth()
+						.VAlign(VAlign_Center).HAlign(HAlign_Left)
 						[
 							SNew(SBorder)
 							.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-							.BorderImage(FEditorStyle::GetBrush("Sequencer.Thumbnail.SectionHandle"))
+							.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
+							[
+								SNew(SButton)
+								.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedAddMacro)
+								.ButtonStyle(FEditorStyle::Get(),"NoBorder")
+								.VAlign(VAlign_Center).HAlign(HAlign_Center)
+								[
+									SNew(SImage)
+									.Image(FEditorStyle::GetBrush("Plus"))
+								]
+							]
+						]
+						+SHorizontalBox::Slot()
+						.VAlign(VAlign_Center).HAlign(HAlign_Fill)
+						[
+							SNew(SBorder)
+							.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+							.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
+							[
+								SNew(SButton)
+								.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedViewMacros)
+								.ButtonStyle(FEditorStyle::Get(),"NoBorder")
+								.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+								[
+									SNew(STextBlock).Margin(FMargin(5,0,0,0))
+									.Text(LOCTEXT("KMGC_MacrosPanel","[] Macros"))
+									.ColorAndOpacity(FSlateColor(FLinearColor(FColor(155,155,155,225))))
+								]
+							]
+						]
+					]
+					+SVerticalBox::Slot().AutoHeight()
+					[
+						SNew(SBorder)
+						.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+						.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
+						.Visibility(this,&SKMGC_MagicNodeWidget::GetMacrosPanelVisibility)
+						[
+							SAssignNew(MACROS_LIST,SListView<TSharedPtr<FString>>)
+							.OnGenerateRow(this,&SKMGC_MagicNodeWidget::OnGenerateMacros)
+							.ScrollbarVisibility(EVisibility::Hidden)
+							.SelectionMode(ESelectionMode::Single)
+							.ListItemsSource(&SourceMacros)
+						]
+					]
+				]
+				+SVerticalBox::Slot()
+				.FillHeight(1.f).Padding(10,5,10,5)
+				[
+					SNew(SHorizontalBox)
+					+SHorizontalBox::Slot()
+					.HAlign(HAlign_Left).AutoWidth()
+					[
+						SNew(SVerticalBox)
+						+SVerticalBox::Slot()
+						.AutoHeight().Padding(-32,0,0,4)
+						[
+							SNew(SButton)
+							.ButtonColorAndOpacity(this,&SKMGC_MagicNodeWidget::GetHeaderIconColor)
+							.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedHeaderIcon)
+							.VAlign(VAlign_Top).HAlign(HAlign_Left)
+							[
+								SNew(SImage)
+								.Image(FKMGC_NodeStyle::Get()->GetBrush(TEXT("KMGC.Toolbar.H")))
+							]
+						]
+						+SVerticalBox::Slot()
+						.AutoHeight().Padding(-32,0,0,4)
+						[
+							SNew(SButton)
+							.ButtonColorAndOpacity(this,&SKMGC_MagicNodeWidget::GetScriptIconColor)
+							.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedScriptIcon)
+							.VAlign(VAlign_Top).HAlign(HAlign_Left)
+							[
+								SNew(SImage)
+								.Image(FKMGC_NodeStyle::Get()->GetBrush(TEXT("KMGC.Toolbar.CPP")))
+							]
+						]
+						+SVerticalBox::Slot()
+						.AutoHeight().Padding(-32,0,0,4)
+						[
+							SNew(SButton)
+							.ButtonColorAndOpacity(this,&SKMGC_MagicNodeWidget::GetTypesIconColor)
+							.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedTypesIcon)
+							.VAlign(VAlign_Top).HAlign(HAlign_Left)
+							[
+								SNew(SImage)
+								.Image(FKMGC_NodeStyle::Get()->GetBrush(TEXT("KMGC.Toolbar.T")))
+							]
+						]
+					]
+					+SHorizontalBox::Slot()
+					.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+					[
+						SNew(SOverlay)
+						+SOverlay::Slot()
+						.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+						[
+							SNew(SBox)
+							.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+							.MinDesiredWidth(400.f).MinDesiredHeight(250.f)
+							.MaxDesiredHeight(1250.f).MaxDesiredWidth(1500.f)
 							[
 								SNew(SBorder)
 								.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-								.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
+								.BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
 								[
-									SNew(SVerticalBox)
-									+SVerticalBox::Slot().Padding(5)
-									.VAlign(VAlign_Top).HAlign(HAlign_Fill)
+									SAssignNew(VS_SCROLL_BOX,SScrollBox)
+									.OnUserScrolled(this,&SKMGC_MagicNodeWidget::OnVerticalScroll)
+									.Orientation(EOrientation::Orient_Vertical)
+									.ScrollBarThickness(FVector2D(8.f,8.f))
+									+SScrollBox::Slot()
 									[
 										SNew(SHorizontalBox)
 										+SHorizontalBox::Slot()
-										.Padding(0,2,5,0).AutoWidth()
-										.VAlign(VAlign_Top).HAlign(HAlign_Left)
+										.VAlign(VAlign_Fill).HAlign(HAlign_Left).AutoWidth()
 										[
-											SNew(SCheckBox)
-											.OnCheckStateChanged(this,&SKMGC_MagicNodeWidget::OnSearchSensitiveChanged)
-											.IsChecked(this,&SKMGC_MagicNodeWidget::IsSearchSensitive)
-											.Style(FEditorStyle::Get(),"ToggleButtonCheckbox")
-											.Content()
+											SNew(SBorder)
+											.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+											.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
 											[
-												SNew(STextBlock).Margin(2)
-												.Text(LOCTEXT("KMGC_SearchToggleCase","Aa"))
-												.ColorAndOpacity(FSlateColor(FLinearColor(FColor(255,255,255,225))))
-												.Font(FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.CodeBlockStyle").Font)
+												SAssignNew(LINE_COUNTER,SListView<TSharedPtr<FString>>)
+												.OnSelectionChanged(this,&SKMGC_MagicNodeWidget::OnSelectedLineCounterItem)
+												.OnGenerateRow(this,&SKMGC_MagicNodeWidget::OnGenerateLineCounter)
+												.ScrollbarVisibility(EVisibility::Collapsed)
+												.ListItemsSource(&LineCount).ItemHeight(14)
+												.SelectionMode(ESelectionMode::Single)
 											]
 										]
 										+SHorizontalBox::Slot()
 										.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
 										[
-											SAssignNew(SEARCH_TEXT,SEditableTextBox)
-											.Text(this,&SKMGC_MagicNodeWidget::GetSearchText)
-											.OnTextCommitted(this,&SKMGC_MagicNodeWidget::OnSearchTextComitted)
-											.OnTextChanged(this,&SKMGC_MagicNodeWidget::OnSearchTextChanged,ETextCommit::Default)
+											SAssignNew(SCRIPT_EDITOR,SKMGC_TextEditorWidget)
+											.OnTextChanged(this,&SKMGC_MagicNodeWidget::OnScriptTextChanged,ETextCommit::Default)
+											.OnTextCommitted(this,&SKMGC_MagicNodeWidget::OnScriptTextComitted)
+											.Visibility(this,&SKMGC_MagicNodeWidget::GetScriptPanelVisibility)
+											.OnInvokeSearch(this,&SKMGC_MagicNodeWidget::OnInvokedSearch)
+											.OnAutoComplete(this,&SKMGC_MagicNodeWidget::OnAutoComplete)
+											.IsEnabled(this,&SKMGC_MagicNodeWidget::HasScript)
+											.Text(this,&SKMGC_MagicNodeWidget::GetScriptText)
+											.VScrollBar(VS_SCROLL).HScrollBar(HSS_SCROLL)
+											.Marshaller(MARSHALL.ToSharedRef())
+											.CanKeyboardFocus(true)
+											.IsReadOnly(false)
 										]
 										+SHorizontalBox::Slot()
-										.Padding(5,2,0,0).AutoWidth()
-										.VAlign(VAlign_Top).HAlign(HAlign_Left)
+										.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
 										[
-											SNew(SButton)
-											.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedSearchGlass)
-											.ButtonStyle(FEditorStyle::Get(),"NoBorder")
-											[
-												SNew(SImage)
-												.Image(FEditorStyle::Get().GetBrush(TEXT("Symbols.SearchGlass")))
-											]
+											SAssignNew(HEADER_EDITOR,SKMGC_TextEditorWidget)
+											.OnTextChanged(this,&SKMGC_MagicNodeWidget::OnHeaderTextChanged,ETextCommit::Default)
+											.OnTextCommitted(this,&SKMGC_MagicNodeWidget::OnHeaderTextComitted)
+											.Visibility(this,&SKMGC_MagicNodeWidget::GetHeaderPanelVisibility)
+											.OnInvokeSearch(this,&SKMGC_MagicNodeWidget::OnInvokedSearch)
+											.OnAutoComplete(this,&SKMGC_MagicNodeWidget::OnAutoComplete)
+											.IsEnabled(this,&SKMGC_MagicNodeWidget::HasScript)
+											.Text(this,&SKMGC_MagicNodeWidget::GetHeaderText)
+											.VScrollBar(VS_SCROLL).HScrollBar(HSH_SCROLL)
+											.Marshaller(MARSHALL.ToSharedRef())
+											.CanKeyboardFocus(true)
+											.IsReadOnly(false)
+										]
+										+SHorizontalBox::Slot()
+										.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+										[
+											SAssignNew(TYPES_EDITOR,SKMGC_TextEditorWidget)
+											.OnTextChanged(this,&SKMGC_MagicNodeWidget::OnTypesTextChanged,ETextCommit::Default)
+											.OnTextCommitted(this,&SKMGC_MagicNodeWidget::OnTypesTextComitted)
+											.Visibility(this,&SKMGC_MagicNodeWidget::GetTypesPanelVisibility)
+											.OnInvokeSearch(this,&SKMGC_MagicNodeWidget::OnInvokedSearch)
+											.OnAutoComplete(this,&SKMGC_MagicNodeWidget::OnAutoComplete)
+											.IsEnabled(this,&SKMGC_MagicNodeWidget::HasScript)
+											.Text(this,&SKMGC_MagicNodeWidget::GetTypesText)
+											.VScrollBar(VS_SCROLL).HScrollBar(HSH_SCROLL)
+											.Marshaller(MARSHALL.ToSharedRef())
+											.CanKeyboardFocus(true)
+											.IsReadOnly(false)
 										]
 									]
-									+SVerticalBox::Slot().Padding(5)
-									.VAlign(VAlign_Top).HAlign(HAlign_Fill)
+								]
+							]
+						]
+						+SOverlay::Slot()
+						.VAlign(VAlign_Top).HAlign(HAlign_Right)
+						[
+							SNew(SBox)
+							.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+							.WidthOverride(250.f).HeightOverride(80.f)
+							.Visibility(this,&SKMGC_MagicNodeWidget::GetSearchBoxVisibility)
+							[
+								SNew(SBorder)
+								.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+								.BorderImage(FEditorStyle::GetBrush("Sequencer.Thumbnail.SectionHandle"))
+								[
+									SNew(SBorder)
+									.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+									.BorderImage(FEditorStyle::GetBrush("Menu.Background"))
 									[
-										SNew(SHorizontalBox)
-										+SHorizontalBox::Slot()
-										.Padding(5,0,5,0).AutoWidth()
-										.VAlign(VAlign_Top).HAlign(HAlign_Left)
+										SNew(SVerticalBox)
+										+SVerticalBox::Slot().Padding(5)
+										.VAlign(VAlign_Top).HAlign(HAlign_Fill)
 										[
-											SNew(SBox)
-											.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-											.WidthOverride(22.f).HeightOverride(22.f)
-										]
-										+SHorizontalBox::Slot()
-										.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-										[
-											SNew(SEditableTextBox)
-											.Text(this,&SKMGC_MagicNodeWidget::GetReplaceText)
-											.OnTextCommitted(this,&SKMGC_MagicNodeWidget::OnReplaceTextComitted)
-										]
-										+SHorizontalBox::Slot()
-										.Padding(5,0,0,5).AutoWidth()
-										.VAlign(VAlign_Top).HAlign(HAlign_Left)
-										[
-											SNew(SButton)
-											.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedReplaceSearch)
-											.ButtonStyle(FEditorStyle::Get(),"NoBorder")
+											SNew(SHorizontalBox)
+											+SHorizontalBox::Slot()
+											.Padding(0,2,5,0).AutoWidth()
+											.VAlign(VAlign_Top).HAlign(HAlign_Left)
 											[
-												SNew(STextBlock).Margin(2)
-												.Text(FText::FromString(FString(TEXT("\xf061"))))
-												.Font(FEditorStyle::Get().GetFontStyle("FontAwesome.11"))
-												.ColorAndOpacity(FSlateColor(FLinearColor(FColor(255,255,255,225))))
+												SNew(SCheckBox)
+												.OnCheckStateChanged(this,&SKMGC_MagicNodeWidget::OnSearchSensitiveChanged)
+												.IsChecked(this,&SKMGC_MagicNodeWidget::IsSearchSensitive)
+												.Style(FEditorStyle::Get(),"ToggleButtonCheckbox")
+												.Content()
+												[
+													SNew(STextBlock).Margin(2)
+													.Text(LOCTEXT("KMGC_SearchToggleCase","Aa"))
+													.ColorAndOpacity(FSlateColor(FLinearColor(FColor(255,255,255,225))))
+													.Font(FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.CodeBlockStyle").Font)
+												]
+											]
+											+SHorizontalBox::Slot()
+											.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+											[
+												SAssignNew(SEARCH_TEXT,SEditableTextBox)
+												.OnTextChanged(this,&SKMGC_MagicNodeWidget::OnSearchTextChanged,ETextCommit::Default)
+												.OnTextCommitted(this,&SKMGC_MagicNodeWidget::OnSearchTextComitted)
+												.Text(this,&SKMGC_MagicNodeWidget::GetSearchText)
+												.SelectAllTextWhenFocused(true)
+											]
+											+SHorizontalBox::Slot()
+											.Padding(5,2,0,0).AutoWidth()
+											.VAlign(VAlign_Top).HAlign(HAlign_Left)
+											[
+												SNew(SButton)
+												.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedSearchGlass)
+												.ButtonStyle(FEditorStyle::Get(),"NoBorder")
+												[
+													SNew(SImage)
+													.Image(FEditorStyle::Get().GetBrush(TEXT("Symbols.SearchGlass")))
+												]
+											]
+										]
+										+SVerticalBox::Slot().Padding(5)
+										.VAlign(VAlign_Top).HAlign(HAlign_Fill)
+										[
+											SNew(SHorizontalBox)
+											+SHorizontalBox::Slot()
+											.Padding(5,0,5,0).AutoWidth()
+											.VAlign(VAlign_Top).HAlign(HAlign_Left)
+											[
+												SNew(SBox)
+												.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+												.WidthOverride(22.f).HeightOverride(22.f)
+											]
+											+SHorizontalBox::Slot()
+											.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+											[
+												SNew(SEditableTextBox)
+												.SelectAllTextWhenFocused(true)
+												.Text(this,&SKMGC_MagicNodeWidget::GetReplaceText)
+												.OnTextCommitted(this,&SKMGC_MagicNodeWidget::OnReplaceTextComitted)
+											]
+											+SHorizontalBox::Slot()
+											.Padding(5,0,0,5).AutoWidth()
+											.VAlign(VAlign_Top).HAlign(HAlign_Left)
+											[
+												SNew(SButton)
+												.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedReplaceSearch)
+												.ButtonStyle(FEditorStyle::Get(),"NoBorder")
+												[
+													SNew(STextBlock).Margin(2)
+													.Text(FText::FromString(FString(TEXT("\xf061"))))
+													.Font(FEditorStyle::Get().GetFontStyle("FontAwesome.11"))
+													.ColorAndOpacity(FSlateColor(FLinearColor(FColor(255,255,255,225))))
+												]
 											]
 										]
 									]
@@ -459,151 +462,151 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 						]
 					]
 				]
-			]
-			+SVerticalBox::Slot()
-			.AutoHeight().Padding(10,0,10,0)
-			[
-				SNew(SVerticalBox)
-				+SVerticalBox::Slot().AutoHeight()
-				[
-					HSS_SCROLL.ToSharedRef()
-				]
-				+SVerticalBox::Slot().AutoHeight()
-				[
-					HSH_SCROLL.ToSharedRef()
-				]
-			]
-			+SVerticalBox::Slot()
-			.AutoHeight().Padding(10,0,10,5)
-			[
-				SNew(SBorder)
-				.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-				.BorderImage(FEditorStyle::GetBrush("Menu.Background"))
-				[
-					SNew(STextBlock).Margin(FMargin(5,0,0,0))
-					.Text(this,&SKMGC_MagicNodeWidget::GetCursorLocation)
-					.ColorAndOpacity(FSlateColor(FLinearColor(FColor(225,225,255,225))))
-				]
-			]
-			+SVerticalBox::Slot()
-			.AutoHeight().Padding(10,5,10,5)
-			[
-				SNew(SHorizontalBox)
-				.IsEnabled(this,&SKMGC_MagicNodeWidget::HasScript)
-				+SHorizontalBox::Slot().AutoWidth().Padding(0,0,5,0)
-				[
-					SNew(SButton)
-					.ToolTipText(LOCTEXT("KMGC_Compile","Generates node's native C++ classes to compile (C++ binary target)."))
-					.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedCompile)
-					.ButtonStyle(FEditorStyle::Get(),"FlatButton.DarkGrey")
-					.ForegroundColor(FSlateColor::UseForeground())
-					.VAlign(VAlign_Center).HAlign(HAlign_Left)
-					[
-						SNew(SImage)
-						.Image(this,&SKMGC_MagicNodeWidget::GetCompilerIcon)
-					]
-				]
-				+SHorizontalBox::Slot().AutoWidth().Padding(0,0,5,0)
-				[
-					SNew(SButton)
-					.ToolTipText(LOCTEXT("KMGC_ReloadScript","Rebuilds this node's pins (if there was a successful C++ compilation)."))
-					.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedReloadScript)
-					.ButtonStyle(FEditorStyle::Get(),"FlatButton.DarkGrey")
-					.ForegroundColor(FSlateColor::UseForeground())
-					.VAlign(VAlign_Center).HAlign(HAlign_Left)
-					[
-						SNew(SImage)
-						.Image(FKMGC_NodeStyle::Get()->GetBrush(TEXT("KMGC.Toolbar.ReloadScript")))
-					]
-				]
-				+SHorizontalBox::Slot().AutoWidth().Padding(0,0,5,0)
-				[
-					SNew(SButton)
-					.ToolTipText(LOCTEXT("KMGC_SaveScript","Saves this node's source code (NOT in compiled form)."))
-					.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedSaveScript)
-					.ButtonStyle(FEditorStyle::Get(),"FlatButton.DarkGrey")
-					.ForegroundColor(FSlateColor::UseForeground())
-					.VAlign(VAlign_Center).HAlign(HAlign_Left)
-					[
-						SNew(SImage)
-						.Image(FKMGC_NodeStyle::Get()->GetBrush(TEXT("KMGC.Toolbar.SaveScript")))
-					]
-				]
-				+SHorizontalBox::Slot().AutoWidth().Padding(0,0,5,0)
-				[
-					SNew(SButton)
-					.ToolTipText(LOCTEXT("KMGC_BuildDatabase","The auto-complete system will search for Unreal Types.\nThe list of types is HUGE and this process may take several minutes to complete!"))
-					.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedBuildDatabase)
-					.IsEnabled(this,&SKMGC_MagicNodeWidget::CanBuildDatabase)
-					.ButtonStyle(FEditorStyle::Get(),"FlatButton.DarkGrey")
-					.ForegroundColor(FSlateColor::UseForeground())
-					.VAlign(VAlign_Center).HAlign(HAlign_Left)
-					[
-						SNew(SImage)
-						.Image(FKMGC_NodeStyle::Get()->GetBrush(TEXT("KMGC.Toolbar.Database")))
-					]
-				]
-			]
-			+SVerticalBox::Slot()
-			.AutoHeight().Padding(10,0,10,5)
-			[
-				SNew(SBorder)
-				.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-				.BorderImage(FEditorStyle::GetBrush("Menu.Background"))
-				.Visibility(this,&SKMGC_MagicNodeWidget::GetDatabaseWarningVisibility)
+				+SVerticalBox::Slot()
+				.AutoHeight().Padding(10,0,10,0)
 				[
 					SNew(SVerticalBox)
-					+SVerticalBox::Slot()
-					.AutoHeight().Padding(0)
+					+SVerticalBox::Slot().AutoHeight()
+					[
+						HSS_SCROLL.ToSharedRef()
+					]
+					+SVerticalBox::Slot().AutoHeight()
+					[
+						HSH_SCROLL.ToSharedRef()
+					]
+				]
+				+SVerticalBox::Slot()
+				.AutoHeight().Padding(10,0,10,5)
+				[
+					SNew(SBorder)
+					.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+					.BorderImage(FEditorStyle::GetBrush("Menu.Background"))
 					[
 						SNew(STextBlock).Margin(FMargin(5,0,0,0))
-						.Text(this,&SKMGC_MagicNodeWidget::GetDatabaseLoadTooltip)
-						.ColorAndOpacity(FSlateColor(FLinearColor(1.f,0.45f,0.f)))
-					]
-					+SVerticalBox::Slot()
-					.AutoHeight().Padding(2,0,2,0)
-					[
-						SNew(SProgressBar)
-						.BorderPadding(FVector2D::ZeroVector)
-						.Percent(this,&SKMGC_MagicNodeWidget::GetDatabaseLoad)
-						.FillColorAndOpacity(FSlateColor(FLinearColor(0.5f,0.5f,1.f)))
+						.Text(this,&SKMGC_MagicNodeWidget::GetCursorLocation)
+						.ColorAndOpacity(FSlateColor(FLinearColor(FColor(225,225,255,225))))
 					]
 				]
-			]
-		]
-	]
-	+SHorizontalBox::Slot()
-	.HAlign(HAlign_Right).AutoWidth().Padding(FMargin(2.f,0.f,0.f,0.f))
-	[
-		SNew(SBorder)
-		.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-		.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
-		[
-			SNew(SBox)
-			.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-			.MinDesiredWidth(50.f).MinDesiredHeight(250.f)
-			.MaxDesiredHeight(1010.f).MaxDesiredWidth(250.f)
-			.Visibility(this,&SKMGC_MagicNodeWidget::GetAutoCompleteVisibility)
-			[
-				SAssignNew(AUTOCOMPLETE_BOX,SScrollBox)
-				.OnUserScrolled(this,&SKMGC_MagicNodeWidget::OnAutoCompleteScroll)
-				.Orientation(EOrientation::Orient_Vertical)
-				.ScrollBarThickness(FVector2D(8.f,8.f))
-				//
-				+SScrollBox::Slot()
-				.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+				+SVerticalBox::Slot()
+				.AutoHeight().Padding(10,5,10,5)
 				[
-					SAssignNew(AUTOCOMPLETE,SListView<TSharedPtr<FString>>)
-					.OnMouseButtonDoubleClick(this,&SKMGC_MagicNodeWidget::OnClickedAutoCompleteItem)
-					.OnSelectionChanged(this,&SKMGC_MagicNodeWidget::OnSelectedAutoCompleteItem)
-					.OnGenerateRow(this,&SKMGC_MagicNodeWidget::OnGenerateAutoComplete)
-					.ExternalScrollbar(AUTOCOMPLETE_SCROLL)
-					.SelectionMode(ESelectionMode::Single)
-					.ListItemsSource(&AutoCompleteList)
+					SNew(SHorizontalBox)
+					.IsEnabled(this,&SKMGC_MagicNodeWidget::HasScript)
+					+SHorizontalBox::Slot().AutoWidth().Padding(0,0,5,0)
+					[
+						SNew(SButton)
+						.ToolTipText(LOCTEXT("KMGC_Compile","Generates node's native C++ classes to compile (C++ binary target)."))
+						.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedCompile)
+						.IsEnabled(this,&SKMGC_MagicNodeWidget::CanCompileScript)
+						.ButtonStyle(FEditorStyle::Get(),"FlatButton.DarkGrey")
+						.ForegroundColor(FSlateColor::UseForeground())
+						.VAlign(VAlign_Center).HAlign(HAlign_Left)
+						[
+							SNew(SImage)
+							.Image(this,&SKMGC_MagicNodeWidget::GetCompilerIcon)
+						]
+					]
+					+SHorizontalBox::Slot().AutoWidth().Padding(0,0,5,0)
+					[
+						SNew(SButton)
+						.ToolTipText(LOCTEXT("KMGC_ReloadScript","Rebuilds this node's pins (if there was a successful C++ compilation)."))
+						.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedReloadScript)
+						.ButtonStyle(FEditorStyle::Get(),"FlatButton.DarkGrey")
+						.ForegroundColor(FSlateColor::UseForeground())
+						.VAlign(VAlign_Center).HAlign(HAlign_Left)
+						[
+							SNew(SImage)
+							.Image(FKMGC_NodeStyle::Get()->GetBrush(TEXT("KMGC.Toolbar.ReloadScript")))
+						]
+					]
+					+SHorizontalBox::Slot().AutoWidth().Padding(0,0,5,0)
+					[
+						SNew(SButton)
+						.ToolTipText(LOCTEXT("KMGC_SaveScript","Saves this node's source code (NOT in compiled form)."))
+						.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedSaveScript)
+						.ButtonStyle(FEditorStyle::Get(),"FlatButton.DarkGrey")
+						.ForegroundColor(FSlateColor::UseForeground())
+						.VAlign(VAlign_Center).HAlign(HAlign_Left)
+						[
+							SNew(SImage)
+							.Image(FKMGC_NodeStyle::Get()->GetBrush(TEXT("KMGC.Toolbar.SaveScript")))
+						]
+					]
+					+SHorizontalBox::Slot().AutoWidth().Padding(0,0,5,0)
+					[
+						SNew(SButton)
+						.ToolTipText(LOCTEXT("KMGC_BuildDatabase","The auto-complete system will search for Unreal Types.\nThe list of types is HUGE and this process may take several minutes to complete!"))
+						.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedBuildDatabase)
+						.IsEnabled(this,&SKMGC_MagicNodeWidget::CanBuildDatabase)
+						.ButtonStyle(FEditorStyle::Get(),"FlatButton.DarkGrey")
+						.ForegroundColor(FSlateColor::UseForeground())
+						.VAlign(VAlign_Center).HAlign(HAlign_Left)
+						[
+							SNew(SImage)
+							.Image(FKMGC_NodeStyle::Get()->GetBrush(TEXT("KMGC.Toolbar.Database")))
+						]
+					]
+				]
+				+SVerticalBox::Slot()
+				.AutoHeight().Padding(10,0,10,5)
+				[
+					SNew(SBorder)
+					.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+					.BorderImage(FEditorStyle::GetBrush("Menu.Background"))
+					.Visibility(this,&SKMGC_MagicNodeWidget::GetDatabaseWarningVisibility)
+					[
+						SNew(SVerticalBox)
+						+SVerticalBox::Slot()
+						.AutoHeight().Padding(0)
+						[
+							SNew(STextBlock).Margin(FMargin(5,0,0,0))
+							.Text(this,&SKMGC_MagicNodeWidget::GetDatabaseLoadTooltip)
+							.ColorAndOpacity(FSlateColor(FLinearColor(1.f,0.45f,0.f)))
+						]
+						+SVerticalBox::Slot()
+						.AutoHeight().Padding(2,0,2,0)
+						[
+							SNew(SProgressBar)
+							.BorderPadding(FVector2D::ZeroVector)
+							.Percent(this,&SKMGC_MagicNodeWidget::GetDatabaseLoad)
+							.FillColorAndOpacity(FSlateColor(FLinearColor(0.5f,0.5f,1.f)))
+						]
+					]
 				]
 			]
 		]
-	]
+		+SHorizontalBox::Slot()
+		.HAlign(HAlign_Right).AutoWidth().Padding(FMargin(2.f,0.f,0.f,0.f))
+		[
+			SNew(SBorder)
+			.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+			.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
+			[
+				SNew(SBox)
+				.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+				.MinDesiredWidth(50.f).MinDesiredHeight(250.f)
+				.MaxDesiredHeight(1250.f).MaxDesiredWidth(250.f)
+				.Visibility(this,&SKMGC_MagicNodeWidget::GetAutoCompleteVisibility)
+				[
+					SAssignNew(AUTOCOMPLETE_BOX,SScrollBox)
+					.OnUserScrolled(this,&SKMGC_MagicNodeWidget::OnAutoCompleteScroll)
+					.Orientation(EOrientation::Orient_Vertical)
+					.ScrollBarThickness(FVector2D(8.f,8.f))
+					//
+					+SScrollBox::Slot()
+					.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+					[
+						SAssignNew(AUTOCOMPLETE,SListView<TSharedPtr<FString>>)
+						.OnMouseButtonDoubleClick(this,&SKMGC_MagicNodeWidget::OnClickedAutoCompleteItem)
+						.OnSelectionChanged(this,&SKMGC_MagicNodeWidget::OnSelectedAutoCompleteItem)
+						.OnGenerateRow(this,&SKMGC_MagicNodeWidget::OnGenerateAutoComplete)
+						.ExternalScrollbar(AUTOCOMPLETE_SCROLL)
+						.SelectionMode(ESelectionMode::Single)
+						.ListItemsSource(&AutoCompleteList)
+					]
+				]
+			]
+		]
 	];
 	//
 	//
@@ -692,6 +695,12 @@ bool SKMGC_MagicNodeWidget::HasScript() const {
 	return (GetScriptObject()!=nullptr);
 }
 
+bool SKMGC_MagicNodeWidget::CanCompileScript() const {
+	if (!HasScript()) {return false;}
+	//
+	return (CastChecked<UKMGC_MagicNode>(GraphNode))->CanCompileProject();
+}
+
 bool SKMGC_MagicNodeWidget::CanBuildDatabase() const {
 	return (UMGC_SemanticDB::DBState==EDatabaseState::READY);
 }
@@ -757,7 +766,7 @@ void SKMGC_MagicNodeWidget::SetTypesText(const FText &NewText) {
 void SKMGC_MagicNodeWidget::SetLineCountList(const int32 Count) {
 	LineCount.Empty();
 	//
-	for (int32 I=1; I<=Count+1; I++) {
+	for (int32 I=1; I<=Count; I++) {
 		FString ID = FString::Printf(TEXT("%i"),I);
 		LineCount.Add(MakeShareable(new FString(ID)));
 	}///
@@ -863,6 +872,8 @@ FText SKMGC_MagicNodeWidget::GetSearchText() const {
 		return HEADER_EDITOR->GetSearchText();
 	} else if (Source==ESKMGC_Source::Script) {
 		return SCRIPT_EDITOR->GetSearchText();
+	} else if (Source==ESKMGC_Source::Types) {
+		return TYPES_EDITOR->GetSearchText();
 	}///
 	//
 	return FText();
@@ -1026,7 +1037,7 @@ const FSlateBrush* SKMGC_MagicNodeWidget::GetCompilerIcon() const {
 		return FEditorStyle::GetBrush(TEXT("Kismet.Status.Warning"));
 	} else if (GraphNode->ErrorType <= EMessageSeverity::Error) {
 		return FEditorStyle::GetBrush(TEXT("Kismet.Status.Error"));
-	} else {return FEditorStyle::GetBrush(TEXT("Kismet.Status.Good"));}
+	} else {return FKMGC_NodeStyle::Get()->GetBrush(TEXT("KMGC.Toolbar.Compile"));}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1063,7 +1074,6 @@ void SKMGC_MagicNodeWidget::OnScriptTextChanged(const FText &InText, ETextCommit
 		else {SCRIPT_EDITOR->AutoCompleteSubject(Subject);}
 	} else {
 		FString Subject = SCRIPT_EDITOR->ParseAutoCompleteWord(Lines);
-		//
 		if (SCRIPT_EDITOR->IsAutoComplete(Subject)) {
 			SCRIPT_EDITOR->AutoCompleteSubject(Subject);
 		} else {SCRIPT_EDITOR->AutoSuggest(Lines);}
@@ -1087,7 +1097,6 @@ void SKMGC_MagicNodeWidget::OnHeaderTextChanged(const FText &InText, ETextCommit
 		else {HEADER_EDITOR->AutoCompleteSubject(Subject);}
 	} else {
 		FString Subject = HEADER_EDITOR->ParseAutoCompleteWord(Lines);
-		//
 		if (HEADER_EDITOR->IsAutoComplete(Subject)) {
 			HEADER_EDITOR->AutoCompleteSubject(Subject);
 		} else {HEADER_EDITOR->AutoSuggest(Lines);}
@@ -1111,7 +1120,6 @@ void SKMGC_MagicNodeWidget::OnTypesTextChanged(const FText &InText, ETextCommit:
 		else {TYPES_EDITOR->AutoCompleteSubject(Subject);}
 	} else {
 		FString Subject = TYPES_EDITOR->ParseAutoCompleteWord(Lines);
-		//
 		if (TYPES_EDITOR->IsAutoComplete(Subject)) {
 			TYPES_EDITOR->AutoCompleteSubject(Subject);
 		} else {TYPES_EDITOR->AutoSuggest(Lines);}
@@ -1124,8 +1132,6 @@ void SKMGC_MagicNodeWidget::OnTypesTextChanged(const FText &InText, ETextCommit:
 
 void SKMGC_MagicNodeWidget::OnSearchTextChanged(const FText &InText, ETextCommit::Type CommitType) {
 	SearchText = InText.ToString();
-	//
-	OnClickedSearchGlass();
 }
 
 void SKMGC_MagicNodeWidget::OnScriptTextComitted(const FText &NewText, ETextCommit::Type CommitInfo) {
@@ -1179,7 +1185,8 @@ void SKMGC_MagicNodeWidget::OnMacroTextComitted(const FText &NewText, ETextCommi
 void SKMGC_MagicNodeWidget::OnSearchTextComitted(const FText &NewText, ETextCommit::Type CommitInfo) {
 	SearchText.Empty(); SearchText.Append(NewText.ToString());
 	//
-	OnClickedSearchGlass();
+	const ESearchCase::Type Case = (SensitiveSearch) ? ESearchCase::CaseSensitive : ESearchCase::IgnoreCase;
+	SCRIPT_EDITOR->BeginSearch(FText::FromString(SearchText),Case,false);
 }
 
 void SKMGC_MagicNodeWidget::OnReplaceTextComitted(const FText &NewText, ETextCommit::Type CommitInfo) {
@@ -1224,14 +1231,12 @@ void SKMGC_MagicNodeWidget::OnAdvanceAutoComplete(const FString &Search) {
 	if (Found.Num()>=1) {SetAutoCompleteList(Found);}
 }
 
-void SKMGC_MagicNodeWidget::OnInvokedSearch() {
+void SKMGC_MagicNodeWidget::OnInvokedSearch(bool DoSearch) {
 	ReplaceText = TEXT("Replace..");
-	ViewSearchBox = !ViewSearchBox;
+	ViewSearchBox = DoSearch;
 	//
 	if (ViewSearchBox) {
 		FSlateApplication::Get().SetKeyboardFocus(SEARCH_TEXT.ToSharedRef());
-		if (HEADER_EDITOR.IsValid()) {HEADER_EDITOR->SetSearchText(FText::FromString(HEADER_EDITOR->GetUnderCursor()));}
-		if (SCRIPT_EDITOR.IsValid()) {SCRIPT_EDITOR->SetSearchText(FText::FromString(SCRIPT_EDITOR->GetUnderCursor()));}
 	}///
 }
 
@@ -1331,6 +1336,9 @@ FReply SKMGC_MagicNodeWidget::OnClickedSearchGlass() {
 	} else if (Source==ESKMGC_Source::Script && SCRIPT_EDITOR.IsValid()) {
 		FSlateApplication::Get().SetKeyboardFocus(SCRIPT_EDITOR.ToSharedRef());
 		SCRIPT_EDITOR->BeginSearch(FText::FromString(SearchText),Case,false);
+	} else if (Source==ESKMGC_Source::Types && TYPES_EDITOR.IsValid()) {
+		FSlateApplication::Get().SetKeyboardFocus(TYPES_EDITOR.ToSharedRef());
+		TYPES_EDITOR->BeginSearch(FText::FromString(SearchText),Case,false);
 	}///
 	//
 	return FReply::Handled();
@@ -1364,26 +1372,31 @@ FReply SKMGC_MagicNodeWidget::OnClickedRemoveMacro(const FString Item) {
 
 void SKMGC_MagicNodeWidget::OnSearchSensitiveChanged(ECheckBoxState NewState) {
 	SensitiveSearch = (NewState==ECheckBoxState::Checked);
-	//
-	if (ReplaceText==TEXT("Replace..")) {ReplaceText=TEXT("");}
 }
 
 FReply SKMGC_MagicNodeWidget::OnClickedReplaceSearch() {
 	if (!HEADER_EDITOR.IsValid()||!SCRIPT_EDITOR.IsValid()) {return FReply::Unhandled();}
 	if (!IsScriptSourceEditable()) {return FReply::Unhandled();}
+	if (ReplaceText.IsEmpty()) {return FReply::Handled();}
+	if (SearchText.IsEmpty()) {return FReply::Handled();}
 	//
+	//
+	UMagicNodeScript* Script = (CastChecked<UKMGC_MagicNode>(GraphNode))->GetScriptObject();
 	if (Source==ESKMGC_Source::Header) {
-		FSlateApplication::Get().SetKeyboardFocus(HEADER_EDITOR.ToSharedRef());
-		//
-		HEADER_EDITOR->AdvanceSearch();
-		HEADER_EDITOR->DeleteSelectedText();
-		HEADER_EDITOR->InsertTextAtCursor(ReplaceText);
+		const FText DO = FText::FromString(Script->Source.Header.Replace(*SearchText,*ReplaceText));
+		HEADER_EDITOR->BeginEditTransaction();
+		 HEADER_EDITOR->SetText(DO);
+		HEADER_EDITOR->EndEditTransaction();
 	} else if (Source==ESKMGC_Source::Script) {
-		FSlateApplication::Get().SetKeyboardFocus(SCRIPT_EDITOR.ToSharedRef());
-		//
-		SCRIPT_EDITOR->AdvanceSearch();
-		SCRIPT_EDITOR->DeleteSelectedText();
-		SCRIPT_EDITOR->InsertTextAtCursor(ReplaceText);
+		const FText DO = FText::FromString(Script->Source.Script.Replace(*SearchText,*ReplaceText));
+		SCRIPT_EDITOR->BeginEditTransaction();
+		 SCRIPT_EDITOR->SetText(DO);
+		SCRIPT_EDITOR->EndEditTransaction();
+	} else if (Source==ESKMGC_Source::Types) {
+		const FText DO = FText::FromString(Script->Source.Types.Replace(*SearchText,*ReplaceText));
+		TYPES_EDITOR->BeginEditTransaction();
+		 TYPES_EDITOR->SetText(DO);
+		TYPES_EDITOR->EndEditTransaction();
 	}///
 	//
 	return FReply::Handled();
@@ -1442,6 +1455,12 @@ void SKMGC_MagicNodeWidget::OnSelectedLineCounterItem(TSharedPtr<FString>Item, E
 		FSlateApplication::Get().SetKeyboardFocus(HEADER_EDITOR.ToSharedRef());
 		HEADER_EDITOR->GoToLineColumn(LineID-1,0);
 		HEADER_EDITOR->SelectLine();
+	}///
+	//
+	if (Source==ESKMGC_Source::Types) {
+		FSlateApplication::Get().SetKeyboardFocus(TYPES_EDITOR.ToSharedRef());
+		TYPES_EDITOR->GoToLineColumn(LineID-1,0);
+		TYPES_EDITOR->SelectLine();
 	}///
 	//
 	LINE_COUNTER->SetItemSelection(Item,false);
