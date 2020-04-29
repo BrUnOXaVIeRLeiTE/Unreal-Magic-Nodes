@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
-///			Copyright 2019 (C) Bruno Xavier B. Leite
+///			Copyright 2020 (C) Bruno Xavier B. Leite
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -44,7 +44,7 @@ FName UKMGC_MagicNodeHelper::PN_Context(TEXT("Context"));
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 UKMGC_MagicNode::UKMGC_MagicNode(const FObjectInitializer &ObjectInitializer) : Super(ObjectInitializer) {
-	NodeTooltip = LOCTEXT("NodeTooltip","It's Magic.");
+	NodeTooltip = LOCTEXT("MGC_NodeTooltip","Magic Node (C++)");
 	//
 	KMGC_InitParser();
 }
@@ -74,7 +74,7 @@ FText UKMGC_MagicNode::GetNodeTitle(ENodeTitleType::Type TType) const {
 		FText Name = FText::FromString(SCaps);
 		FFormatNamedArguments Args; Args.Add(TEXT("Name"),Name);
 		//
-		CachedNodeTitle.SetCachedText(FText::Format(NSLOCTEXT("K2Node","KMGC_MagicNode_Title","Script :: {Name}"),Args),this);
+		CachedNodeTitle.SetCachedText(FText::Format(NSLOCTEXT("K2Node","KMGC_MagicNode_Title","(C++) :: {Name}"),Args),this);
 		Title = CachedNodeTitle;
 	}///
 	//
@@ -114,7 +114,6 @@ void UKMGC_MagicNode::AllocateDefaultPins() {
 	//
 	PIN_Script->bHidden = true;
 	PIN_Script->bAdvancedView = true;
-	///AdvancedPinDisplay = ENodeAdvancedPins::Hidden;
 	//
 	//
 	RuntimeScriptObject.Reset();

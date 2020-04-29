@@ -1,4 +1,4 @@
-/// Copyright 2019 (C) Bruno Xavier B. Leite
+/// Copyright 2020 (C) Bruno Xavier B. Leite
 
 using UnrealBuildTool;
 using System.IO;

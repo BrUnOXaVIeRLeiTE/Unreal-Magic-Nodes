@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
-///			Copyright 2019 (C) Bruno Xavier B. Leite
+///			Copyright 2020 (C) Bruno Xavier B. Leite
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -56,31 +56,31 @@ protected:
 	//
 	MAGICNODEKISMET_API const EMGC_CompilerResult CompileScriptClass(const FString &ScriptName, const FString &Header, const FString &Script, const FString &Types, const FString &ParentClass, const TArray<FString>&Includes, const TArray<FString>&Macros);
 protected:
-	static const bool BuildAutoComplete(const FClassDefinition &Definition, TArray<FString>&Results);
-	static const bool ParseHeaderIsland(const FString &Class, const FString &Island, FClassDefinition &ClassInfo, EAccessLevel &Level);
+	MAGICNODEKISMET_API static const bool BuildAutoComplete(const FClassDefinition &Definition, TArray<FString>&Results);
+	MAGICNODEKISMET_API static const bool ParseHeaderIsland(const FString &Class, const FString &Island, FClassDefinition &ClassInfo, EAccessLevel &Level);
 public:
-	static const FFunctionDefinition NOFunctionInfo;
-	static const FPropertyDefinition NOPropertyInfo;
-	static const FKeywordDefinition NOKeywordInfo;
-	static const FClassRedirector NORedirector;
-	static const FClassDefinition NOClassInfo;
+	MAGICNODEKISMET_API static const FFunctionDefinition NOFunctionInfo;
+	MAGICNODEKISMET_API static const FPropertyDefinition NOPropertyInfo;
+	MAGICNODEKISMET_API static const FKeywordDefinition NOKeywordInfo;
+	MAGICNODEKISMET_API static const FClassRedirector NORedirector;
+	MAGICNODEKISMET_API static const FClassDefinition NOClassInfo;
 	//
 	MAGICNODEKISMET_API static TMap<uint32,FString>Message;
 public:
-	static FClassDefinition &GetClassReference(const FString &Keyword);
-	static const FClassDefinition &GetClassInfo(const FString &Keyword);
-	static const FClassRedirector &GetClassRedirector(const FString &Keyword);
-	static const FClassDefinition &GetClassPointerInfo(const FString &Keyword);
+	MAGICNODEKISMET_API static FClassDefinition &GetClassReference(const FString &Keyword);
+	MAGICNODEKISMET_API static const FClassDefinition &GetClassInfo(const FString &Keyword);
+	MAGICNODEKISMET_API static const FClassRedirector &GetClassRedirector(const FString &Keyword);
+	MAGICNODEKISMET_API static const FClassDefinition &GetClassPointerInfo(const FString &Keyword);
 	//
-	static const FKeywordDefinition &GetKeywordInfo(const FString &Keyword);
-	static const FPropertyDefinition &GetPropertyInfo(const FString &Keyword);
-	static const FPropertyDefinition &GetPropertyInfo(const UClass* FromClass, const FString &Keyword);
-	static const FPropertyDefinition &GetPropertyInfo(const FString &FromClass, const FString &Keyword);
-	static const FPropertyDefinition &GetPropertyInfo(const UScriptStruct* FromStruct, const FString &Keyword);
+	MAGICNODEKISMET_API static const FKeywordDefinition &GetKeywordInfo(const FString &Keyword);
+	MAGICNODEKISMET_API static const FPropertyDefinition &GetPropertyInfo(const FString &Keyword);
+	MAGICNODEKISMET_API static const FPropertyDefinition &GetPropertyInfo(const UClass* FromClass, const FString &Keyword);
+	MAGICNODEKISMET_API static const FPropertyDefinition &GetPropertyInfo(const FString &FromClass, const FString &Keyword);
+	MAGICNODEKISMET_API static const FPropertyDefinition &GetPropertyInfo(const UScriptStruct* FromStruct, const FString &Keyword);
 	//
-	static const FFunctionDefinition &GetFunctionInfo(const FString &Keyword);
-	static const FFunctionDefinition &GetFunctionInfo(const UClass* FromClass, const FString &Keyword);
-	static const FFunctionDefinition &GetFunctionInfo(const FString &FromClass, const FString &Keyword);
+	MAGICNODEKISMET_API static const FFunctionDefinition &GetFunctionInfo(const FString &Keyword);
+	MAGICNODEKISMET_API static const FFunctionDefinition &GetFunctionInfo(const UClass* FromClass, const FString &Keyword);
+	MAGICNODEKISMET_API static const FFunctionDefinition &GetFunctionInfo(const FString &FromClass, const FString &Keyword);
 	//
 	MAGICNODEKISMET_API static const FSlateColor GetTypeColor(const FString &Notation);
 	MAGICNODEKISMET_API static const FSlateBrush* GetTypeIcon(const FString &Notation);

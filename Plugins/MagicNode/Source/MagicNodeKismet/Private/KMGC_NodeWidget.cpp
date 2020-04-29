@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
-///		Copyright 2019 (C) Bruno Xavier B. Leite
+///		Copyright 2020 (C) Bruno Xavier B. Leite
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1530,8 +1530,14 @@ void SKMGC_MagicNodeWidget::OnClickedAutoCompleteItem(TSharedPtr<FString>Item) {
 			Result.ReplaceInline(*SCRIPT_EDITOR->GetUnderCursor(),TEXT(""));
 			//
 			if (Item.Get()->Contains(TEXT("FUN|"))) {
-				SCRIPT_EDITOR->InsertTextAtCursor(Result+TEXT("()"));
-			} else {SCRIPT_EDITOR->InsertTextAtCursor(Result);}
+				SCRIPT_EDITOR->BeginEditTransaction();
+				 SCRIPT_EDITOR->InsertTextAtCursor(Result+TEXT("()"));
+				SCRIPT_EDITOR->EndEditTransaction();
+			} else {
+				SCRIPT_EDITOR->BeginEditTransaction();
+				 SCRIPT_EDITOR->InsertTextAtCursor(Result);
+				SCRIPT_EDITOR->EndEditTransaction();
+			}///
 		}///
 	} else if (AUTOCOMPLETE.IsValid()&&HEADER_EDITOR.IsValid()&&(Source==ESKMGC_Source::Header)) {
 		FSlateApplication::Get().SetKeyboardFocus(HEADER_EDITOR.ToSharedRef());
@@ -1543,8 +1549,14 @@ void SKMGC_MagicNodeWidget::OnClickedAutoCompleteItem(TSharedPtr<FString>Item) {
 			Result.ReplaceInline(*HEADER_EDITOR->GetUnderCursor(),TEXT(""));
 			//
 			if (Item.Get()->Contains(TEXT("FUN|"))) {
-				HEADER_EDITOR->InsertTextAtCursor(Result+TEXT("()"));
-			} else {HEADER_EDITOR->InsertTextAtCursor(Result);}
+				HEADER_EDITOR->BeginEditTransaction();
+				 HEADER_EDITOR->InsertTextAtCursor(Result+TEXT("()"));
+				HEADER_EDITOR->EndEditTransaction();
+			} else {
+				HEADER_EDITOR->BeginEditTransaction();
+				 HEADER_EDITOR->InsertTextAtCursor(Result);
+				HEADER_EDITOR->EndEditTransaction();
+			}///
 		}///
 	}///
 	//

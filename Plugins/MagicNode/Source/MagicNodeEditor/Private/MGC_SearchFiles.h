@@ -119,7 +119,22 @@ public:
 			}	}	}	}	}	}///
 		}///
 		//
-		if (SearchResultList.Num()>0) {RequestListRefresh=true;}
+		if (SearchResultList.Num()>0) {
+			SearchResultList.Sort(
+				[](const TSharedPtr<FSearchInfo>&SI, const TSharedPtr<FSearchInfo>&TI)
+				{
+					if (TI->MatchLine.StartsWith(TEXT("*"))) {return false;}
+					if (TI->MatchLine.StartsWith(TEXT("@"))) {return false;}
+					if (TI->MatchLine.StartsWith(TEXT("#"))) {return false;}
+					if (TI->MatchLine.StartsWith(TEXT("/*"))) {return false;}
+					if (TI->MatchLine.StartsWith(TEXT("//"))) {return false;}
+					//
+					return (TI->MatchLine > SI->MatchLine);
+				}///
+			);///
+			//
+			RequestListRefresh = true;
+		}///
 	}///
 	//
 	bool CanAbandon() {return true;}

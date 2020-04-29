@@ -221,25 +221,34 @@ void SMGC_SearchFiles::Tick(const FGeometry &AllottedGeometry, const double Curr
 		SearchLoad = 0.f;
 		RequestListRefresh = false;
 		//
-		if (SEARCH_RESULTS.IsValid()) {SEARCH_RESULTS->RequestListRefresh();}
+		if (SEARCH_RESULTS.IsValid()) {SEARCH_RESULTS->RebuildList();}
 	}///
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+
 TSharedRef<ITableRow> SMGC_SearchFiles::OnGenerateSearchResult(TSharedPtr<FSearchInfo>Item, const TSharedRef<STableViewBase>&OwnerTable) {
 	if (Item.IsValid()&&(TASK_SearchFiles::IsSourceFile(Item.Get()->MatchFilePath))) {
 		TSharedRef<SImage>ICON = SNew(SImage).Image(FEditorStyle::GetBrush(TEXT("Kismet.VariableList.TypeIcon")));
 		FSlateColor COLOR = FSlateColor(FLinearColor(0.0f,0.5f,1.f,1.f));
 		//
-		if (Item.Get()->MatchLine.StartsWith("UFUNCTION",ESearchCase::CaseSensitive)
-		||	Item.Get()->MatchLine.StartsWith("void ",ESearchCase::CaseSensitive)) {
+		if (Item.Get()->MatchLine.StartsWith(TEXT("UFUNCTION"),ESearchCase::CaseSensitive)
+		||	Item.Get()->MatchLine.StartsWith(TEXT("void"),ESearchCase::CaseSensitive)) {
 			COLOR = FSlateColor(FLinearColor(1.f,0.3f,0.f,1.f));
 			ICON = SNew(SImage).Image(FEditorStyle::GetBrush(TEXT("Kismet.AllClasses.FunctionIcon"))).ColorAndOpacity(COLOR);
 		}///
 		//
-		if (Item.Get()->MatchLine.StartsWith("//",ESearchCase::CaseSensitive)
-		||	Item.Get()->MatchLine.StartsWith("/*",ESearchCase::CaseSensitive)) {
+		if (Item.Get()->MatchLine.StartsWith(TEXT("class"),ESearchCase::CaseSensitive)
+		||	Item.Get()->MatchLine.StartsWith(TEXT("UCLASS"),ESearchCase::CaseSensitive)
+		||	Item.Get()->MatchLine.StartsWith(TEXT("public class"),ESearchCase::CaseSensitive)
+		||	Item.Get()->MatchLine.StartsWith(TEXT("private class"),ESearchCase::CaseSensitive)
+		||	Item.Get()->MatchLine.StartsWith(TEXT("protected class"),ESearchCase::CaseSensitive)) {
+			COLOR = FSlateColor(FLinearColor(1.f,0.55f,0.95f,1.f));
+			ICON = SNew(SImage).Image(FEditorStyle::GetBrush(TEXT("CodeView.ClassIcon")));
+		}///
+		//
+		if (Item.Get()->MatchLine.StartsWith(TEXT("//"),ESearchCase::CaseSensitive)
+		||	Item.Get()->MatchLine.StartsWith(TEXT("/*"),ESearchCase::CaseSensitive)) {
 			COLOR = FSlateColor(FLinearColor(0.f,0.9f,0.1f,1.f));
 		}///
 		//
@@ -340,7 +349,6 @@ FReply SMGC_SearchFiles::OnClickedCancelSearch() {
 	if (ASYNC_Search) {
 		ASYNC_Search->EnsureCompletion(false);
 		SearchState = ESearchState::COMPLETE;
-		/*RequestListRefresh = true;*/
 	}///
 	//
 	return FReply::Handled();
