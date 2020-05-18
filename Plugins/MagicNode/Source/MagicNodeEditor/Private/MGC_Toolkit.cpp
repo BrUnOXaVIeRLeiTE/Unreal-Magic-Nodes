@@ -7,9 +7,10 @@
 
 #include "MGC_Toolkit.h"
 
+#include "MGC_EditorStyle.h"
 #include "KMGC_KismetTypes.h"
 #include "KMGC_ScriptParser.h"
-#include "MagicNodeEditorStyle.h"
+
 #include "MagicNodeEditor_Shared.h"
 
 #include "Editor/KismetWidgets/Public/SSingleObjectDetailsPanel.h"
@@ -801,7 +802,7 @@ void FMGC_Toolkit::UpdateDatabaseReferences() {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void FMGC_Toolkit::RegisterTabSpawners(const TSharedRef<FTabManager>&TBManager) {
-	WorkspaceMenuCategory = TBManager->AddLocalWorkspaceMenuCategory(LOCTEXT("MGC_MagicNode_Workspace","MGC Code Editor"));
+	WorkspaceMenuCategory = TBManager->AddLocalWorkspaceMenuCategory(LOCTEXT("MGC_MagicNode_Workspace","Code Editor"));
 	auto WorkspaceMenuCategoryRef = WorkspaceMenuCategory.ToSharedRef();
 	FAssetEditorToolkit::RegisterTabSpawners(TBManager);
 	//
@@ -957,10 +958,6 @@ void FMGC_Toolkit::OnSearchCommitted(const FText &NewText, ETextCommit::Type Com
 void FMGC_Toolkit::OnProjectDirectoryChanged(const TArray<FFileChangeData> &Data) {
 	RefreshPluginSourceView();
 	RefreshProjectSourceView();
-	//
-	if (SourceTreeWidget.IsValid()) {
-		SourceTreeWidget->RebuildList();
-	}///
 }
 
 void FMGC_Toolkit::OnToolkitHostingStarted(const TSharedRef<IToolkit>&Toolkit) {}

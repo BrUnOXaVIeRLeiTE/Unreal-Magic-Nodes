@@ -578,7 +578,7 @@ UMGC_ClassDB::UMGC_ClassDB() {
 	ScriptCore.Add(TEXT("UObject"));
 	ScriptCore.Add(TEXT("UStruct"));
 	ScriptCore.Add(TEXT("UFunction"));
-	ScriptCore.Add(TEXT("UProperty"));
+	ScriptCore.Add(TEXT("FProperty"));
 	ScriptCore.Add(TEXT("UField"));
 	//
 	ScriptCore.Add(TEXT("Debug"));
@@ -1916,9 +1916,9 @@ void UMGC_SemanticDB::RegisterClassReflection(UClass* Class, FString Prefix) {
 	ClassDefinition.Tooltip = CMeta;
 	ClassDefinition.Hint = CHint;
 	//
-	for (TFieldIterator<UProperty>PIT(Class,EFieldIteratorFlags::IncludeSuper); PIT; ++PIT) {
+	for (TFieldIterator<FProperty>PIT(Class,EFieldIteratorFlags::IncludeSuper); PIT; ++PIT) {
 		FString PropName = PIT->GetName();
-		UProperty* Property = *PIT;
+		TFieldPath<FProperty>Property = *PIT;
 		//
 		const FString PHint = PIT->GetMetaData(TEXT("MgcHint"));
 		const FString PMeta = PIT->GetMetaData(TEXT("ToolTip"));
@@ -1933,67 +1933,67 @@ void UMGC_SemanticDB::RegisterClassReflection(UClass* Class, FString Prefix) {
 		//
 		if (PIT->HasAnyPropertyFlags(CPF_Protected)) {PropDefinition.Access=EAccessLevel::Protected;}
 		//
-		if (Property->IsA(UEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
-		if (Property->IsA(UClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
-		if (Property->IsA(UStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
-		if (Property->IsA(UObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
+		if (Property->IsA(FEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
+		if (Property->IsA(FClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
+		if (Property->IsA(FStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
+		if (Property->IsA(FObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
 		//
-		if (Property->IsA(UIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
-		if (Property->IsA(UBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
-		if (Property->IsA(UByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
-		if (Property->IsA(UNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
-		if (Property->IsA(UTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
-		if (Property->IsA(UStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
-		if (Property->IsA(UFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;} else
+		if (Property->IsA(FIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
+		if (Property->IsA(FBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
+		if (Property->IsA(FByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
+		if (Property->IsA(FNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
+		if (Property->IsA(FTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
+		if (Property->IsA(FStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
+		if (Property->IsA(FFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;} else
 		//
-		if (Property->IsA(UArrayProperty::StaticClass())) {
-			UArrayProperty* PArray = CastChecked<UArrayProperty>(Property);
+		if (Property->IsA(FArrayProperty::StaticClass())) {
+			TFieldPath<FArrayProperty>PArray = CastFieldChecked<FArrayProperty>(Property.Get());
 			PropDefinition.StackOf = EStack::Array;
 			//
-			if (PArray->Inner && PArray->Inner->IsA(UEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
-			if (PArray->Inner && PArray->Inner->IsA(UClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
-			if (PArray->Inner && PArray->Inner->IsA(UStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
-			if (PArray->Inner && PArray->Inner->IsA(UObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
+			if (PArray->Inner && PArray->Inner->IsA(FEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
+			if (PArray->Inner && PArray->Inner->IsA(FClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
+			if (PArray->Inner && PArray->Inner->IsA(FStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
+			if (PArray->Inner && PArray->Inner->IsA(FObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
 			//
-			if (PArray->Inner && PArray->Inner->IsA(UIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
-			if (PArray->Inner && PArray->Inner->IsA(UBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
-			if (PArray->Inner && PArray->Inner->IsA(UByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
-			if (PArray->Inner && PArray->Inner->IsA(UNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
-			if (PArray->Inner && PArray->Inner->IsA(UTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
-			if (PArray->Inner && PArray->Inner->IsA(UStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
-			if (PArray->Inner && PArray->Inner->IsA(UFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;}
-		} else if (Property->IsA(USetProperty::StaticClass())) {
-			USetProperty* PSet = CastChecked<USetProperty>(Property);
+			if (PArray->Inner && PArray->Inner->IsA(FIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
+			if (PArray->Inner && PArray->Inner->IsA(FBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
+			if (PArray->Inner && PArray->Inner->IsA(FByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
+			if (PArray->Inner && PArray->Inner->IsA(FNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
+			if (PArray->Inner && PArray->Inner->IsA(FTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
+			if (PArray->Inner && PArray->Inner->IsA(FStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
+			if (PArray->Inner && PArray->Inner->IsA(FFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;}
+		} else if (Property->IsA(FSetProperty::StaticClass())) {
+			TFieldPath<FSetProperty>PSet = CastFieldChecked<FSetProperty>(Property.Get());
 			PropDefinition.StackOf = EStack::Set;
 			//
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
 			//
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;}
-		} else if (Property->IsA(UMapProperty::StaticClass())) {
-			UMapProperty* PMap = CastChecked<UMapProperty>(Property);
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;}
+		} else if (Property->IsA(FMapProperty::StaticClass())) {
+			TFieldPath<FMapProperty>PMap = CastFieldChecked<FMapProperty>(Property.Get());
 			PropDefinition.StackOf = EStack::Map;
 			//
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
 			//
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;}
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;}
 		}///
 		//
 		ClassDefinition.Variables.Add(PropName,PropDefinition);
@@ -2023,8 +2023,8 @@ void UMGC_SemanticDB::RegisterClassReflection(UClass* Class, FString Prefix) {
 		if (FIT->HasAnyFunctionFlags(FUNC_Protected)) {FunDefinition.Access=EAccessLevel::Protected;}
 		//
 		FunDefinition.ReturnType = TEXT("void");
-		for (TFieldIterator<UProperty>PIT(Function); PIT&&(PIT->PropertyFlags&CPF_Parm); ++PIT) {
-			UProperty* Property = *PIT;
+		for (TFieldIterator<FProperty>PIT(Function); PIT&&(PIT->PropertyFlags&CPF_Parm); ++PIT) {
+			TFieldPath<FProperty>Property = *PIT;
 			//
 			FString Display = (PropertyToTypeName(Property)+FString(TEXT(" "))+Property->GetName());
 			if (Property->HasAnyPropertyFlags(CPF_ReturnParm)) {
@@ -2094,9 +2094,9 @@ void UMGC_SemanticDB::RegisterStructReflection(UStruct* Struct) {
 	StructDefinition.Hint = CHint;
 	//
 	//
-	for (TFieldIterator<UProperty>PIT(Struct,EFieldIteratorFlags::IncludeSuper); PIT; ++PIT) {
+	for (TFieldIterator<FProperty>PIT(Struct,EFieldIteratorFlags::IncludeSuper); PIT; ++PIT) {
 		FString PropName = PIT->GetName();
-		UProperty* Property = *PIT;
+		TFieldPath<FProperty>Property = *PIT;
 		//
 		const FString PHint = PIT->GetMetaData(TEXT("MgcHint"));
 		const FString PMeta = PIT->GetMetaData(TEXT("ToolTip"));
@@ -2111,67 +2111,67 @@ void UMGC_SemanticDB::RegisterStructReflection(UStruct* Struct) {
 		//
 		if (PIT->HasAnyPropertyFlags(CPF_Protected)) {PropDefinition.Access=EAccessLevel::Protected;}
 		//
-		if (Property->IsA(UEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
-		if (Property->IsA(UClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
-		if (Property->IsA(UStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
-		if (Property->IsA(UObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
+		if (Property->IsA(FEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
+		if (Property->IsA(FClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
+		if (Property->IsA(FStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
+		if (Property->IsA(FObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
 		//
-		if (Property->IsA(UIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
-		if (Property->IsA(UBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
-		if (Property->IsA(UByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
-		if (Property->IsA(UNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
-		if (Property->IsA(UTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
-		if (Property->IsA(UStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
-		if (Property->IsA(UFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;} else
+		if (Property->IsA(FIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
+		if (Property->IsA(FBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
+		if (Property->IsA(FByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
+		if (Property->IsA(FNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
+		if (Property->IsA(FTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
+		if (Property->IsA(FStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
+		if (Property->IsA(FFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;} else
 		//
-		if (Property->IsA(UArrayProperty::StaticClass())) {
-			UArrayProperty* PArray = CastChecked<UArrayProperty>(Property);
+		if (Property->IsA(FArrayProperty::StaticClass())) {
+			TFieldPath<FArrayProperty>PArray = CastFieldChecked<FArrayProperty>(Property.Get());
 			PropDefinition.StackOf = EStack::Array;
 			//
-			if (PArray->Inner && PArray->Inner->IsA(UEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
-			if (PArray->Inner && PArray->Inner->IsA(UClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
-			if (PArray->Inner && PArray->Inner->IsA(UStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
-			if (PArray->Inner && PArray->Inner->IsA(UObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
+			if (PArray->Inner && PArray->Inner->IsA(FEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
+			if (PArray->Inner && PArray->Inner->IsA(FClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
+			if (PArray->Inner && PArray->Inner->IsA(FStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
+			if (PArray->Inner && PArray->Inner->IsA(FObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
 			//
-			if (PArray->Inner && PArray->Inner->IsA(UIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
-			if (PArray->Inner && PArray->Inner->IsA(UBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
-			if (PArray->Inner && PArray->Inner->IsA(UByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
-			if (PArray->Inner && PArray->Inner->IsA(UNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
-			if (PArray->Inner && PArray->Inner->IsA(UTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
-			if (PArray->Inner && PArray->Inner->IsA(UStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
-			if (PArray->Inner && PArray->Inner->IsA(UFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;}
-		} else if (Property->IsA(USetProperty::StaticClass())) {
-			USetProperty* PSet = CastChecked<USetProperty>(Property);
+			if (PArray->Inner && PArray->Inner->IsA(FIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
+			if (PArray->Inner && PArray->Inner->IsA(FBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
+			if (PArray->Inner && PArray->Inner->IsA(FByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
+			if (PArray->Inner && PArray->Inner->IsA(FNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
+			if (PArray->Inner && PArray->Inner->IsA(FTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
+			if (PArray->Inner && PArray->Inner->IsA(FStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
+			if (PArray->Inner && PArray->Inner->IsA(FFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;}
+		} else if (Property->IsA(FSetProperty::StaticClass())) {
+			TFieldPath<FSetProperty>PSet = CastFieldChecked<FSetProperty>(Property.Get());
 			PropDefinition.StackOf = EStack::Set;
 			//
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
 			//
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
-			if (PSet->ElementProp && PSet->ElementProp->IsA(UFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;}
-		} else if (Property->IsA(UMapProperty::StaticClass())) {
-			UMapProperty* PMap = CastChecked<UMapProperty>(Property);
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
+			if (PSet->ElementProp && PSet->ElementProp->IsA(FFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;}
+		} else if (Property->IsA(FMapProperty::StaticClass())) {
+			TFieldPath<FMapProperty>PMap = CastFieldChecked<FMapProperty>(Property.Get());
 			PropDefinition.StackOf = EStack::Map;
 			//
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FEnumProperty::StaticClass())) {PropDefinition.TypeOf=EType::Enum;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FClassProperty::StaticClass())) {PropDefinition.TypeOf=EType::Class;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FStructProperty::StaticClass())) {PropDefinition.TypeOf=EType::Struct;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FObjectProperty::StaticClass())) {PropDefinition.TypeOf=EType::Object;} else
 			//
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
-			if (PMap->KeyProp && PMap->KeyProp->IsA(UFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;}
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FIntProperty::StaticClass())) {PropDefinition.TypeOf=EType::Int;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FBoolProperty::StaticClass())) {PropDefinition.TypeOf=EType::Bool;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FByteProperty::StaticClass())) {PropDefinition.TypeOf=EType::Byte;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FNameProperty::StaticClass())) {PropDefinition.TypeOf=EType::Name;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FTextProperty::StaticClass())) {PropDefinition.TypeOf=EType::Text;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FStrProperty::StaticClass())) {PropDefinition.TypeOf=EType::String;} else
+			if (PMap->KeyProp && PMap->KeyProp->IsA(FFloatProperty::StaticClass())) {PropDefinition.TypeOf=EType::Float;}
 		}///
 		//
 		StructDefinition.Variables.Add(PropName,PropDefinition);
@@ -2189,38 +2189,38 @@ void UMGC_SemanticDB::RegisterStructReflection(UStruct* Struct) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-FString UMGC_SemanticDB::PropertyToTypeName(UProperty* Property) {
+FString UMGC_SemanticDB::PropertyToTypeName(TFieldPath<FProperty>Property) {
 	FString PType = TEXT("<?>");
 	//
 	if (Property==nullptr) {return PType;}
 	//
-	if (Property->IsA(UBoolProperty::StaticClass())) {PType=TEXT("bool"); return PType;}
-	if (Property->IsA(UIntProperty::StaticClass())) {PType=TEXT("int32"); return PType;}
-	if (Property->IsA(UByteProperty::StaticClass())) {PType=TEXT("uint8"); return PType;}
-	if (Property->IsA(UFloatProperty::StaticClass())) {PType=TEXT("float"); return PType;}
+	if (Property->IsA(FBoolProperty::StaticClass())) {PType=TEXT("bool"); return PType;}
+	if (Property->IsA(FIntProperty::StaticClass())) {PType=TEXT("int32"); return PType;}
+	if (Property->IsA(FByteProperty::StaticClass())) {PType=TEXT("uint8"); return PType;}
+	if (Property->IsA(FFloatProperty::StaticClass())) {PType=TEXT("float"); return PType;}
 	//
-	if (Property->IsA(UNameProperty::StaticClass())) {PType=TEXT("FName"); return PType;}
-	if (Property->IsA(UTextProperty::StaticClass())) {PType=TEXT("FText"); return PType;}
-	if (Property->IsA(UStrProperty::StaticClass())) {PType=TEXT("FString"); return PType;}
+	if (Property->IsA(FNameProperty::StaticClass())) {PType=TEXT("FName"); return PType;}
+	if (Property->IsA(FTextProperty::StaticClass())) {PType=TEXT("FText"); return PType;}
+	if (Property->IsA(FStrProperty::StaticClass())) {PType=TEXT("FString"); return PType;}
 	//
-	if (Property->IsA(UEnumProperty::StaticClass())) {
+	if (Property->IsA(FEnumProperty::StaticClass())) {
 		PType = TEXT("enum");
 		//
-		UEnum* Enum = CastChecked<UEnumProperty>(Property)->GetEnum();
+		UEnum* Enum = CastFieldChecked<FEnumProperty>(Property.Get())->GetEnum();
 		PType = FString(TEXT("E"))+Enum->GetName();
 	return PType;}
 	//
-	if (Property->IsA(UClassProperty::StaticClass())) {
+	if (Property->IsA(FClassProperty::StaticClass())) {
 		PType = TEXT("class");
 		//
-		UClassProperty* PCLS = CastChecked<UClassProperty>(Property);
+		TFieldPath<FClassProperty>PCLS = CastFieldChecked<FClassProperty>(Property.Get());
 		auto CLS = PCLS->GetDefaultPropertyValue();
 		//
 		if (CLS!=nullptr) {PType=FString(TEXT("U"))+CLS->GetName();}
 	return PType;}
 	//
-	if (Property->IsA(UStructProperty::StaticClass())) {
-		UStructProperty* PStruct = CastChecked<UStructProperty>(Property);
+	if (Property->IsA(FStructProperty::StaticClass())) {
+		TFieldPath<FStructProperty>PStruct = CastFieldChecked<FStructProperty>(Property.Get());
 		PType = TEXT("struct");
 		//
 		if (PStruct->Struct==TBaseStructure<FColor>::Get()) {PType=TEXT("FColor"); return PType;}
@@ -2233,45 +2233,45 @@ FString UMGC_SemanticDB::PropertyToTypeName(UProperty* Property) {
 		PType = FString(TEXT("F"))+PStruct->Struct->GetName();
 	return PType;}
 	//
-	if (Property->IsA(UObjectProperty::StaticClass())) {
+	if (Property->IsA(FObjectProperty::StaticClass())) {
 		PType = TEXT("object");
 		//
-		UObjectProperty* POBJ = CastChecked<UObjectProperty>(Property);
+		TFieldPath<FObjectProperty>POBJ = CastFieldChecked<FObjectProperty>(Property.Get());
 		auto OBJ = POBJ->GetDefaultPropertyValue();
 		//
 		if (OBJ!=nullptr) {PType=FString(TEXT("U"))+OBJ->GetName();}
 	return PType;}
 	//
-	if (Property->IsA(USetProperty::StaticClass())) {
-		USetProperty* PSet = CastChecked<USetProperty>(Property);
+	if (Property->IsA(FSetProperty::StaticClass())) {
+		TFieldPath<FSetProperty>PSet = CastFieldChecked<FSetProperty>(Property.Get());
 		//
-		if (PSet->ElementProp && PSet->ElementProp->IsA(UIntProperty::StaticClass())) {PType=TEXT("TSet< int >"); return PType;}
-		if (PSet->ElementProp && PSet->ElementProp->IsA(UBoolProperty::StaticClass())) {PType=TEXT("TSet< bool >"); return PType;}
-		if (PSet->ElementProp && PSet->ElementProp->IsA(UByteProperty::StaticClass())) {PType=TEXT("TSet< uint8 >"); return PType;}
-		if (PSet->ElementProp && PSet->ElementProp->IsA(UFloatProperty::StaticClass())) {PType=TEXT("TSet< float >"); return PType;}
+		if (PSet->ElementProp && PSet->ElementProp->IsA(FIntProperty::StaticClass())) {PType=TEXT("TSet< int >"); return PType;}
+		if (PSet->ElementProp && PSet->ElementProp->IsA(FBoolProperty::StaticClass())) {PType=TEXT("TSet< bool >"); return PType;}
+		if (PSet->ElementProp && PSet->ElementProp->IsA(FByteProperty::StaticClass())) {PType=TEXT("TSet< uint8 >"); return PType;}
+		if (PSet->ElementProp && PSet->ElementProp->IsA(FFloatProperty::StaticClass())) {PType=TEXT("TSet< float >"); return PType;}
 		//
-		if (PSet->ElementProp && PSet->ElementProp->IsA(UNameProperty::StaticClass())) {PType=TEXT("TSet< FName >"); return PType;}
-		if (PSet->ElementProp && PSet->ElementProp->IsA(UTextProperty::StaticClass())) {PType=TEXT("TSet< FText >"); return PType;}
-		if (PSet->ElementProp && PSet->ElementProp->IsA(UStrProperty::StaticClass())) {PType=TEXT("TSet< FString >"); return PType;}
+		if (PSet->ElementProp && PSet->ElementProp->IsA(FNameProperty::StaticClass())) {PType=TEXT("TSet< FName >"); return PType;}
+		if (PSet->ElementProp && PSet->ElementProp->IsA(FTextProperty::StaticClass())) {PType=TEXT("TSet< FText >"); return PType;}
+		if (PSet->ElementProp && PSet->ElementProp->IsA(FStrProperty::StaticClass())) {PType=TEXT("TSet< FString >"); return PType;}
 		//
-		if (PSet->ElementProp && PSet->ElementProp->IsA(UEnumProperty::StaticClass())) {
+		if (PSet->ElementProp && PSet->ElementProp->IsA(FEnumProperty::StaticClass())) {
 			PType = TEXT("TSet< enum >");
 			//
-			UEnum* Enum = CastChecked<UEnumProperty>(PSet->ElementProp)->GetEnum();
+			UEnum* Enum = CastFieldChecked<FEnumProperty>(PSet->ElementProp)->GetEnum();
 			PType = FString(TEXT("E"))+Enum->GetName();
 		return PType;}
 		//
-		if (PSet->ElementProp && PSet->ElementProp->IsA(UClassProperty::StaticClass())) {
+		if (PSet->ElementProp && PSet->ElementProp->IsA(FClassProperty::StaticClass())) {
 			PType = TEXT("TSet< class >");
 			//
-			UClassProperty* PCLS = CastChecked<UClassProperty>(PSet->ElementProp);
+			TFieldPath<FClassProperty>PCLS = CastFieldChecked<FClassProperty>(PSet->ElementProp);
 			auto CLS = PCLS->GetDefaultPropertyValue();
 			//
 			if (CLS!=nullptr) {PType=FString(TEXT("U"))+CLS->GetName();}
 		return PType;}
 		//
-		if (PSet->ElementProp && PSet->ElementProp->IsA(UStructProperty::StaticClass())) {
-			UStructProperty* PStruct = CastChecked<UStructProperty>(PSet->ElementProp);
+		if (PSet->ElementProp && PSet->ElementProp->IsA(FStructProperty::StaticClass())) {
+			TFieldPath<FStructProperty>PStruct = CastFieldChecked<FStructProperty>(PSet->ElementProp);
 			PType = TEXT("TSet< struct >");
 			//
 			if (PStruct->Struct==TBaseStructure<FColor>::Get()) {PType=TEXT("TSet< FColor >"); return PType;}
@@ -2284,8 +2284,8 @@ FString UMGC_SemanticDB::PropertyToTypeName(UProperty* Property) {
 			PType = FString::Printf(TEXT("TSet< F%s >"),*PStruct->Struct->GetName());
 		return PType;}
 		//
-		if (PSet->ElementProp && PSet->ElementProp->IsA(UObjectProperty::StaticClass())) {
-			UObjectProperty* POBJ = CastChecked<UObjectProperty>(PSet->ElementProp);
+		if (PSet->ElementProp && PSet->ElementProp->IsA(FObjectProperty::StaticClass())) {
+			TFieldPath<FObjectProperty>POBJ = CastFieldChecked<FObjectProperty>(PSet->ElementProp);
 			PType = TEXT("TSet< object >");
 			//
 			auto OBJ = POBJ->GetDefaultPropertyValue();
@@ -2293,35 +2293,35 @@ FString UMGC_SemanticDB::PropertyToTypeName(UProperty* Property) {
 		return PType;}
 	}///
 	//
-	if (Property->IsA(UMapProperty::StaticClass())) {
-		UMapProperty* PMap = CastChecked<UMapProperty>(Property);
+	if (Property->IsA(FMapProperty::StaticClass())) {
+		TFieldPath<FMapProperty>PMap = CastFieldChecked<FMapProperty>(Property.Get());
 		//
-		if (PMap->KeyProp && PMap->KeyProp->IsA(UBoolProperty::StaticClass())) {PType=TEXT("TMap< bool, ... >"); return PType;}
-		if (PMap->KeyProp && PMap->KeyProp->IsA(UIntProperty::StaticClass())) {PType=TEXT("TMap< int32, ... >"); return PType;}
-		if (PMap->KeyProp && PMap->KeyProp->IsA(UByteProperty::StaticClass())) {PType=TEXT("TMap< uint8, ... >"); return PType;}
-		if (PMap->KeyProp && PMap->KeyProp->IsA(UFloatProperty::StaticClass())) {PType=TEXT("TMap< float, ... >"); return PType;}
+		if (PMap->KeyProp && PMap->KeyProp->IsA(FBoolProperty::StaticClass())) {PType=TEXT("TMap< bool, ... >"); return PType;}
+		if (PMap->KeyProp && PMap->KeyProp->IsA(FIntProperty::StaticClass())) {PType=TEXT("TMap< int32, ... >"); return PType;}
+		if (PMap->KeyProp && PMap->KeyProp->IsA(FByteProperty::StaticClass())) {PType=TEXT("TMap< uint8, ... >"); return PType;}
+		if (PMap->KeyProp && PMap->KeyProp->IsA(FFloatProperty::StaticClass())) {PType=TEXT("TMap< float, ... >"); return PType;}
 		//
-		if (PMap->KeyProp && PMap->KeyProp->IsA(UNameProperty::StaticClass())) {PType=TEXT("TMap< FName, ... >"); return PType;}
-		if (PMap->KeyProp && PMap->KeyProp->IsA(UTextProperty::StaticClass())) {PType=TEXT("TMap< FText, ... >"); return PType;}
-		if (PMap->KeyProp && PMap->KeyProp->IsA(UStrProperty::StaticClass())) {PType=TEXT("TMap< FString, ... >"); return PType;}
+		if (PMap->KeyProp && PMap->KeyProp->IsA(FNameProperty::StaticClass())) {PType=TEXT("TMap< FName, ... >"); return PType;}
+		if (PMap->KeyProp && PMap->KeyProp->IsA(FTextProperty::StaticClass())) {PType=TEXT("TMap< FText, ... >"); return PType;}
+		if (PMap->KeyProp && PMap->KeyProp->IsA(FStrProperty::StaticClass())) {PType=TEXT("TMap< FString, ... >"); return PType;}
 		//
-		if (PMap->KeyProp && PMap->KeyProp->IsA(UEnumProperty::StaticClass())) {
+		if (PMap->KeyProp && PMap->KeyProp->IsA(FEnumProperty::StaticClass())) {
 			PType = TEXT("TMap< enum, ... >");
 			//
-			UEnum* Enum = CastChecked<UEnumProperty>(PMap->KeyProp)->GetEnum();
+			UEnum* Enum = CastFieldChecked<FEnumProperty>(PMap->KeyProp)->GetEnum();
 			PType = FString(TEXT("E"))+Enum->GetName();
 		return PType;}
 		//
-		if (PMap->KeyProp && PMap->KeyProp->IsA(UClassProperty::StaticClass())) {
-			UClassProperty* PCLS = CastChecked<UClassProperty>(PMap->KeyProp);
+		if (PMap->KeyProp && PMap->KeyProp->IsA(FClassProperty::StaticClass())) {
+			TFieldPath<FClassProperty>PCLS = CastFieldChecked<FClassProperty>(PMap->KeyProp);
 			PType = TEXT("TMap< class, ... >");
 			//
 			auto CLS = PCLS->GetDefaultPropertyValue();
 			if (CLS!=nullptr) {PType=FString::Printf(TEXT("TMap< U%s, ... >"),*CLS->GetName());}
 		return PType;}
 		//
-		if (PMap->KeyProp && PMap->KeyProp->IsA(UStructProperty::StaticClass())) {
-			UStructProperty* PStruct = CastChecked<UStructProperty>(PMap->KeyProp);
+		if (PMap->KeyProp && PMap->KeyProp->IsA(FStructProperty::StaticClass())) {
+			TFieldPath<FStructProperty>PStruct = CastFieldChecked<FStructProperty>(PMap->KeyProp);
 			PType = TEXT("TMap< struct, ... >");
 			//
 			if (PStruct->Struct==TBaseStructure<FColor>::Get()) {PType=TEXT("TMap< FColor, ... >"); return PType;}
@@ -2334,8 +2334,8 @@ FString UMGC_SemanticDB::PropertyToTypeName(UProperty* Property) {
 			PType = FString::Printf(TEXT("TMap< F%s >"),*PStruct->Struct->GetName());
 		return PType;}
 		//
-		if (PMap->KeyProp && PMap->KeyProp->IsA(UObjectProperty::StaticClass())) {
-			UObjectProperty* POBJ = CastChecked<UObjectProperty>(PMap->KeyProp);
+		if (PMap->KeyProp && PMap->KeyProp->IsA(FObjectProperty::StaticClass())) {
+			TFieldPath<FObjectProperty>POBJ = CastFieldChecked<FObjectProperty>(PMap->KeyProp);
 			PType = TEXT("TMap< object, ... >");
 			//
 			auto OBJ = POBJ->GetDefaultPropertyValue();
@@ -2343,35 +2343,35 @@ FString UMGC_SemanticDB::PropertyToTypeName(UProperty* Property) {
 		return PType;}
 	}///
 	//
-	if (Property->IsA(UArrayProperty::StaticClass())) {
-		UArrayProperty* PArray = CastChecked<UArrayProperty>(Property);
+	if (Property->IsA(FArrayProperty::StaticClass())) {
+		TFieldPath<FArrayProperty>PArray = CastFieldChecked<FArrayProperty>(Property.Get());
 		//
-		if (PArray->Inner && PArray->Inner->IsA(UBoolProperty::StaticClass())) {PType=TEXT("TArray< bool >"); return PType;}
-		if (PArray->Inner && PArray->Inner->IsA(UIntProperty::StaticClass())) {PType=TEXT("TArray< int32 >"); return PType;}
-		if (PArray->Inner && PArray->Inner->IsA(UByteProperty::StaticClass())) {PType=TEXT("TArray< uint8 >"); return PType;}
-		if (PArray->Inner && PArray->Inner->IsA(UFloatProperty::StaticClass())) {PType=TEXT("TArray< float >"); return PType;}
+		if (PArray->Inner && PArray->Inner->IsA(FBoolProperty::StaticClass())) {PType=TEXT("TArray< bool >"); return PType;}
+		if (PArray->Inner && PArray->Inner->IsA(FIntProperty::StaticClass())) {PType=TEXT("TArray< int32 >"); return PType;}
+		if (PArray->Inner && PArray->Inner->IsA(FByteProperty::StaticClass())) {PType=TEXT("TArray< uint8 >"); return PType;}
+		if (PArray->Inner && PArray->Inner->IsA(FFloatProperty::StaticClass())) {PType=TEXT("TArray< float >"); return PType;}
 		//
-		if (PArray->Inner && PArray->Inner->IsA(UNameProperty::StaticClass())) {PType=TEXT("TArray< FName >"); return PType;}
-		if (PArray->Inner && PArray->Inner->IsA(UTextProperty::StaticClass())) {PType=TEXT("TArray< FText >"); return PType;}
-		if (PArray->Inner && PArray->Inner->IsA(UStrProperty::StaticClass())) {PType=TEXT("TArray< FString >"); return PType;}
+		if (PArray->Inner && PArray->Inner->IsA(FNameProperty::StaticClass())) {PType=TEXT("TArray< FName >"); return PType;}
+		if (PArray->Inner && PArray->Inner->IsA(FTextProperty::StaticClass())) {PType=TEXT("TArray< FText >"); return PType;}
+		if (PArray->Inner && PArray->Inner->IsA(FStrProperty::StaticClass())) {PType=TEXT("TArray< FString >"); return PType;}
 		//
-		if (PArray->Inner && PArray->Inner->IsA(UEnumProperty::StaticClass())) {
+		if (PArray->Inner && PArray->Inner->IsA(FEnumProperty::StaticClass())) {
 			PType = TEXT("TArray< enum >");
 			//
-			UEnum* Enum = CastChecked<UEnumProperty>(PArray->Inner)->GetEnum();
+			UEnum* Enum = CastFieldChecked<FEnumProperty>(PArray->Inner)->GetEnum();
 			PType = FString(TEXT("E"))+Enum->GetName();
 		return PType;}
 		//
-		if (PArray->Inner && PArray->Inner->IsA(UClassProperty::StaticClass())) {
-			UClassProperty* PCLS = CastChecked<UClassProperty>(PArray->Inner);
+		if (PArray->Inner && PArray->Inner->IsA(FClassProperty::StaticClass())) {
+			TFieldPath<FClassProperty>PCLS = CastFieldChecked<FClassProperty>(PArray->Inner);
 			PType = TEXT("TArray< class >");
 			//
 			auto CLS = PCLS->GetDefaultPropertyValue();
 			if (CLS!=nullptr) {PType=FString::Printf(TEXT("TArray< U%s, ... >"),*CLS->GetName());}
 		return PType;}
 		//
-		if (PArray->Inner && PArray->Inner->IsA(UStructProperty::StaticClass())) {
-			UStructProperty* PStruct = CastChecked<UStructProperty>(PArray->Inner);
+		if (PArray->Inner && PArray->Inner->IsA(FStructProperty::StaticClass())) {
+			TFieldPath<FStructProperty>PStruct = CastFieldChecked<FStructProperty>(PArray->Inner);
 			PType = TEXT("TArray< struct >");
 			//
 			if (PStruct->Struct==TBaseStructure<FColor>::Get()) {PType=TEXT("TArray< FColor >"); return PType;}
@@ -2384,8 +2384,8 @@ FString UMGC_SemanticDB::PropertyToTypeName(UProperty* Property) {
 			PType = FString::Printf(TEXT("TArray< F%s >"),*PStruct->Struct->GetName());
 		return PType;}
 		//
-		if (PArray->Inner && PArray->Inner->IsA(UObjectProperty::StaticClass())) {
-			UObjectProperty* POBJ = CastChecked<UObjectProperty>(PArray->Inner);
+		if (PArray->Inner && PArray->Inner->IsA(FObjectProperty::StaticClass())) {
+			TFieldPath<FObjectProperty>POBJ = CastFieldChecked<FObjectProperty>(PArray->Inner);
 			PType=TEXT("TArray< object >");
 			//
 			auto OBJ = POBJ->GetDefaultPropertyValue();

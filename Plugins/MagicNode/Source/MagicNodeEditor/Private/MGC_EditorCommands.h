@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "MagicNodeEditorStyle.h"
+#include "MGC_EditorStyle.h"
 
 #include "CoreMinimal.h"
 #include "Framework/Commands/Commands.h"

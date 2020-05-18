@@ -345,7 +345,7 @@ public:
 	void RegisterStructReflection(UStruct* Struct);
 	void RegisterClassReflection(UClass* Class, FString Prefix);
 	//
-	FString PropertyToTypeName(UProperty* Property);
+	FString PropertyToTypeName(TFieldPath<FProperty>Property);
 	//
 	//
 	/* MGC Default Scripting Keyword Definitions. */

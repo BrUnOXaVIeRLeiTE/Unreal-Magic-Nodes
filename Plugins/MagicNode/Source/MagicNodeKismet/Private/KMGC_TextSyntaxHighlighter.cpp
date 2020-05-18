@@ -163,16 +163,27 @@ void FKMGC_TextSyntaxHighlighter::ParseToken(const FString &Source, const FSynta
 			ParserState = EParserState::None;
 		} else if (ParserState==EParserState::None && TChar<WIDECHAR>::IsAlpha(Keyword[0])) {
 			for (const UMGC_KeywordDB* DB : SyntaxTextStyle.KeywordDB) {
-				if (DB->ScriptCore.Contains(Keyword)||DB->Extensions.Contains(Keyword)) {
-					Info.Name = TEXT("KMGC.SyntaxHighlight.Keyword");
-					TextStyle = SyntaxTextStyle.KeywordTextStyle;
+				if (const FString*F=DB->ScriptCore.Find(Keyword)) {
+					if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
+						Info.Name = TEXT("KMGC.SyntaxHighlight.Keyword");
+						TextStyle = SyntaxTextStyle.KeywordTextStyle;
+					}///
+				break;}
+				//
+				if (const FString*F=DB->Extensions.Find(Keyword)) {
+					if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
+						Info.Name = TEXT("KMGC.SyntaxHighlight.Keyword");
+						TextStyle = SyntaxTextStyle.KeywordTextStyle;
+					}///
 				break;}
 			}///
 			//
 			for (const UMGC_ClassDB* DB : SyntaxTextStyle.ClassDB) {
-				if (DB->ScriptTypes.Contains(Keyword)) {
-					Info.Name = TEXT("KMGC.SyntaxHighlight.Type");
-					TextStyle = SyntaxTextStyle.TypeTextStyle;
+				if (const FString*F=DB->ScriptTypes.Find(Keyword)) {
+					if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
+						Info.Name = TEXT("KMGC.SyntaxHighlight.Type");
+						TextStyle = SyntaxTextStyle.TypeTextStyle;
+					}///
 				break;}
 			}///
 			//
@@ -189,9 +200,11 @@ void FKMGC_TextSyntaxHighlighter::ParseToken(const FString &Source, const FSynta
 				TextStyle = SyntaxTextStyle.IllegalTextStyle;
 			} else {
 				for (const UMGC_KeywordDB* DB : SyntaxTextStyle.KeywordDB) {
-					if (DB->Operators.Contains(Keyword)) {
-						Info.Name = TEXT("KMGC.SyntaxHighlight.Operator");
-						TextStyle = SyntaxTextStyle.OperatorTextStyle;
+					if (const FString*F=DB->Operators.Find(Keyword)) {
+						if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
+							Info.Name = TEXT("KMGC.SyntaxHighlight.Operator");
+							TextStyle = SyntaxTextStyle.OperatorTextStyle;
+						}///
 					break;}
 				}///
 			}///
@@ -206,16 +219,27 @@ void FKMGC_TextSyntaxHighlighter::ParseToken(const FString &Source, const FSynta
 		TextStyle = SyntaxTextStyle.NumberTextStyle;
 	} else if (ParserState==EParserState::None) {
 		for (const UMGC_SemanticDB* DB : SyntaxTextStyle.SemanticDB) {
-			if (DB->ClassRedirectors.Contains(Keyword)) {
-				Info.Name = TEXT("KMGC.SyntaxHighlight.Variable");
-				TextStyle = SyntaxTextStyle.VariableTextStyle;
+			for (auto IT=DB->ClassRedirectors.CreateConstIterator(); IT; ++IT) {
+				if (IT->Key.Equals(Keyword,ESearchCase::CaseSensitive)) {
+					Info.Name = TEXT("KMGC.SyntaxHighlight.Variable");
+					TextStyle = SyntaxTextStyle.VariableTextStyle;
+				}///
 			break;}
 		}///
 		//
 		for (const UMGC_FunctionDB* DB : SyntaxTextStyle.FunctionDB) {
-			if (DB->ScriptCore.Contains(Keyword)||DB->Extensions.Contains(Keyword)) {
-				Info.Name = TEXT("KMGC.SyntaxHighlight.Function");
-				TextStyle = SyntaxTextStyle.FunctionTextStyle;
+			if (const FString*F=DB->ScriptCore.Find(Keyword)) {
+				if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
+					Info.Name = TEXT("KMGC.SyntaxHighlight.Function");
+					TextStyle = SyntaxTextStyle.FunctionTextStyle;
+				}///
+			break;}
+			//
+			if (const FString*F=DB->Extensions.Find(Keyword)) {
+				if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
+					Info.Name = TEXT("KMGC.SyntaxHighlight.Function");
+					TextStyle = SyntaxTextStyle.FunctionTextStyle;
+				}///
 			break;}
 		}///
 		//
@@ -225,30 +249,52 @@ void FKMGC_TextSyntaxHighlighter::ParseToken(const FString &Source, const FSynta
 				Keyword.ParseIntoArray(SubTokens,TEXT("."));
 				//
 				for (const FString &SubToken : SubTokens) {
-					if (DB->ScriptCore.Contains(SubToken)||DB->Extensions.Contains(SubToken)) {
-						Info.Name = TEXT("KMGC.SyntaxHighlight.Function");
-						TextStyle = SyntaxTextStyle.FunctionTextStyle;
+					if (const FString*F=DB->ScriptCore.Find(SubToken)) {
+						if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
+							Info.Name = TEXT("KMGC.SyntaxHighlight.Function");
+							TextStyle = SyntaxTextStyle.FunctionTextStyle;
+						}///
+					break;}
+					//
+					if (const FString*F=DB->Extensions.Find(SubToken)) {
+						if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
+							Info.Name = TEXT("KMGC.SyntaxHighlight.Function");
+							TextStyle = SyntaxTextStyle.FunctionTextStyle;
+						}///
 					break;}
 				}///
 			} else {
-				if (DB->ScriptCore.Contains(Keyword)||DB->Extensions.Contains(Keyword)) {
-					Info.Name = TEXT("KMGC.SyntaxHighlight.Class");
-					TextStyle = SyntaxTextStyle.ClassTextStyle;
+				if (const FString*F=DB->ScriptCore.Find(Keyword)) {
+					if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
+						Info.Name = TEXT("KMGC.SyntaxHighlight.Class");
+						TextStyle = SyntaxTextStyle.ClassTextStyle;
+					}///
+				break;}
+				//
+				if (const FString*F=DB->Extensions.Find(Keyword)) {
+					if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
+						Info.Name = TEXT("KMGC.SyntaxHighlight.Class");
+						TextStyle = SyntaxTextStyle.ClassTextStyle;
+					}///
 				break;}
 			}///
 		}///
 		//
 		for (const UMGC_ClassDB* DB : SyntaxTextStyle.ClassDB) {
-			if (DB->ScriptTypes.Contains(Keyword)) {
-				Info.Name = TEXT("KMGC.SyntaxHighlight.Type");
-				TextStyle = SyntaxTextStyle.TypeTextStyle;
+			if (const FString*F=DB->ScriptTypes.Find(Keyword)) {
+				if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
+					Info.Name = TEXT("KMGC.SyntaxHighlight.Type");
+					TextStyle = SyntaxTextStyle.TypeTextStyle;
+				}///
 			break;}
 		}///
 		//
 		for (const UMGC_KeywordDB* DB : SyntaxTextStyle.KeywordDB) {
-			if (DB->Macros.Contains(Keyword)) {
-				Info.Name = TEXT("KMGC.SyntaxHighlight.Macro");
-				TextStyle = SyntaxTextStyle.MacroTextStyle;
+			if (const FString*F=DB->Macros.Find(Keyword)) {
+				if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
+					Info.Name = TEXT("KMGC.SyntaxHighlight.Macro");
+					TextStyle = SyntaxTextStyle.MacroTextStyle;
+				}///
 			break;}
 		}///
 	}///

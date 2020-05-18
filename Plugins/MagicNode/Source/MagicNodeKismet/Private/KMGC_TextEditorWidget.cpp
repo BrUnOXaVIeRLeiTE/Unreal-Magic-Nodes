@@ -697,7 +697,8 @@ void SKMGC_TextEditorWidget::AutoSuggest(const TArray<FString>&Lines) {
 		//
 		for (auto &Suggestion : SuggestionResults) {
 			const float Width = FontMeasure->Measure(Suggestion,FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.CodeBlockStyle").Font).X + MAX_SUGGESTIONS;
-			if (Width>CompletionBoxSize.X) {CompletionBoxSize.X=Width;}
+			if (CompletionBoxSize.X<MIN_BOX_SIZE){CompletionBoxSize.X=MIN_BOX_SIZE;}
+			if (Width>CompletionBoxSize.X){CompletionBoxSize.X=Width;}
 		}///
 		//
 		if (SuggestPicked>SuggestionResults.Num()-1) {

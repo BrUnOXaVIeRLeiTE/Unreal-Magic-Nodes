@@ -116,6 +116,18 @@ void SMGC_CodeEditorCore::Construct(const FArguments &InArgs, UMagicNodeScript* 
 				]
 			]
 			+SVerticalBox::Slot()
+			.AutoHeight().Padding(0,5,0,0)
+			[
+				SNew(SBorder)
+				.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+				.BorderImage(FEditorStyle::GetBrush("Menu.Background"))
+				[
+					SNew(STextBlock).Margin(FMargin(5,0,0,0))
+					.Text(this,&SMGC_CodeEditorCore::GetCursorLocation)
+					.ColorAndOpacity(FSlateColor(FLinearColor(FColor(225,225,255,225))))
+				]
+			]
+			+SVerticalBox::Slot()
 			.AutoHeight().Padding(0,4,2,0)
 			[
 				SNew(SBorder)
@@ -285,19 +297,7 @@ void SMGC_CodeEditorCore::Construct(const FArguments &InArgs, UMagicNodeScript* 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SMGC_CodeEditorCore::Tick(const FGeometry &AllottedGeometry, const double CurrentTime, const float DeltaTime) {
-	if (UMGC_SemanticDB::DBState==EDatabaseState::ASYNCLOADING) {
-		RequestedUpdateDB = true;
-		//
-		if (DatabaseLoad>=1.f) {
-			DatabaseLoad = 0.f;
-		} else {DatabaseLoad+=0.05f;}
-	} else if (RequestedUpdateDB) {
-		UpdateDatabaseReferences();
-		RequestedUpdateDB = false;
-		DatabaseLoad = 0.f;
-		//
-		Invalidate(EInvalidateWidgetReason::Layout);
-	}///
+	//
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -350,6 +350,12 @@ FText SMGC_CodeEditorCore::GetSearchText() const {
 
 FText SMGC_CodeEditorCore::GetReplaceText() const {
 	return FText::FromString(ReplaceText);
+}
+
+FText SMGC_CodeEditorCore::GetCursorLocation() const {
+	if (!SCRIPT_EDITOR.IsValid()) {return FText();}
+	//
+	return FText::FromString(FString::Printf(TEXT("Ln: %i  |  Col: %i"),SCRIPT_EDITOR->GetCursorLocation().GetLineIndex()+1,SCRIPT_EDITOR->GetCursorLocation().GetOffset()+1));
 }
 
 void SMGC_CodeEditorCore::SetLineCountList(const int32 Count) {

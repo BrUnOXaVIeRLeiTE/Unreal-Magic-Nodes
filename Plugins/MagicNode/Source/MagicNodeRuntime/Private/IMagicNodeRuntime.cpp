@@ -20,11 +20,11 @@ class FMagicNodeRuntime : public IMagicNodeRuntime {
 public:
 	virtual void StartupModule() override {
 		FAssetRegistryModule &AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
-		TArray<FAssetData>NodeData; AssetRegistry.Get().GetAssetsByClass(UMagicNode::StaticClass()->GetFName(),NodeData);
+		TArray<FAssetData>NodeData; AssetRegistry.Get().GetAssetsByClass(UMagicNode::StaticClass()->GetFName(),NodeData,true);
 		for (FAssetData Data : NodeData) {Data.GetAsset();}
 		//
 		#if WITH_EDITOR
-		TArray<FAssetData>ScriptData; AssetRegistry.Get().GetAssetsByClass(UMagicNodeScript::StaticClass()->GetFName(),ScriptData);
+		TArray<FAssetData>ScriptData; AssetRegistry.Get().GetAssetsByClass(UMagicNodeScript::StaticClass()->GetFName(),ScriptData,true);
 		for (FAssetData Data : ScriptData) {Data.GetAsset();}
 		#endif
 	}///

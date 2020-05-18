@@ -9,12 +9,12 @@
 
 #include "MGC_Toolkit.h"
 #include "MGC_SearchFiles.h"
+#include "MGC_EditorStyle.h"
 #include "MGC_CodeEditorCore.h"
+#include "MGC_EditorCommands.h"
 
 #include "MagicNodeEditor.h"
-#include "MagicNodeEditorStyle.h"
 #include "MagicNodeEditor_Shared.h"
-#include "MagicNodeEditorCommands.h"
 
 #include "Developer/AssetTools/Public/IAssetTools.h"
 
@@ -25,9 +25,12 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void FMagicNodeEditor::StartupModule() {
-	ToolBarExtensibilityManager = MakeShareable(new FExtensibilityManager);
+	FMagicNodeEditorStyle::Initialize();
+	FMagicNodeEditorCommands::Register();
+	//
 	//
 	IAssetTools &AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+	FLevelEditorModule &LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 	SY_AssetCategory = AssetTools.RegisterAdvancedAssetCategory(FName(TEXT("Synaptech")),LOCTEXT("SynaptechCategory","Synaptech"));
 	//
 	{
@@ -35,14 +38,13 @@ void FMagicNodeEditor::StartupModule() {
 		AssetTools.RegisterAssetTypeActions(ACT_MGC);
 	}
 	//
-	FMagicNodeEditorStyle::Initialize();
-	FMagicNodeEditorCommands::Register();
 	//
-	MenuExtender = MakeShareable(new FExtender());
-	MenuExtender->AddMenuExtension("FileProject",EExtensionHook::After,TSharedPtr<FUICommandList>(),FMenuExtensionDelegate::CreateStatic(&FMagicNodeEditor::ExtendMenu));
+	ToolBarExtensibilityManager = MakeShareable(new FExtensibilityManager);
 	//
-	FLevelEditorModule &LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
-	LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(MenuExtender);
+	MainMenuExtender = MakeShareable(new FExtender());
+	MainMenuExtender->AddMenuExtension("FileProject",EExtensionHook::After,TSharedPtr<FUICommandList>(),FMenuExtensionDelegate::CreateStatic(&FMagicNodeEditor::ExtendMainMenu));
+	//
+	LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(MainMenuExtender);
 	//
 	//
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(TABSV,FOnSpawnTab::CreateRaw(this,&FMagicNodeEditor::OnSpawnSourceCodeViewerTAB))
@@ -73,7 +75,7 @@ void FMagicNodeEditor::ShutdownModule() {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void FMagicNodeEditor::ExtendMenu(FMenuBuilder &MenuBuilder) {
+void FMagicNodeEditor::ExtendMainMenu(FMenuBuilder &MenuBuilder) {
 	MenuBuilder.AddMenuSeparator();
 	//
 	MenuBuilder.AddMenuEntry (

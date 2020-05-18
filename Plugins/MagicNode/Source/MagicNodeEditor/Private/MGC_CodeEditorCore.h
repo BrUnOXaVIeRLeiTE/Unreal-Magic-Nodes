@@ -114,6 +114,7 @@ public:
 	FText GetScriptText() const;
 	FText GetSearchText() const;
 	FText GetReplaceText() const;
+	FText GetCursorLocation() const;
 	//
 	void SetLineCountList(const int32 Count);
 	void SetScriptText(const FText &NewText);

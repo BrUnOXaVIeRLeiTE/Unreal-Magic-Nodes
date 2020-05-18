@@ -476,7 +476,7 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 					]
 				]
 				+SVerticalBox::Slot()
-				.AutoHeight().Padding(10,0,10,5)
+				.AutoHeight().Padding(10,-5,10,5)
 				[
 					SNew(SBorder)
 					.VAlign(VAlign_Fill).HAlign(HAlign_Fill)

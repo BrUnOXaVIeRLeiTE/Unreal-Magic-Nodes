@@ -92,7 +92,8 @@ void FKMGC_NodeStyle::Initialize() {
 	{
 		StyleSet->Set("KMGC.CodeBlockStyle",TBS_CodeStyle);
 		//
-		StyleSet->Set("KMGC.SyntaxHighlight.Processor",FTextBlockStyle(TBS_CodeStyle).SetColorAndOpacity(FLinearColor(FColor(115,115,115,255))));
+		StyleSet->Set("KMGC.SyntaxHighlight.Processor",FTextBlockStyle(TBS_CodeStyle).SetColorAndOpacity(FLinearColor(FColor(125,125,125,255))));
+		StyleSet->Set("KMGC.SyntaxHighlight.Container",FTextBlockStyle(TBS_CodeStyle).SetColorAndOpacity(FLinearColor(FColor(125,235,185,255))));
 		StyleSet->Set("KMGC.SyntaxHighlight.Variable",FTextBlockStyle(TBS_CodeStyle).SetColorAndOpacity(FLinearColor(FColor(255,225,155,255))));
 		StyleSet->Set("KMGC.SyntaxHighlight.Operator",FTextBlockStyle(TBS_CodeStyle).SetColorAndOpacity(FLinearColor(FColor(95,255,245,255))));
 		StyleSet->Set("KMGC.SyntaxHighlight.Normal",FTextBlockStyle(TBS_CodeStyle).SetColorAndOpacity(FLinearColor(FColor(255,235,195,255))));

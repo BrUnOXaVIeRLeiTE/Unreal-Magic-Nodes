@@ -37,7 +37,7 @@ class IMagicNodeEditor : public IModuleInterface {
 public:
 	static inline IMagicNodeEditor &Get() {return FModuleManager::LoadModuleChecked<IMagicNodeEditor>("MagicNodeEditor");}
 	static inline bool IsAvailable() {return FModuleManager::Get().IsModuleLoaded("MagicNodeEditor");}
-	//
+public:
 	virtual TSharedPtr<FExtensibilityManager>GetMagicNodeEditorToolBarExtensibilityManager() {return nullptr;}
 };
 
@@ -45,22 +45,25 @@ public:
 
 class FMagicNodeEditor : public IMagicNodeEditor {
 private:
-	TSharedPtr<FExtender>MenuExtender; 
+	TSharedPtr<FExtender>MenuExtender;
+	TSharedPtr<FExtender>MainMenuExtender;
 	TSharedPtr<FExtensibilityManager>ToolBarExtensibilityManager;
 private:
 	TSharedRef<SDockTab>OnSpawnSourceCodeViewerTAB(const FSpawnTabArgs &SpawnTabArgs);
 	TSharedRef<SDockTab>OnSpawnSourceCodeSearchTAB(const FSpawnTabArgs &SpawnTabArgs);
 public:
-	static void ExtendMenu(FMenuBuilder &MenuBuilder);
-	static void InvokeSourceCodeViewerTAB(const FTextLocation &Location);
-	static void InvokeSourceCodeSearchTAB();
-	static void CreateNewScriptAsset();
-	//
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 	virtual bool SupportsDynamicReloading() override {return false;}
 public:
 	virtual TSharedPtr<FExtensibilityManager>GetMagicNodeEditorToolBarExtensibilityManager() override {return ToolBarExtensibilityManager;}
+public:
+	//static void ExtendMenu(FMenuBuilder &MenuBuilder);
+	static void ExtendMainMenu(FMenuBuilder &MenuBuilder);
+public:
+	static void InvokeSourceCodeViewerTAB(const FTextLocation &Location);
+	static void InvokeSourceCodeSearchTAB();
+	static void CreateNewScriptAsset();
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

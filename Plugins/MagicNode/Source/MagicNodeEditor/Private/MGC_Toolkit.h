@@ -11,7 +11,7 @@
 
 #include "MGC_SearchFiles.h"
 #include "MGC_CodeEditorCore.h"
-#include "MagicNodeEditorCommands.h"
+#include "MGC_EditorCommands.h"
 
 #include "Runtime/Core/Public/Misc/Paths.h"
 #include "Runtime/Core/Public/HAL/FileManagerGeneric.h"
@@ -60,7 +60,7 @@ const FName FCodeEditorTAB::TAB_Types(TEXT("MGC_Types"));
 const FName MGC_APP = FName(TEXT("MGC_CodeEditor"));
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// MGC State-Machine Asset Editor Toolkit:
+/// MGC Asset Editor Toolkit:
 
 class FMGC_Toolkit : public IKMGC_ScriptParser, public FAssetEditorToolkit, public FEditorUndoClient, public FGCObject {
 private:

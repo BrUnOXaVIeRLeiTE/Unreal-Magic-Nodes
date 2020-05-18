@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "MagicNodeEditorStyle.h"
+#include "MGC_EditorStyle.h"
 #include "MagicNodeEditor_Shared.h"
 
 #include "Styling/SlateStyle.h"
@@ -23,7 +23,7 @@ TSharedPtr<ISlateStyle>FMagicNodeEditorStyle::Get() {return StyleSet;}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 FString FMagicNodeEditorStyle::InContent(const FString &RelativePath, const TCHAR* Extension) {
-	static FString Content = IPluginManager::Get().FindPlugin(TEXT("MagicNode"))->GetContentDir();
+	static FString Content = IPluginManager::Get().FindPlugin(MGC_PLUGIN_NAME)->GetContentDir();
 	return (Content/RelativePath)+Extension;
 }
 
@@ -43,7 +43,7 @@ void FMagicNodeEditorStyle::Initialize() {
 	const FVector2D Icon128x128(128.f,128.f);
 	//
 	StyleSet = MakeShareable(new FSlateStyleSet(GetStyleSetName()));
-	StyleSet->SetContentRoot(IPluginManager::Get().FindPlugin(TEXT("MagicNode"))->GetContentDir());
+	StyleSet->SetContentRoot(IPluginManager::Get().FindPlugin(MGC_PLUGIN_NAME)->GetContentDir());
 	//
 	//
 	StyleSet->Set("ClassIcon.MagicNodeScript", new PLUGIN_BRUSH(TEXT("Icons/MagicNode_16x"),Icon16x16));

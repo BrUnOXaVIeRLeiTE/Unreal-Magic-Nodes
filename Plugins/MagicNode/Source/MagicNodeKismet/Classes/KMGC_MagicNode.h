@@ -72,7 +72,7 @@ public:
 	bool HasScript() const;
 	bool CanCompileProject() const;
 	bool IsDefaultPin(UEdGraphPin* Pin);
-	bool IsDefaultParam(const UProperty* Param);
+	bool IsDefaultParam(const TFieldPath<FProperty>Param);
 	void CreatePinsForScript(UFunction* Function=nullptr);
 	//
 	UEdGraphPin* GetExecPin() const;
@@ -87,6 +87,7 @@ public:
 	FString GetParentClass() const;
 	TArray<FString>GetMacros() const;
 	TArray<FString>GetIncludes() const;
+	//
 	UMagicNode* GetRuntimeScriptObject();
 	UMagicNodeScript* GetScriptObject() const;
 	//

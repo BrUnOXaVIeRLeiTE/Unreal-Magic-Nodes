@@ -6,6 +6,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "KMGC_ScriptParser.h"
+#include "KMGC_KismetTypes.h"
 
 #include "Runtime/Core/Public/Misc/App.h"
 #include "Runtime/Core/Public/Misc/Paths.h"
@@ -213,6 +214,31 @@ const FClassDefinition & IKMGC_ScriptParser::GetClassInfo(const FString &Keyword
 		if (DB.IsValid()) {
 			if (DB.Get()->ClassDefinitions.Contains(Keyword)) {return DB.Get()->ClassDefinitions.FindChecked(Keyword);}
 		}///
+	}///
+	//
+	//
+	UMGC_SemanticDB* DB = _Settings->SemanticDB.Array()[0].Get();
+	if (DB==nullptr) {IKMGC_ScriptParser::ClassPointer;}
+	//
+	FString NPK = Keyword;
+	if (NPK.RemoveFromStart(TEXT("A"),ESearchCase::CaseSensitive)) {
+		if (UClass*Class=FindObject<UClass>(ANY_PACKAGE,*NPK,true)) {
+			DB->RegisterClassReflection(Class,Class->GetPrefixCPP());
+			return DB->ClassDefinitions.FindChecked(Class->GetPrefixCPP()+NPK);
+		}///
+	} else if (NPK.RemoveFromStart(TEXT("U"),ESearchCase::CaseSensitive)) {
+		if (UClass*Class=FindObject<UClass>(ANY_PACKAGE,*NPK,true)) {
+			DB->RegisterClassReflection(Class,Class->GetPrefixCPP());
+			return DB->ClassDefinitions.FindChecked(Class->GetPrefixCPP()+NPK);
+		}///
+	} else if (NPK.RemoveFromStart(TEXT("F"),ESearchCase::CaseSensitive)) {
+		if (UScriptStruct*Struct=FindObject<UScriptStruct>(ANY_PACKAGE,*NPK,true)) {
+			DB->RegisterStructReflection(Struct);
+			return DB->ClassDefinitions.FindChecked(Struct->GetPrefixCPP()+NPK);
+		}///
+	} else if (UEnum*Enum=FindObject<UEnum>(ANY_PACKAGE,*Keyword,true)) {
+		DB->RegisterEnumReflection(Enum);
+		return DB->ClassDefinitions.FindChecked(Keyword);
 	}///
 	//
 	return IKMGC_ScriptParser::NOClassInfo;
