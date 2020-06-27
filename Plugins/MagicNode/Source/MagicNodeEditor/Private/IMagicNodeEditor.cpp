@@ -83,7 +83,7 @@ void FMagicNodeEditor::ExtendMainMenu(FMenuBuilder &MenuBuilder) {
 		LOCTEXT("MGC_NewScriptAsset_Tooltip", "Create a new 'Magic Node' class.\nThis special class allows you to create custom functions,\ntyping code within user Blueprint Graphs executing the node.\nChanges to the node's source code will update all instances in all graphs."),
 		FSlateIcon(FMagicNodeEditorStyle::Get().Get()->GetStyleSetName(),"ClassIcon.MagicNode"),
 		FUIAction(FExecuteAction::CreateStatic(&FMagicNodeEditor::CreateNewScriptAsset))
-	);///
+	);//
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

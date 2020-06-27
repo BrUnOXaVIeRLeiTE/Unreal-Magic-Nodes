@@ -84,7 +84,7 @@ struct FKeywordDefinition {
 	bool operator == (const FKeywordDefinition &Other) const {
 		return (
 			Info == Other.Info
-		);///
+		);//
 	}///
 	//
 	bool operator != (const FKeywordDefinition &Other) const {
@@ -115,7 +115,7 @@ struct FPropertyDefinition {
 			TypeOf == Other.TypeOf &&
 			Access == Other.Access &&
 			Hint == Other.Hint
-		);///
+		);//
 	}///
 	//
 	bool operator != (const FPropertyDefinition &Other) const {
@@ -196,7 +196,7 @@ struct FFunctionDefinition {
 			//
 			Tooltip == Other.Tooltip &&
 			Hint == Other.Hint
-		);///
+		);//
 	}///
 	//
 	bool operator != (const FFunctionDefinition &Other) const {
@@ -253,7 +253,7 @@ struct FClassDefinition {
 			ParentClass == Other.ParentClass &&
 			Tooltip == Other.Tooltip &&
 			Hint == Other.Hint
-		);///
+		);//
 	}///
 	//
 	bool operator != (const FClassDefinition &Other) const {

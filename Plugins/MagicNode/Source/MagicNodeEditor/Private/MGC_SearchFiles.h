@@ -50,7 +50,7 @@ struct FSearchInfo {
 			(MatchLine==Other.MatchLine) &&
 			(MatchFilePath==Other.MatchFilePath) &&
 			(MatchWordLocation==Other.MatchWordLocation)
-		);///
+		);//
 	}///
 	//
 	bool operator != (const FSearchInfo &Other) const {
@@ -131,7 +131,7 @@ public:
 					//
 					return (TI->MatchLine > SI->MatchLine);
 				}///
-			);///
+			);//
 			//
 			RequestListRefresh = true;
 		}///

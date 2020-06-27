@@ -28,7 +28,7 @@ void FSelf::Execute(UObject* Context)\n\
 	Ensure(Context);\n\
 	UE_LOG(LogTemp,Log,TEXT(\"%s\"),TEXT(\"Hello World!\"));\n\
 }\n\n\n\n\n\
-");///
+");//
 }/////
 	//
 	//

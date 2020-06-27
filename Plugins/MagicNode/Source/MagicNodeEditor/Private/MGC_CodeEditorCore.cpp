@@ -325,7 +325,7 @@ int32 SMGC_CodeEditorCore::GetLineCount() const {
 	int32 Count = 0;
 	//
 	const FString Text = GetScriptText().ToString();
-	Count = Text.ParseIntoArray(Array,TEXT("\n"),false);
+	Count = Text.ParseIntoArray(Array,LT,false);
 	//
 	return Count;
 }
@@ -573,8 +573,7 @@ void SMGC_CodeEditorCore::OnSelectedLineCounterItem(TSharedPtr<FString>Item, ESe
 }
 
 TSharedRef<ITableRow> SMGC_CodeEditorCore::OnGenerateLineCounter(TSharedPtr<FString>Item, const TSharedRef<STableViewBase>&OwnerTable) {
-	return
-	SNew(SComboRow<TSharedRef<FString>>,OwnerTable)
+	return SNew(SComboRow<TSharedRef<FString>>,OwnerTable)
 	[
 		SNew(SBorder)
 		.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
@@ -768,7 +767,7 @@ void SMGC_CodeEditorCore::UpdateDatabaseReferences() {
 	//
 	MARSHALL = FKMGC_TextSyntaxHighlighter::Create(
 		FKMGC_TextSyntaxHighlighter::FSyntaxTextStyle(KeywordDB,ClassDB,FunctionDB,SemanticDB)
-	);///
+	);//
 	//
 	SetLineCountList(GetLineCount());
 }

@@ -448,7 +448,7 @@ void FMGC_Toolkit::BindCommands() {
 			Commands.Compile,
 			FExecuteAction::CreateSP(this,&FMGC_Toolkit::CompileScript),
 			FCanExecuteAction::CreateStatic(&FLevelEditorActionCallbacks::Recompile_CanExecute)
-		);///
+		);//
 	}
 }
 
@@ -518,7 +518,7 @@ void FMGC_Toolkit::CompileScript() {
 		GetParentClass(),
 		GET()->Source.Includes,
 		GET()->Source.Macros
-	);///
+	);//
 	//
 	if (CompilerResult != EMGC_CompilerResult::None) {
 		switch (CompilerResult) {

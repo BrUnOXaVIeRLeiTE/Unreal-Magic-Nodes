@@ -522,7 +522,7 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 					+SHorizontalBox::Slot().AutoWidth().Padding(0,0,5,0)
 					[
 						SNew(SButton)
-						.ToolTipText(LOCTEXT("KMGC_SaveScript","Saves this node's source code (NOT in compiled form)."))
+						.ToolTipText(LOCTEXT("KMGC_SaveScript","Saves this node's source code (NOT compilated)."))
 						.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedSaveScript)
 						.ButtonStyle(FEditorStyle::Get(),"FlatButton.DarkGrey")
 						.ForegroundColor(FSlateColor::UseForeground())
@@ -651,7 +651,7 @@ void SKMGC_MagicNodeWidget::UpdateDatabaseReferences() {
 	//
 	MARSHALL = FKMGC_TextSyntaxHighlighter::Create(
 		FKMGC_TextSyntaxHighlighter::FSyntaxTextStyle(KeywordDB,ClassDB,FunctionDB,SemanticDB)
-	);///
+	);//
 	//
 	SetLineCountList(GetLineCount());
 }
@@ -1013,13 +1013,13 @@ int32 SKMGC_MagicNodeWidget::GetLineCount() const {
 	//
 	if (Source==ESKMGC_Source::Header) {
 		const FString Text = GetHeaderText().ToString();
-		Count = Text.ParseIntoArray(Array,TEXT("\n"),false);
+		Count = Text.ParseIntoArray(Array,LT,false);
 	} else if (Source==ESKMGC_Source::Script) {
 		const FString Text = GetScriptText().ToString();
-		Count = Text.ParseIntoArray(Array,TEXT("\n"),false);
+		Count = Text.ParseIntoArray(Array,LT,false);
 	} else if (Source==ESKMGC_Source::Types) {
 		const FString Text = GetTypesText().ToString();
-		Count = Text.ParseIntoArray(Array,TEXT("\n"),false);
+		Count = Text.ParseIntoArray(Array,LT,false);
 	}///
 	//
 	return Count;
@@ -1489,7 +1489,7 @@ void SKMGC_MagicNodeWidget::OnSelectedAutoCompleteItem(TSharedPtr<FString>Item, 
 	//
 	FString Info = Keyword+FString(TEXT(" ::\n\n"));
 	if (!FunInfo.Hint.IsEmpty()) {Info+=(FunInfo.Hint+FString(TEXT(" \n\n")));}
-	if (!FunInfo.TypeToString().Contains("?")) {Info+=(FString(TEXT("Type: \t"))+FunInfo.TypeToString()+FString(TEXT("\n")));}
+	if (!FunInfo.TypeToString().Contains("?")) {Info+=(FString(TEXT("Type: \t"))+FunInfo.TypeToString()+FString(LT));}
 	if (!FunInfo.AccessToString().Contains("?")) {Info+=(FString(TEXT("Access: \t"))+FunInfo.AccessToString()+FString(TEXT("\n\n")));}
 	//
 	if (!FunInfo.ReturnType.IsEmpty()) {Info+=(FString(TEXT("Return: \t"))+FunInfo.ReturnType+FString(TEXT("\n\n")));}
@@ -1497,19 +1497,19 @@ void SKMGC_MagicNodeWidget::OnSelectedAutoCompleteItem(TSharedPtr<FString>Item, 
 	if (FunInfo.Inputs.Num()>=1) {
 		Info+=(FString(TEXT("Inputs:\n")));
 		for (const FString &Input : FunInfo.Inputs) {
-			Info += (FString(TEXT("\t"))+Input+FString(TEXT("\n")));
-		} Info += FString(TEXT("\n"));
+			Info += (FString(TEXT("\t"))+Input+FString(LT));
+		} Info += FString(LT);
 	}///
 	//
 	if (FunInfo.Outputs.Num()>=1) {
 		Info+=(FString(TEXT("Outputs:\n")));
 		for (const FString &Output : FunInfo.Outputs) {
-			Info += (FString(TEXT("\t"))+Output+FString(TEXT("\n")));
-		} Info += FString(TEXT("\n"));
+			Info += (FString(TEXT("\t"))+Output+FString(LT));
+		} Info += FString(LT);
 	}///
 	//
-	if (Info.Contains(TEXT("Return"))) {Info+=FString(TEXT("\n"));}
-	if (!FunInfo.Tooltip.IsEmpty()) {Info+=(FunInfo.Tooltip+FString(TEXT("\n")));}
+	if (Info.Contains(TEXT("Return"))) {Info+=FString(LT);}
+	if (!FunInfo.Tooltip.IsEmpty()) {Info+=(FunInfo.Tooltip+FString(LT));}
 	//
 	//
 	KNode->SetTooltip(Info);
@@ -1782,12 +1782,12 @@ FReply SKMGC_MagicNodeWidget::OnMouseMove(const FGeometry &MyGeometry, const FPo
 		FString Keyword;
 		//
 		if (Source==ESKMGC_Source::Header) {
-			HEADER_EDITOR->GetSelectedText().ToString().Split(TEXT("\n"),&Keyword,nullptr);
+			HEADER_EDITOR->GetSelectedText().ToString().Split(LT,&Keyword,nullptr);
 			Keyword.Split(TEXT(" "),&Keyword,nullptr);
 			//
 			if (Keyword.TrimStart().IsEmpty()) {Keyword=HEADER_EDITOR->GetUnderCursor();}
 		} else if (Source==ESKMGC_Source::Script) {
-			SCRIPT_EDITOR->GetSelectedText().ToString().Split(TEXT("\n"),&Keyword,nullptr);
+			SCRIPT_EDITOR->GetSelectedText().ToString().Split(LT,&Keyword,nullptr);
 			Keyword.Split(TEXT(" "),&Keyword,nullptr);
 			//
 			if (Keyword.TrimStart().IsEmpty()) {Keyword=SCRIPT_EDITOR->GetUnderCursor();}
@@ -1807,41 +1807,41 @@ FReply SKMGC_MagicNodeWidget::OnMouseMove(const FGeometry &MyGeometry, const FPo
 				FString Info = Keyword+FString(TEXT(" ::\n\n"));
 				//
 				if (!ClassInfo.Hint.IsEmpty()) {Info+=(ClassInfo.Hint+FString(TEXT("\n\n"))); Nill=false;}
-				if (!ClassInfo.Tooltip.IsEmpty()) {Info+=(ClassInfo.Tooltip+FString(TEXT("\n"))); Nill=false;}
+				if (!ClassInfo.Tooltip.IsEmpty()) {Info+=(ClassInfo.Tooltip+FString(LT)); Nill=false;}
 				if (!ClassInfo.ParentClass.IsEmpty()) {Info+=(FString(TEXT("Parent Class: \t"))+ClassInfo.ParentClass+FString(TEXT("\n\n"))); Nill=false;}
 				//
 				if (!Nill) {KNode->SetTooltip(Info);} else {
 					const FPropertyDefinition &PropInfo = IKMGC_ScriptParser::GetPropertyInfo(Script->GetRuntimeScriptClass(),Keyword);
 					//
 					if (!PropInfo.Hint.IsEmpty()) {Info+=(PropInfo.Hint+FString(TEXT("\n\n"))); Nill=false;}
-					if (!PropInfo.TypeToString().Contains("?")) {Info+=(FString(TEXT("Type: \t"))+PropInfo.TypeToString()+FString(TEXT("\n"))); Nill=false;}
+					if (!PropInfo.TypeToString().Contains("?")) {Info+=(FString(TEXT("Type: \t"))+PropInfo.TypeToString()+FString(LT)); Nill=false;}
 					if (!PropInfo.AccessToString().Contains("?")) {Info+=(FString(TEXT("Access: \t"))+PropInfo.AccessToString()+FString(TEXT("\n\n"))); Nill=false;}
-					if (!PropInfo.Tooltip.IsEmpty()) {Info+=(PropInfo.Tooltip+FString(TEXT("\n"))); Nill=false;}
+					if (!PropInfo.Tooltip.IsEmpty()) {Info+=(PropInfo.Tooltip+FString(LT)); Nill=false;}
 					//
 					if (!Nill) {KNode->SetTooltip(Info);} else {
 						const FFunctionDefinition &FunInfo = IKMGC_ScriptParser::GetFunctionInfo(Script->GetRuntimeScriptClass(),Keyword);
 						//
 						if (!FunInfo.Hint.IsEmpty()) {Info+=(FunInfo.Hint+FString(TEXT("\n\n"))); Nill=false;}
-						if (!FunInfo.TypeToString().Contains("?")) {Info+=(FString(TEXT("Type: \t"))+FunInfo.TypeToString()+FString(TEXT("\n"))); Nill=false;}
+						if (!FunInfo.TypeToString().Contains("?")) {Info+=(FString(TEXT("Type: \t"))+FunInfo.TypeToString()+FString(LT)); Nill=false;}
 						if (!FunInfo.AccessToString().Contains("?")) {Info+=(FString(TEXT("Access: \t"))+FunInfo.AccessToString()+FString(TEXT("\n\n"))); Nill=false;}
 						//
 						if (!FunInfo.ReturnType.IsEmpty()) {Info+=(FString(TEXT("Return: \t"))+FunInfo.ReturnType+FString(TEXT("\n\n"))); Nill=false;}
 						if (FunInfo.Inputs.Num()>=1) {
 							Info+=(FString(TEXT("Inputs:\n"))); Nill=false;
 							for (const FString &Input : FunInfo.Inputs) {
-								Info += (FString(TEXT("\t"))+Input+FString(TEXT("\n")));
-							} Info += FString(TEXT("\n"));
+								Info += (FString(TEXT("\t"))+Input+FString(LT));
+							} Info += FString(LT);
 						}///
 						//
 						if (FunInfo.Outputs.Num()>=1) {
 							Info+=(FString(TEXT("Outputs:\n"))); Nill=false;
 							for (const FString &Output : FunInfo.Outputs) {
-								Info += (FString(TEXT("\t"))+Output+FString(TEXT("\n")));
-							} Info += FString(TEXT("\n"));
+								Info += (FString(TEXT("\t"))+Output+FString(LT));
+							} Info += FString(LT);
 						}///
 						//
-						if (Info.Contains(TEXT("Return"))) {Info+=FString(TEXT("\n"));}
-						if (!FunInfo.Tooltip.IsEmpty()) {Info+=(FunInfo.Tooltip+FString(TEXT("\n"))); Nill=false;}
+						if (Info.Contains(TEXT("Return"))) {Info+=FString(LT);}
+						if (!FunInfo.Tooltip.IsEmpty()) {Info+=(FunInfo.Tooltip+FString(LT)); Nill=false;}
 						//
 						if (!Nill) {KNode->SetTooltip(Info);} else {KNode->SetTooltip(Keyword);}
 					}///

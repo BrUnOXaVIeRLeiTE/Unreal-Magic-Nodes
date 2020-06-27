@@ -30,6 +30,8 @@ class FBlueprintActionDatabaseRegistrar;
 UCLASS()
 class MAGICNODEKISMET_API UKMGC_MagicNode : public UK2Node, public IKMGC_ScriptParser {
 	GENERATED_UCLASS_BODY()
+private:
+	bool CollapsePanel;
 protected:
 	TWeakObjectPtr<UMagicNode>RuntimeScriptObject = nullptr;
 	//
@@ -55,6 +57,10 @@ public:
 	virtual void GetMenuActions(FBlueprintActionDatabaseRegistrar &ActionRegistrar) const override;
 	//
 	virtual bool IsNodeSafeToIgnore() const override {return false;}
+	virtual bool ShowPaletteIconOnNode() const override {return true;}
+	virtual bool ShouldShowNodeProperties() const override {return true;}
+	virtual bool NodeCausesStructuralBlueprintChange() const override {return true;}
+	//
 	virtual bool IsCompatibleWithGraph(const UEdGraph* TargetGraph) const override;
 	virtual class FNodeHandlingFunctor* CreateNodeHandler(FKismetCompilerContext &CompilerContext) const override;
 	//
@@ -62,7 +68,6 @@ public:
 	virtual FText GetTooltipText() const override;
 	virtual FText GetMenuCategory() const override;
 	virtual FLinearColor GetNodeTitleColor() const override;
-	virtual bool ShowPaletteIconOnNode() const override {return true;}
 	virtual FText GetNodeTitle(ENodeTitleType::Type TType) const override;
 	virtual FSlateIcon GetIconAndTint(FLinearColor &OutColor) const override;
 	//

@@ -128,6 +128,11 @@ void UKMGC_MagicNode::AllocateDefaultPins() {
 	//
 	//
 	FBlueprintEditorUtils::MarkBlueprintAsModified(GetBlueprint());
+	//
+	//
+	if (CollapsePanel) {
+		AdvancedPinDisplay = ENodeAdvancedPins::Hidden;
+	} else {AdvancedPinDisplay=ENodeAdvancedPins::Shown;}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -319,6 +324,8 @@ void UKMGC_MagicNode::PostReconstructNode() {
 }
 
 void UKMGC_MagicNode::ReallocatePinsDuringReconstruction(TArray<UEdGraphPin*>&OldPins) {
+	CollapsePanel = (AdvancedPinDisplay==ENodeAdvancedPins::Hidden);
+	//
 	AllocateDefaultPins();
 	//
 	const UMagicNodeScript* ScriptObject = GetScriptObject();

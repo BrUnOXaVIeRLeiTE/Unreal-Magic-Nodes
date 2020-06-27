@@ -25,7 +25,7 @@ struct FSourceTreeNode {
 			(FullPath==Other.FullPath) &&
 			(ChildNodes==Other.ChildNodes) &&
 			(ParentNode.Get()==Other.ParentNode.Get())
-		);///
+		);//
 	}///
 	//
 	bool operator != (const FSourceTreeNode &Other) const {
