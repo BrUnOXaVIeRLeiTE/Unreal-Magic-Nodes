@@ -12,7 +12,7 @@ With this I hope, with time, Blueprint developers have a first contact with C++ 
 
 
 
-More Info: [Quick Guide]: https://brunoxavierleite.com/2019/01/16/unreal-magic-nodes-programming
+More Info: [Quick Guide]: https://brunoxavierleite.wordpress.com/2019/01/16/unreal-magic-nodes-programming/
 
 
 
