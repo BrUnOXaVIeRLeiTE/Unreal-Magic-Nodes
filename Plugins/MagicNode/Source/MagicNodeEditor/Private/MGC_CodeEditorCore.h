@@ -151,6 +151,7 @@ public:
 	//
 	FReply OnClickedSearchGlass();
 	FReply OnClickedReplaceSearch();
+	FReply OnTextPanelPressed(const FGeometry &Geometry, const FPointerEvent &PointerEvent);
 	//
 	void OnClickedAutoCompleteItem(TSharedPtr<FString>Item);
 	void OnSelectedAutoCompleteItem(TSharedPtr<FString>Item, ESelectInfo::Type SelectInfo);

@@ -61,8 +61,9 @@ private:
 	int32 SuggestDrawID;
 	//
 	bool KeyboardFocus;
-	bool LockedSuggestion;
 	bool IsMouseWithinCompletionBox;
+private:
+	const bool IsOperator(const TCHAR &CH) const;
 protected:
 	TSharedPtr<ITextLayoutMarshaller>Marshall;
 	TSharedPtr<FSlateFontMeasure>FontMeasure;
@@ -126,8 +127,8 @@ public:
 	void DeleteSelectedText();
 	void GoToLineColumn(int32 Line, int32 Column);
 	//
-	const FTextLocation &GetCursorLocation() const;
 	const FString GetUnderCursor() const;
+	const FTextLocation &GetCursorLocation() const;
 	//
 	int32 CountLines() const;
 	const FLinearColor GetLineIndexColor(int32 Line) const;
@@ -148,7 +149,7 @@ public:
 	//
 	const bool HasSuggestion() const;
 	const bool HasAutoComplete() const;
-	const bool IsOperator(const TCHAR &CH) const;
+	//
 	const bool IsAutoComplete(const FString &Keyword) const;
 	//
 	const FSlateBrush* GetSuggestionIcon(const FString &Keyword) const;

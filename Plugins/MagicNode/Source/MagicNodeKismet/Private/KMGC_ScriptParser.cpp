@@ -86,13 +86,13 @@ const EMGC_CompilerResult IKMGC_ScriptParser::CompileScriptClass(const FString &
 		//
 		if (!In.Contains(TEXT("#include"))) {
 			FString InFormat = FString::Printf(TEXT("#include \"%s\""),*In);
-			Include.Append(InFormat); Include.AppendChar(LN);
+			Include.Append(InFormat); Include.AppendChar(NLC);
 		} else {
 			Include.Append(In);
-			Include.AppendChar(LN);
+			Include.AppendChar(NLC);
 		}///
 	}///
-	Include.RemoveFromEnd(LT);
+	Include.RemoveFromEnd(NLS);
 	IKMGC_ScriptParser::THeader.ReplaceInline(TEXT("{Includes}"),*Include);
 	//
 	//
@@ -101,9 +101,9 @@ const EMGC_CompilerResult IKMGC_ScriptParser::CompileScriptClass(const FString &
 	FString Macroe;
 	for (FString In : Macros) {
 		Macroe.Append(In);
-		Macroe.AppendChar(LN);
+		Macroe.AppendChar(NLC);
 	}///
-	Macroe.RemoveFromEnd(LT);
+	Macroe.RemoveFromEnd(NLS);
 	IKMGC_ScriptParser::THeader.ReplaceInline(TEXT("{Macros}"),*Macroe);
 	//
 	//
@@ -115,7 +115,7 @@ const EMGC_CompilerResult IKMGC_ScriptParser::CompileScriptClass(const FString &
 	FString HeaderCheck = IKMGC_ScriptParser::THeader;
 	HeaderCheck.ReplaceInline(TEXT("\"false\""),TEXT("false"));
 	HeaderCheck.ReplaceInline(TEXT("\"true\""),TEXT("true"));
-	HeaderCheck.ReplaceInline(LT,TEXT(""));
+	HeaderCheck.ReplaceInline(NLS,TEXT(""));
 	HeaderCheck.ReplaceInline(TEXT(" "),TEXT(""));
 	//
 	if (!HeaderCheck.Contains(TEXT("IMGC"),ESearchCase::CaseSensitive)) {
@@ -774,8 +774,8 @@ const bool IKMGC_ScriptParser::ParseClassFromHeader(const FString &Header, const
 		int32 I=0;
 		bool Search=false;
 		//
-		TCHAR IT=LN;
-		TCHAR ITL=LN;
+		TCHAR IT=NLC;
+		TCHAR ITL=NLC;
 		//
 		while (I<Raw.Len()) {
 			ITL=IT; IT=Raw[I];
@@ -797,14 +797,14 @@ const bool IKMGC_ScriptParser::ParseClassFromHeader(const FString &Header, const
 		int32 I=0;
 		bool Search=false;
 		//
-		TCHAR IT=LN;
-		TCHAR ITL=LN;
+		TCHAR IT=NLC;
+		TCHAR ITL=NLC;
 		//
 		while (I<Raw.Len()) {
 			ITL=IT; IT=Raw[I];
 			//
 			if ((!Search)&&(ITL==TEXT('/')&&(IT==TEXT('/')))) {Search=true; Parse.AppendChar(TEXT('|')); Parse.AppendChar(TEXT('~')); Parse.AppendChar(TEXT('|')); Parse.AppendChar(ITL);} else
-			if ((Search)&&(IT==LN)) {Search=false; Parse.AppendChar(IT);}
+			if ((Search)&&(IT==NLC)) {Search=false; Parse.AppendChar(IT);}
 			//
 			if (Search) {Parse.AppendChar(IT);}
 		++I;}

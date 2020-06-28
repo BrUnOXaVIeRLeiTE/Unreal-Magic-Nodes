@@ -66,13 +66,14 @@ void SMGC_CodeEditorCore::Construct(const FArguments &InArgs, UMagicNodeScript* 
 			SNew(SVerticalBox)
 			+SVerticalBox::Slot()
 			[
-				SNew(SBox)
+				/*SNew(SBox)
 				.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
 				.MinDesiredWidth(500.f).MinDesiredHeight(300.f)
-				[
+				[*/
 					SNew(SBorder)
 					.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
 					.BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
+					.OnMouseButtonDown(this,&SMGC_CodeEditorCore::OnTextPanelPressed)
 					[
 						SAssignNew(VS_SCROLL_BOX,SScrollBox)
 						.OnUserScrolled(this,&SMGC_CodeEditorCore::OnVerticalScroll)
@@ -113,7 +114,7 @@ void SMGC_CodeEditorCore::Construct(const FArguments &InArgs, UMagicNodeScript* 
 							]
 						]
 					]
-				]
+				/*]*/
 			]
 			+SVerticalBox::Slot()
 			.AutoHeight().Padding(0,5,0,0)
@@ -297,7 +298,11 @@ void SMGC_CodeEditorCore::Construct(const FArguments &InArgs, UMagicNodeScript* 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SMGC_CodeEditorCore::Tick(const FGeometry &AllottedGeometry, const double CurrentTime, const float DeltaTime) {
-	//
+	if ((FSlateApplication::Get().GetKeyboardFocusedWidget().Get()!=SCRIPT_EDITOR.Get())
+		&&(SCRIPT_EDITOR->HasSuggestion()||SCRIPT_EDITOR->HasAutoComplete())
+	) {
+		FSlateApplication::Get().SetKeyboardFocus(SCRIPT_EDITOR.ToSharedRef());
+	}///
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -325,13 +330,15 @@ int32 SMGC_CodeEditorCore::GetLineCount() const {
 	int32 Count = 0;
 	//
 	const FString Text = GetScriptText().ToString();
-	Count = Text.ParseIntoArray(Array,LT,false);
+	Count = Text.ParseIntoArray(Array,NLS,false);
 	//
 	return Count;
 }
 
 FText SMGC_CodeEditorCore::GetScriptText() const {
-	if (IsSourceView()) {return FText::FromString(*ExternalFileText.Get());}
+	if (IsSourceView()) {
+		return FText::FromString(*ExternalFileText.Get());
+	}///
 	//
 	if (Source==EMGC_CodeSource::Script) {
 		return FText::FromString(ScriptObject->Source.Script);
@@ -452,6 +459,12 @@ EVisibility SMGC_CodeEditorCore::GetAutoCompleteVisibility() const {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+FReply SMGC_CodeEditorCore::OnTextPanelPressed(const FGeometry &Geometry, const FPointerEvent &PointerEvent) {
+	FSlateApplication::Get().SetKeyboardFocus(SCRIPT_EDITOR.ToSharedRef());
+	//
+	return FReply::Handled();
+}
+
 FReply SMGC_CodeEditorCore::OnClickedSearchGlass() {
 	if (!HasScript()) {return FReply::Unhandled();}
 	//
@@ -499,13 +512,17 @@ void SMGC_CodeEditorCore::OnClickedAutoCompleteItem(TSharedPtr<FString>Item) {
 			//
 			Result.ReplaceInline(*SCRIPT_EDITOR->GetUnderCursor(),TEXT(""));
 			//
+			SCRIPT_EDITOR->BeginEditTransaction();
 			if (Item.Get()->Contains(TEXT("FUN|"))) {
 				SCRIPT_EDITOR->InsertTextAtCursor(Result+TEXT("()"));
 			} else {SCRIPT_EDITOR->InsertTextAtCursor(Result);}
+			SCRIPT_EDITOR->EndEditTransaction();
 		}///
 	}///
 	//
 	if (Item.IsValid()) {AUTOCOMPLETE->SetItemSelection(Item,false);}
+	//
+	AutoComplete = EAutoComplete::Off;
 }
 
 void SMGC_CodeEditorCore::OnSelectedAutoCompleteItem(TSharedPtr<FString>Item, ESelectInfo::Type SelectInfo) {}

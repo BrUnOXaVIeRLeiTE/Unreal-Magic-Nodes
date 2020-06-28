@@ -39,6 +39,7 @@ void SKMGC_TextEditorWidget::Construct(const FArguments &InArgs) {
 		.VScrollBar(InArgs._VScrollBar)
 		.Marshaller(InArgs._Marshaller)
 		.IsReadOnly(InArgs._IsReadOnly)
+		.AllowContextMenu(true)
 		.AutoWrapText(false)
 		.Text(InArgs._Text)
 		.Margin(0.f)
@@ -201,19 +202,20 @@ void SKMGC_TextEditorWidget::OnTextCursorMoved(const FTextLocation &NewPosition)
 	const float DPIScale = FSlateApplication::Get().FindWidgetWindow(this->AsShared())->GetNativeWindow()->GetDPIScaleFactor();
 	CursorLocation = NewPosition;
 	//
-	FVector2D OutSize, OutPosition;
+	///FVector2D OutSize, OutPosition;
 	FTextRange Range = FTextRange(CursorLocation.GetLineIndex(),CursorLocation.GetOffset());
-	EditableTextLayout->GetTextInputMethodContext()->GetTextBounds(Range.BeginIndex,CursorLocation.GetOffset(),OutPosition,OutSize);
+	///EditableTextLayout->GetTextInputMethodContext()->GetTextBounds(Range.BeginIndex,CursorLocation.GetOffset(),OutPosition,OutSize);
 	//
-	CompletionBoxPos = FVector2D(OutSize.X,((CursorLocation.GetLineIndex()*LineHeight)-EditableTextLayout->GetScrollOffset().Y)+LineHeight);
+	float Offset = FontMeasure->Measure(UnderCursor,FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.CodeBlockStyle").Font).X + CursorLocation.GetOffset();
+	CompletionBoxPos = FVector2D(4+Offset/*OutSize.X*/,((CursorLocation.GetLineIndex()*LineHeight)-EditableTextLayout->GetScrollOffset().Y)+(LineHeight+4));
 	CompletionBoxPos.X /= DPIScale;
 	//
 	//
-	if ((!LockedSuggestion)&&(HasSuggestion())) {
+	if (HasSuggestion()) {
 		if (AutoCompleteKeyword.TrimStartAndEnd().IsEmpty()||(!AutoCompleteKeyword.Contains(UnderCursor))) {
-			SuggestionResults.Empty(); KeywordInfo.Empty();
+			KeywordInfo.Empty(); AutoCompleteKeyword.Empty();
 		}///
-	} else if (!HasSuggestion()) {LockedSuggestion=false;}
+	}///
 	//
 	OnMovedCursor.ExecuteIfBound(NewPosition);
 }
@@ -348,9 +350,9 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 			EditableTextLayout->BeginEditTransation();
 			//
 			Selected.Append(GetSelectedText().ToString());
-			Selected.ReplaceInline(LT,TEXT("\n\t"));
+			Selected.ReplaceInline(NLS,TEXT("\n\t"));
 			Selected.RemoveFromEnd(TEXT("\t"));
-			Selected.AppendChar(LN);
+			Selected.AppendChar(NLC);
 			//
 			InsertTextAtCursor(Selected);
 			//
@@ -426,8 +428,11 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 		//
 		return FReply::Handled();
 	} else if ((Key==EKeys::Escape||Key==EKeys::BackSpace)&&HasSuggestion()) {
+		AutoCompleteKeyword.Empty();
 		SuggestionResults.Empty();
 		KeywordInfo.Empty();
+		//
+		OnInvokedSearch.ExecuteIfBound(false);
 		//
 		return FReply::Handled();
 	}///
@@ -436,7 +441,83 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 }
 
 FReply SKMGC_TextEditorWidget::OnKeyUp(const FGeometry &Geometry, const FKeyEvent &KeyEvent) {
-	return SMultiLineEditableText::OnKeyUp(Geometry,KeyEvent);
+	if (IsTextReadOnly()) {return FReply::Unhandled();}
+	//
+	FKey Key = KeyEvent.GetKey();
+	if ((Key==EKeys::K)&&(KeyEvent.IsCommandDown()||KeyEvent.IsControlDown())) {
+		FTextLocation Local = CursorLocation;
+		TArray<FString>Lines; FString Formatted;
+		GetPlainText().ToString().ParseIntoArrayLines(Lines,false);
+		//
+		for (int32 I=0; I<Lines.Num(); ++I) {
+			if (Lines[I].Len()>1) {
+				Lines[I].TrimStartInline();
+				//
+				{///
+					TCHAR CH=TEXT(',');
+					TCHAR Last=TEXT('\0');
+					TCHAR Next=TEXT('\0');
+					TCHAR Now =TEXT('\0');
+					//
+					int32 Pos = -1;
+					int32 iLast = -1;
+					int32 iNext = -1;
+					//
+					TArray<TCHAR>Done;
+					//
+					OP:{
+						while (Pos<Lines[I].Len()-1) {
+							Pos++; Last = Now; Now = Lines[I][Pos];
+							if (Lines[I].IsValidIndex(Pos+1)) {Next=Lines[I][Pos+1];} else {Next=TEXT('\0');}
+							//
+							if ((Now==CH)&&(TChar<WIDECHAR>::IsAlpha(Next)||TChar<WIDECHAR>::IsDigit(Next))) {
+								iLast=Pos; iNext=Pos+2;
+								//
+								if (CH==TEXT('*')&&(TChar<WIDECHAR>::IsAlpha(Last))) {iLast=-1;}
+								if (CH==TEXT('&')&&(TChar<WIDECHAR>::IsAlpha(Last))) {iLast=-1;}
+							break;}
+						} Done.AddUnique(CH);
+						//
+						if (iLast>INDEX_NONE) {Lines[I].InsertAt(iLast,TEXT(" "));}
+						if (iNext>INDEX_NONE) {Lines[I].InsertAt(iNext,TEXT(" "));}
+						//
+						if (iLast>INDEX_NONE||iNext>INDEX_NONE) {iLast=-1; iNext=-1; Pos=-1; goto OP;}
+						else if (!Done.Contains(TEXT('('))) {CH=TEXT('('); Pos=-1; goto OP;}
+						else if (!Done.Contains(TEXT('{'))) {CH=TEXT('{'); Pos=-1; goto OP;}
+						else if (!Done.Contains(TEXT(')'))) {CH=TEXT(')'); Pos=-1; goto OP;}
+						else if (!Done.Contains(TEXT('}'))) {CH=TEXT('}'); Pos=-1; goto OP;}
+						else if (!Done.Contains(TEXT('+'))) {CH=TEXT('+'); Pos=-1; goto OP;}
+						else if (!Done.Contains(TEXT('-'))) {CH=TEXT('-'); Pos=-1; goto OP;}
+						else if (!Done.Contains(TEXT('/'))) {CH=TEXT('/'); Pos=-1; goto OP;}
+						else if (!Done.Contains(TEXT('='))) {CH=TEXT('='); Pos=-1; goto OP;}
+						else if (!Done.Contains(TEXT('*'))) {CH=TEXT('*'); Pos=-1; goto OP;}
+						else if (!Done.Contains(TEXT('&'))) {CH=TEXT('&'); Pos=-1; goto OP;}
+					}///
+				}///
+				//
+				if (Lines[I].EndsWith(TEXT("{"))) {Lines[I].ReplaceInline(TEXT("{"),TEXT("\n{"));}
+				if (Lines[I].EndsWith(TEXT("}"))) {Lines[I].ReplaceInline(TEXT("}"),TEXT("\n}"));}
+			}///
+			//
+			//
+			if (I<Lines.Num()-1) {
+				Lines[I].TrimEndInline();
+				Formatted.Append(Lines[I]+NLS);
+			} else {Formatted.Append(Lines[I]);}
+		}///
+		//
+		//// ToDo:  '\t' on {} pairs
+		//
+		BeginEditTransaction();
+		 SetText(FText::FromString(Formatted));
+		EndEditTransaction();
+		//
+		if (Lines[Local.GetLineIndex()].IsValidIndex(Local.GetOffset())) {
+			GoToLineColumn(Local.GetLineIndex(),Local.GetOffset());
+		} else {GoToLineColumn(Local.GetLineIndex(),Lines[Local.GetLineIndex()].Len()-1);}
+	}///
+	//
+	return FReply::Handled();
 }
 
 FReply SKMGC_TextEditorWidget::OnMouseButtonDown(const FGeometry &Geometry, const FPointerEvent &MouseEvent) {
@@ -460,14 +541,13 @@ FReply SKMGC_TextEditorWidget::OnMouseButtonDown(const FGeometry &Geometry, cons
 		return FReply::Handled();
 	}///
 	//
-	/*if (HasSuggestion()&&(IsMouseWithinCompletionBox)) {
+	if (HasSuggestion()&&(IsMouseWithinCompletionBox)) {
 		InsertPickedSuggestion();
 		return FReply::Handled();
-	} else*/ if(HasSuggestion()&&(!IsMouseWithinCompletionBox)) {
+	} else if(HasSuggestion()&&(!IsMouseWithinCompletionBox)) {
+		AutoCompleteKeyword.Empty();
 		SuggestionResults.Empty();
 		KeywordInfo.Empty();
-		//
-		return FReply::Handled();
 	}///
 	//
 	return SMultiLineEditableText::OnMouseButtonDown(Geometry,MouseEvent);
@@ -497,7 +577,7 @@ int32 SKMGC_TextEditorWidget::CountLines() const {
 	int32 Count = 0;
 	//
 	for (const TCHAR &CH : GetPlainText().ToString().GetCharArray()) {
-		if (CH==LN) {Count++;}
+		if (CH==NLC) {Count++;}
 	}///
 	//
 	return Count;
@@ -715,8 +795,6 @@ const bool SKMGC_TextEditorWidget::HasSuggestion() const {
 }
 
 void SKMGC_TextEditorWidget::InsertPickedSuggestion() {
-	LockedSuggestion = true;
-	//
 	if (SuggestPicked>SuggestionResults.Num()-1) {
 		SuggestPicked = SuggestionResults.Num()-1;
 	}///
@@ -771,41 +849,41 @@ void SKMGC_TextEditorWidget::GetKeywordInfo() {
 			FString Info = Keyword+(FString(TEXT(" ::\n\n")));
 			//
 			if (!ClassInfo.Hint.IsEmpty()) {Info+=(ClassInfo.Hint+FString(TEXT("\n\n"))); Nill=false;}
-			if (!ClassInfo.Tooltip.IsEmpty()) {Info+=(ClassInfo.Tooltip+FString(LT)); Nill=false;}
+			if (!ClassInfo.Tooltip.IsEmpty()) {Info+=(ClassInfo.Tooltip+NLS); Nill=false;}
 			if (!ClassInfo.ParentClass.IsEmpty()) {Info+=(FString(TEXT("Parent Class: \t"))+ClassInfo.ParentClass+FString(TEXT("\n\n"))); Nill=false;}
 			//
 			if (!Nill) {KeywordInfo=Info;} else if (ScriptObject.IsValid()) {
 				const FPropertyDefinition &PropInfo = IKMGC_ScriptParser::GetPropertyInfo(ScriptObject->GetRuntimeScriptClass(),Keyword);
 				//
 				if (!PropInfo.Hint.IsEmpty()) {Info+=(PropInfo.Hint+FString(TEXT("\n\n"))); Nill=false;}
-				if (!PropInfo.TypeToString().Contains("?")) {Info+=(FString(TEXT("Type: \t"))+PropInfo.TypeToString()+FString(LT)); Nill=false;}
+				if (!PropInfo.TypeToString().Contains("?")) {Info+=(FString(TEXT("Type: \t"))+PropInfo.TypeToString()+NLS); Nill=false;}
 				if (!PropInfo.AccessToString().Contains("?")) {Info+=(FString(TEXT("Access: \t"))+PropInfo.AccessToString()+FString(TEXT("\n\n"))); Nill=false;}
-				if (!PropInfo.Tooltip.IsEmpty()) {Info+=(PropInfo.Tooltip+FString(LT)); Nill=false;}
+				if (!PropInfo.Tooltip.IsEmpty()) {Info+=(PropInfo.Tooltip+NLS); Nill=false;}
 				//
 				if (!Nill) {KeywordInfo=Info;} else {
 					const FFunctionDefinition &FunInfo = IKMGC_ScriptParser::GetFunctionInfo(ScriptObject->GetRuntimeScriptClass(),Keyword);
 					//
 					if (!FunInfo.Hint.IsEmpty()) {Info+=(FunInfo.Hint+FString(TEXT("\n\n"))); Nill=false;}
-					if (!FunInfo.TypeToString().Contains("?")) {Info+=(FString(TEXT("Type: \t"))+FunInfo.TypeToString()+FString(LT)); Nill=false;}
+					if (!FunInfo.TypeToString().Contains("?")) {Info+=(FString(TEXT("Type: \t"))+FunInfo.TypeToString()+NLS); Nill=false;}
 					if (!FunInfo.AccessToString().Contains("?")) {Info+=(FString(TEXT("Access: \t"))+FunInfo.AccessToString()+FString(TEXT("\n\n"))); Nill=false;}
 					//
 					if (!FunInfo.ReturnType.IsEmpty()) {Info+=(FString(TEXT("Return: \t"))+FunInfo.ReturnType+FString(TEXT("\n\n"))); Nill=false;}
 					if (FunInfo.Inputs.Num()>=1) {
 						Info+=(FString(TEXT("Inputs:\n"))); Nill=false;
 						for (const FString &Input : FunInfo.Inputs) {
-							Info += (FString(TEXT("\t"))+Input+FString(LT));
-						} Info += FString(LT);
+							Info += (FString(TEXT("\t"))+Input+NLS);
+						} Info += NLS;
 					}///
 					//
 					if (FunInfo.Outputs.Num()>=1) {
 						Info+=(FString(TEXT("Outputs:\n"))); Nill=false;
 						for (const FString &Output : FunInfo.Outputs) {
-							Info += (FString(TEXT("\t"))+Output+FString(LT));
-						} Info += FString(LT);
+							Info += (FString(TEXT("\t"))+Output+NLS);
+						} Info += NLS;
 					}///
 					//
-					if (Info.Contains(TEXT("Return"))) {Info+=FString(LT);}
-					if (!FunInfo.Tooltip.IsEmpty()) {Info+=(FunInfo.Tooltip+FString(LT)); Nill=false;}
+					if (Info.Contains(TEXT("Return"))) {Info+=NLS;}
+					if (!FunInfo.Tooltip.IsEmpty()) {Info+=(FunInfo.Tooltip+NLS); Nill=false;}
 					//
 					if (!Nill) {KeywordInfo=Info;}
 				}///
