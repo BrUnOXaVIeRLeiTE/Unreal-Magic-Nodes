@@ -56,10 +56,11 @@ class MAGICNODEKISMET_API SKMGC_TextEditorWidget : public SMultiLineEditableText
 private:
 	TWeakObjectPtr<UMagicNodeScript>ScriptObject;
 	//
-	float LineHeight;
 	int32 SuggestPicked;
 	int32 SuggestDrawID;
+	int32 LineCount;
 	//
+	float LineHeight;
 	bool KeyboardFocus;
 	bool IsMouseWithinCompletionBox;
 private:

@@ -73,10 +73,9 @@ enum class EAccessLevel : uint8 {
 USTRUCT()
 struct FKeywordDefinition {
 	GENERATED_USTRUCT_BODY()
-	//
+public:
 	UPROPERTY(Category="Definitions", EditDefaultsOnly) FString Info;
-	//
-	//
+public:
 	friend inline uint32 GetTypeHash(const FKeywordDefinition &DEF) {
 		return FCrc::MemCrc32(&DEF,sizeof(FKeywordDefinition));
 	}///
@@ -90,12 +89,14 @@ struct FKeywordDefinition {
 	bool operator != (const FKeywordDefinition &Other) const {
 		return !(*this==Other);
 	}///
+public:
+	FKeywordDefinition() : Info(TEXT("")) {}
 };
 
 USTRUCT()
 struct FPropertyDefinition {
 	GENERATED_USTRUCT_BODY()
-	//
+public:
 	UPROPERTY() EType TypeOf;
 	UPROPERTY() EStack StackOf;
 	UPROPERTY() EAccessLevel Access;
@@ -103,8 +104,7 @@ struct FPropertyDefinition {
 	UPROPERTY() FString ReturnType;
 	UPROPERTY() FString Tooltip;
 	UPROPERTY() FString Hint;
-	//
-	//
+public:
 	friend inline uint32 GetTypeHash(const FPropertyDefinition &DEF) {
 		return FCrc::MemCrc32(&DEF,sizeof(FPropertyDefinition));
 	}///
@@ -121,8 +121,7 @@ struct FPropertyDefinition {
 	bool operator != (const FPropertyDefinition &Other) const {
 		return !(*this==Other);
 	}///
-	//
-	//
+public:
 	FString TypeToString() const {
 		switch (TypeOf) {
 			case EType::Int: return TEXT("int32"); break;
@@ -162,6 +161,15 @@ struct FPropertyDefinition {
 		//
 		return TEXT("<?>");
 	}///
+public:
+	FPropertyDefinition()
+		: TypeOf(EType::None)
+		, StackOf(EStack::None)
+		, Access(EAccessLevel::None)
+		, ReturnType(TEXT(""))
+		, Tooltip(TEXT(""))
+		, Hint(TEXT(""))
+	{}//
 };
 
 USTRUCT()
@@ -173,12 +181,12 @@ struct FFunctionDefinition {
 	UPROPERTY() EFunctionFlag Flag;
 	UPROPERTY() EAccessLevel Access;
 	//
-	UPROPERTY() FString ReturnType;
 	UPROPERTY() TSet<FString>Inputs;
 	UPROPERTY() TSet<FString>Outputs;
 	//
-	UPROPERTY() FString Hint;
+	UPROPERTY() FString ReturnType;
 	UPROPERTY() FString Tooltip;
+	UPROPERTY() FString Hint;
 	//
 	//
 	friend inline uint32 GetTypeHash(const FFunctionDefinition &DEF) {
@@ -227,6 +235,18 @@ struct FFunctionDefinition {
 		//
 		return TEXT("<?>");
 	}///
+public:
+	FFunctionDefinition()
+		: TypeOf(EType::None)
+		, StackOf(EStack::None)
+		, Flag(EFunctionFlag::None)
+		, Access(EAccessLevel::None)
+		, Inputs()
+		, Outputs()
+		, ReturnType(TEXT(""))
+		, Tooltip(TEXT(""))
+		, Hint(TEXT(""))
+	{}//
 };
 
 USTRUCT()
@@ -259,6 +279,14 @@ struct FClassDefinition {
 	bool operator != (const FClassDefinition &Other) const {
 		return !(*this==Other);
 	}///
+public:
+	FClassDefinition()
+		: Variables()
+		, Functions()
+		, ParentClass(TEXT(""))
+		, Tooltip(TEXT(""))
+		, Hint(TEXT(""))
+	{}//
 };
 
 USTRUCT()
@@ -269,6 +297,13 @@ struct FClassRedirector {
 	UPROPERTY() FString OwnerClass;
 	UPROPERTY() FString ObjectName;
 	UPROPERTY() FString Hint;
+public:
+	FClassRedirector()
+		: ObjectClass(TEXT(""))
+		, OwnerClass(TEXT(""))
+		, ObjectName(TEXT(""))
+		, Hint(TEXT(""))
+	{}//
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

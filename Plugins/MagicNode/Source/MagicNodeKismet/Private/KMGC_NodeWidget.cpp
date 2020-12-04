@@ -38,7 +38,7 @@ void SKMGC_MagicNodeWidget::Tick(const FGeometry &AllottedGeometry, const double
 	if (UMGC_SemanticDB::DBState==EDatabaseState::ASYNCLOADING) {
 		RequestedUpdateDB = true;
 		//
-		if (DatabaseLoad>=1.f) {
+		if (DatabaseLoad >= 1.f) {
 			DatabaseLoad = 0.f;
 		} else {DatabaseLoad+=0.05f;}
 	} else if (RequestedUpdateDB) {
@@ -511,6 +511,7 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 						SNew(SButton)
 						.ToolTipText(LOCTEXT("KMGC_ReloadScript","Rebuilds this node's pins (if there was a successful C++ compilation)."))
 						.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedReloadScript)
+						.IsEnabled(this,&SKMGC_MagicNodeWidget::CanCompileScript)
 						.ButtonStyle(FEditorStyle::Get(),"FlatButton.DarkGrey")
 						.ForegroundColor(FSlateColor::UseForeground())
 						.VAlign(VAlign_Center).HAlign(HAlign_Left)
@@ -524,6 +525,7 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 						SNew(SButton)
 						.ToolTipText(LOCTEXT("KMGC_SaveScript","Saves this node's source code (NOT compilated)."))
 						.OnClicked(this,&SKMGC_MagicNodeWidget::OnClickedSaveScript)
+						.IsEnabled(this,&SKMGC_MagicNodeWidget::CanCompileScript)
 						.ButtonStyle(FEditorStyle::Get(),"FlatButton.DarkGrey")
 						.ForegroundColor(FSlateColor::UseForeground())
 						.VAlign(VAlign_Center).HAlign(HAlign_Left)

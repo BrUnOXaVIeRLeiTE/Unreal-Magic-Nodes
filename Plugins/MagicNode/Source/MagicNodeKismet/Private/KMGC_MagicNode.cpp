@@ -409,7 +409,7 @@ bool UKMGC_MagicNode::HasScript() const {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 FName UKMGC_MagicNode::GetCornerIcon() const {
-	return TEXT("KMGC.MagicNodeIcon");
+	return TEXT("ClassIcon.MagicNodeScript");
 }
 
 FText UKMGC_MagicNode::GetTooltipText() const {
@@ -425,13 +425,13 @@ FLinearColor UKMGC_MagicNode::GetNodeTitleColor() const {
 }
 
 FSlateIcon UKMGC_MagicNode::GetIconAndTint(FLinearColor &OutColor) const {
-	static FSlateIcon Icon(TEXT("MagicNodeEditorStyle"),TEXT("ClassIcon.MagicNode"));
+	static FSlateIcon Icon(TEXT("MagicNodeEditorStyle"),TEXT("ClassIcon.MagicNodeScript"));
 	//
 	return Icon;
 }
 
 FText UKMGC_MagicNode::GetMenuCategory() const {
-	return LOCTEXT("MagicNodeCategory","Magic Node");
+	return LOCTEXT("MagicNodeCategory","MagicNode");
 }
 
 void UKMGC_MagicNode::GetMenuActions(FBlueprintActionDatabaseRegistrar &ActionRegistrar) const {
@@ -572,7 +572,14 @@ void UKMGC_MagicNode::SetTooltip(const FString &New) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool UKMGC_MagicNode::CanCompileProject() const {
-	return FLevelEditorActionCallbacks::Recompile_CanExecute();
+	const auto &BP = GetBlueprint();
+	//
+	return (
+		HasScript() &&
+		(BP && BP->ParentClass && (!BP->bBeingCompiled)) &&
+		(GEditor==nullptr||!GEditor->IsPlaySessionInProgress()) &&
+		(FLevelEditorActionCallbacks::Recompile_CanExecute())
+	);//
 }
 
 void UKMGC_MagicNode::CompileProject() {

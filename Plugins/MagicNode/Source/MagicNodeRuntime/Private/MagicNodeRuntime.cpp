@@ -100,7 +100,7 @@ void UMagicNode::Finish() {
 	if (World==nullptr) {return;}
 	//
 	World->GetTimerManager().ClearAllTimersForObject(this);
-	if (!HasAnyFlags(RF_ArchetypeObject|RF_ClassDefaultObject)) {ConditionalBeginDestroy();}
+	if (!HasAnyFlags(RF_ArchetypeObject|RF_ClassDefaultObject|RF_BeginDestroyed)) {ConditionalBeginDestroy();}
 }
 
 void UMagicNode::BeginDestroy() {

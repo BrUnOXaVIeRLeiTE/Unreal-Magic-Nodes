@@ -42,7 +42,7 @@ class UMagicNode;
 /// MGC Runtime:: Node Classes
 
 /// Magic-Node's Runtime Object.
-UCLASS(classGroup="Synaptech", Category="Magic Node", BlueprintType, hideCategories=("Activation","Variable"))
+UCLASS(classGroup="Synaptech", Category="MagicNode", BlueprintType, hideCategories=("Activation","Variable"))
 class MAGICNODERUNTIME_API UMagicNode : public UObject {
 	GENERATED_BODY()
 public:
@@ -70,7 +70,7 @@ public:
 	//
 	void RegisterWorld(UWorld* NewWorld) {World=NewWorld;}
 	//
-	UFUNCTION(Category="Magic Node",BlueprintCallable)
+	UFUNCTION(Category="MagicNode",BlueprintCallable)
 	void Finish();
 };
 
@@ -78,7 +78,7 @@ public:
 /// MGC Object:: Node Script
 
 /* C++ Scriptable Node for Blueprint Graphs */
-UCLASS(classGroup="Synaptech", Category="Magic Node", Blueprintable, hideCategories=("Activation","Variable"), meta=(DisplayName="Magic Node Script"))
+UCLASS(classGroup="Synaptech", Category="MagicNode", Blueprintable, hideCategories=("Activation","Variable"), meta=(DisplayName="Magic Node Script"))
 class MAGICNODERUNTIME_API UMagicNodeScript : public UObject {
 	GENERATED_BODY()
 	//
@@ -88,13 +88,13 @@ protected:
 	TSubclassOf<UMagicNode>RuntimeScriptClass;
 public:
 #if WITH_EDITORONLY_DATA
-	UPROPERTY(Category="Magic Node", EditDefaultsOnly)
+	UPROPERTY(Category="MagicNode", EditDefaultsOnly)
 	FLinearColor NodeColor;
 	//
-	UPROPERTY(Category="Magic Node", EditDefaultsOnly)
+	UPROPERTY(Category="MagicNode", EditDefaultsOnly)
 	TSubclassOf<UMagicNode>ParentClass;
 	//
-	UPROPERTY(Category="Magic Node", EditDefaultsOnly)
+	UPROPERTY(Category="MagicNode", EditDefaultsOnly)
 	bool LockSourceCode;
 	//
 	UPROPERTY(Category="Source Code", EditDefaultsOnly)
@@ -111,7 +111,7 @@ public:
 template<typename T>
 static T* MGC_Allocate(UObject* Context, UClass* Class) {
 	if (Context && Context->GetWorld()) {
-		UMagicNode* NewMGC = NewObject<UMagicNode>(Context,Class,Class->GetFName(),RF_Transient);
+		UMagicNode* NewMGC = NewObject<UMagicNode>(Context,Class,Class->GetFName(),RF_Standalone);
 		NewMGC->RegisterWorld(Context->GetWorld());
 		return CastChecked<T>(NewMGC);
 	}///

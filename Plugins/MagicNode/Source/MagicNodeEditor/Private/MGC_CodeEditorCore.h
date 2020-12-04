@@ -92,7 +92,7 @@ private:
 	bool RequestedUpdateDB;
 public:
 	SMGC_CodeEditorCore();
-	~SMGC_CodeEditorCore();
+	virtual ~SMGC_CodeEditorCore();
 	//
 	SLATE_BEGIN_ARGS(SMGC_CodeEditorCore)
 	{}///

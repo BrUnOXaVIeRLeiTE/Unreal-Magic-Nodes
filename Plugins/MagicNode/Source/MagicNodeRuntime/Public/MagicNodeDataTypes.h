@@ -55,8 +55,16 @@ struct FMGC_SourceCode {
 	UPROPERTY() FString Script;
 	UPROPERTY() FString Types;
 	//
-	UPROPERTY(Category="Magic Node", EditDefaultsOnly) TArray<FString>Includes;
-	UPROPERTY(Category="Magic Node", EditDefaultsOnly) TArray<FString>Macros;
+	UPROPERTY(Category="MagicNode", EditDefaultsOnly) TArray<FString>Includes;
+	UPROPERTY(Category="MagicNode", EditDefaultsOnly) TArray<FString>Macros;
+public:
+	FMGC_SourceCode()
+		: Header(TEXT(""))
+		, Script(TEXT(""))
+		, Types(TEXT(""))
+		, Includes()
+		, Macros()
+	{}//
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

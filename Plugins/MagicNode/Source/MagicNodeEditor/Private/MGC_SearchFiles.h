@@ -161,7 +161,7 @@ private:
 	bool SensitiveSearch;
 public:
 	SMGC_SearchFiles();
-	~SMGC_SearchFiles();
+	virtual ~SMGC_SearchFiles();
 	//
 	SLATE_BEGIN_ARGS(SMGC_SearchFiles)
 	{}///

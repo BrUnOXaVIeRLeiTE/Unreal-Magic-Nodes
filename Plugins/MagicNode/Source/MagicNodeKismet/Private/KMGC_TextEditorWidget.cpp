@@ -47,6 +47,8 @@ void SKMGC_TextEditorWidget::Construct(const FArguments &InArgs) {
 	//
 	FontMeasure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
 	LineHeight = FontMeasure->Measure("MGC_BlockStyle",FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.CodeBlockStyle").Font).Y;
+	//
+	LineCount = CountLines();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -58,7 +60,7 @@ int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &G
 	//
 	//
 	if (!bIsReadOnly.Get()) {
-		for (int32 L=0; L<=(CountLines()); L++) {
+		for (int32 L=0; L<=(LineCount); L++) {
 			FSlateDrawElement::MakeBox(
 				OutDrawElements,LayerID,
 				Geometry.ToPaintGeometry(FVector2D(0,(LineHeight*L)-EditableTextLayout->GetScrollOffset().Y),FVector2D(AllotedWidth,LineHeight)),
@@ -263,6 +265,8 @@ const FLinearColor SKMGC_TextEditorWidget::GetLineIndexColor(int32 Line) const {
 FReply SKMGC_TextEditorWidget::OnKeyChar(const FGeometry &Geometry, const FCharacterEvent &CharacterEvent) {
 	const TCHAR CH = CharacterEvent.GetCharacter();
 	FReply Reply = FReply::Unhandled();
+	//
+	LineCount = CountLines();
 	//
 	if (CH==TEXT('\n')||CH==TEXT('\r')) {
 		if (!GetText().ToString().IsEmpty()) {

@@ -1,8 +1,8 @@
 {
 	"FileVersion": 1,
 	"Version": 1,
-	"VersionName": "0.4.1",
-	"EngineVersion" : "4.25.0",
+	"VersionName": "0.4.2",
+	"EngineVersion" : "4.26.0",
 	"FriendlyName": "Magic Nodes (C++)",
 	"Description": "Scriptable Blueprint Nodes for EVERYONE!",
 	"Category": "SYNAPTECH",
@@ -30,13 +30,16 @@
 			]
 		},
 		{
-			"Type": "Editor",
+			"Type": "UncookedOnly",
 			"Name": "MagicNodeKismet",
 			"LoadingPhase": "Default",
 			"WhitelistPlatforms": [
+				"Android",
 				"Win64",
+				"Win32",
 				"Linux",
-				"Mac"
+				"Mac",
+				"IOS"
 			]
 		},
 		{
