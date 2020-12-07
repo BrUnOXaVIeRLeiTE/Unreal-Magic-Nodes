@@ -1,7 +1,7 @@
 {
 	"FileVersion": 1,
 	"Version": 1,
-	"VersionName": "0.4.2",
+	"VersionName": "0.4.4",
 	"EngineVersion" : "4.26.0",
 	"FriendlyName": "Magic Nodes (C++)",
 	"Description": "Scriptable Blueprint Nodes for EVERYONE!",

@@ -604,7 +604,7 @@ void UKMGC_MagicNode::CompileScript() {
 	return;}
 	//
 	CompilerResult = CompileScriptClass(ScriptObject->GetName(),GetHeaderText(),GetScriptText(),GetTypesText(),GetParentClass(),GetIncludes(),GetMacros());
-	if (CompilerResult != EMGC_CompilerResult::None) {
+	if (CompilerResult != EMGC_CompilerResult::MGC_None) {
 		switch (CompilerResult) {
 			case EMGC_CompilerResult::Compiled:
 			{

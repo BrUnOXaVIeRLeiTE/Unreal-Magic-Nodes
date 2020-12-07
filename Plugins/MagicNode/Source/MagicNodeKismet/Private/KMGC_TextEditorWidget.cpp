@@ -240,16 +240,40 @@ void SKMGC_TextEditorWidget::DeleteSelectedText() {
 	EditableTextLayout->DeleteSelectedText();
 }
 
-const FTextLocation & SKMGC_TextEditorWidget::GetCursorLocation() const {
+const FTextLocation &SKMGC_TextEditorWidget::GetCursorLocation() const {
 	return CursorLocation;
 }
 
-const FString SKMGC_TextEditorWidget::GetUnderCursor() const {
+const FString &SKMGC_TextEditorWidget::GetUnderCursor() const {
 	return UnderCursor;
 }
 
-const FString SKMGC_TextEditorWidget::GetAutoCompleteSubject() const {
+const FString &SKMGC_TextEditorWidget::GetAutoCompleteSubject() const {
 	return AutoCompleteKeyword;
+}
+
+const FString &SKMGC_TextEditorWidget::GetCurrentLineAtCursor() const {
+	return CurrentLine;
+}
+
+int32 SKMGC_TextEditorWidget::CountLines() const {
+	int32 Count = 0;
+	//
+	for (const TCHAR &CH : GetPlainText().ToString().GetCharArray()) {
+		if (CH==NLC) {Count++;}
+	}///
+	//
+	return Count;
+}
+
+int32 SKMGC_TextEditorWidget::CountTabs() const {
+	int32 Count = 0;
+	//
+	for (const TCHAR &CH : CurrentLine.GetCharArray()) {
+		if (CH==NLT) {Count++;}
+	}///
+	//
+	return Count;
 }
 
 const FLinearColor SKMGC_TextEditorWidget::GetLineIndexColor(int32 Line) const {
@@ -269,9 +293,33 @@ FReply SKMGC_TextEditorWidget::OnKeyChar(const FGeometry &Geometry, const FChara
 	LineCount = CountLines();
 	//
 	if (CH==TEXT('\n')||CH==TEXT('\r')) {
-		if (!GetText().ToString().IsEmpty()) {
-			return FReply::Handled();
+		EditableTextLayout->BeginEditTransation();
+		//
+		FString Carr;
+		for (int32 I=0; I<LastLineFeed; ++I) {Carr.AppendChar(NLT);}
+		InsertTextAtCursor(Carr); LastLineFeed = 0; Carr.Empty();
+		//
+		if (NextLineFeed > 0) {
+			FTextLocation LOC = CursorLocation; InsertTextAtCursor(NLS);
+			for (int32 I=0; I<NextLineFeed; ++I) {Carr.AppendChar(NLT);}
+			InsertTextAtCursor(Carr); NextLineFeed = 0; Carr.Empty();
+			//
+			GoTo(LOC);
+		} else {
+			int32 AtLine = CursorLocation.GetLineIndex();
+			int32 Offset = CursorLocation.GetOffset();
+			//
+			TCHAR Next = (EditableTextLayout->IsAtEndOfLine(CursorLocation)) ? NLC : EditableTextLayout->GetCharacterAt(FTextLocation(AtLine,Offset));
+			//
+			if (IsCloseBracket(Next)) {
+				FTextLocation LOC = CursorLocation;
+				InsertTextAtCursor(NLS); GoTo(LOC);
+			}///
 		}///
+		//
+		EditableTextLayout->EndEditTransaction();
+		//
+		return FReply::Handled();
 	}///
 	//
 	if (TChar<WIDECHAR>::IsWhitespace(CH)) {
@@ -281,9 +329,9 @@ FReply SKMGC_TextEditorWidget::OnKeyChar(const FGeometry &Geometry, const FChara
 			} else {
 				EditableTextLayout->BeginEditTransation();
 				//
-				FString String;
-				String.AppendChar(CH);
-				InsertTextAtCursor(String);
+				FString Space;
+				Space.AppendChar(CH);
+				InsertTextAtCursor(Space);
 				//
 				EditableTextLayout->EndEditTransaction();
 				//
@@ -347,21 +395,12 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 		SuggestionResults.Empty();
 		KeywordInfo.Empty();
 		//
-		FString Selected;
-		Selected.AppendChar(TEXT('\t'));
+		EditableTextLayout->BeginEditTransation();
 		//
-		if (GetSelectedText().IsEmpty()) {
-			EditableTextLayout->BeginEditTransation();
-			//
-			Selected.Append(GetSelectedText().ToString());
-			Selected.ReplaceInline(NLS,TEXT("\n\t"));
-			Selected.RemoveFromEnd(TEXT("\t"));
-			Selected.AppendChar(NLC);
-			//
-			InsertTextAtCursor(Selected);
-			//
-			EditableTextLayout->EndEditTransaction();
-		}///
+		SMultiLineEditableText::OnKeyDown(Geometry,KeyEvent);
+		//
+		EditableTextLayout->EndEditTransaction();
+		EditableTextLayout->ClearSelection();
 		//
 		return FReply::Handled();
 	}///
@@ -370,32 +409,25 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 		InsertPickedSuggestion();
 		return FReply::Handled();
 	} else if (Key==EKeys::Enter) {
+		EditableTextLayout->BeginEditTransation();
+		//
+		EditableTextLayout->GetCurrentTextLine(CurrentLine);
+		int32 AtLine = CursorLocation.GetLineIndex();
 		int32 Offset = CursorLocation.GetOffset();
-		FString Appended(TEXT("\n"));
-		FString Line;
 		//
-		TArray<FString>Lines;
-		GetText().ToString().ParseIntoArrayLines(Lines,false);
+		LastLineFeed = CountTabs(); NextLineFeed = LastLineFeed;
+		TCHAR Last = (EditableTextLayout->IsAtBeginningOfLine(CursorLocation)) ? NLC : EditableTextLayout->GetCharacterAt(FTextLocation(AtLine,Offset-1));
+		TCHAR Next = (EditableTextLayout->IsAtEndOfLine(CursorLocation)) ? NLC : EditableTextLayout->GetCharacterAt(FTextLocation(AtLine,Offset));
 		//
-		if (Lines.IsValidIndex(CursorLocation.GetLineIndex())) {
-			EditableTextLayout->BeginEditTransation();
-			//
-			if (Lines[CursorLocation.GetLineIndex()].StartsWith(TEXT("\t"))) {
-				Line = Lines[CursorLocation.GetLineIndex()];
-				int32 I = CursorLocation.GetOffset();
-				//
-				for (const TCHAR &CH : Line) {
-					if (CH==TEXT('\t')) {Appended.AppendChar(CH);}
-					if (I>Offset) {break;}
-				I++;}
-				//
-				InsertTextAtCursor(Appended);
-			} else {InsertTextAtCursor(Appended);}
-			//
-			EditableTextLayout->EndEditTransaction();
-			//
-			return FReply::Handled();
-		} else {return (SMultiLineEditableText::OnKeyDown(Geometry,KeyEvent));}
+		if (IsOpenBracket(Last)) {LastLineFeed++;}
+		if (!IsCloseBracket(Next)) {NextLineFeed=0;}
+		//
+		SMultiLineEditableText::OnKeyDown(Geometry,KeyEvent);
+		//
+		EditableTextLayout->EndEditTransaction();
+		EditableTextLayout->ClearSelection();
+		//
+		return FReply::Handled();
 	}///
 	//
 	if (Key==EKeys::Delete) {
@@ -403,23 +435,11 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 		SuggestionResults.Empty();
 		KeywordInfo.Empty();
 		//
-		TArray<FString>Lines;
-		GetText().ToString().ParseIntoArrayLines(Lines,false);
+		EditableTextLayout->BeginEditTransation();
 		//
-		if (Lines.IsValidIndex(CursorLocation.GetLineIndex())) {
-			if (CursorLocation.GetOffset()>(Lines[CursorLocation.GetLineIndex()].Len()+1)) {
-				if (EditableTextLayout->AnyTextSelected()) {
-					EditableTextLayout->BeginEditTransation();
-					//
-					EditableTextLayout->DeleteSelectedText();
-					InsertTextAtCursor(TEXT("\n"));
-					//
-					EditableTextLayout->EndEditTransaction();
-					//
-					return FReply::Handled();
-				} else {return (SMultiLineEditableText::OnKeyDown(Geometry,KeyEvent));}
-			} else {return (SMultiLineEditableText::OnKeyDown(Geometry,KeyEvent));}
-		}///
+		SMultiLineEditableText::OnKeyDown(Geometry,KeyEvent);
+		//
+		EditableTextLayout->EndEditTransaction();
 		//
 		return FReply::Handled();
 	}///
@@ -449,76 +469,7 @@ FReply SKMGC_TextEditorWidget::OnKeyUp(const FGeometry &Geometry, const FKeyEven
 	//
 	FKey Key = KeyEvent.GetKey();
 	if ((Key==EKeys::K)&&(KeyEvent.IsCommandDown()||KeyEvent.IsControlDown())) {
-		FTextLocation Local = CursorLocation;
-		TArray<FString>Lines; FString Formatted;
-		GetPlainText().ToString().ParseIntoArrayLines(Lines,false);
 		//
-		for (int32 I=0; I<Lines.Num(); ++I) {
-			if (Lines[I].Len()>1) {
-				Lines[I].TrimStartInline();
-				//
-				{///
-					TCHAR CH=TEXT(',');
-					TCHAR Last=TEXT('\0');
-					TCHAR Next=TEXT('\0');
-					TCHAR Now =TEXT('\0');
-					//
-					int32 Pos = -1;
-					int32 iLast = -1;
-					int32 iNext = -1;
-					//
-					TArray<TCHAR>Done;
-					//
-					OP:{
-						while (Pos<Lines[I].Len()-1) {
-							Pos++; Last = Now; Now = Lines[I][Pos];
-							if (Lines[I].IsValidIndex(Pos+1)) {Next=Lines[I][Pos+1];} else {Next=TEXT('\0');}
-							//
-							if ((Now==CH)&&(TChar<WIDECHAR>::IsAlpha(Next)||TChar<WIDECHAR>::IsDigit(Next))) {
-								iLast=Pos; iNext=Pos+2;
-								//
-								if (CH==TEXT('*')&&(TChar<WIDECHAR>::IsAlpha(Last))) {iLast=-1;}
-								if (CH==TEXT('&')&&(TChar<WIDECHAR>::IsAlpha(Last))) {iLast=-1;}
-							break;}
-						} Done.AddUnique(CH);
-						//
-						if (iLast>INDEX_NONE) {Lines[I].InsertAt(iLast,TEXT(" "));}
-						if (iNext>INDEX_NONE) {Lines[I].InsertAt(iNext,TEXT(" "));}
-						//
-						if (iLast>INDEX_NONE||iNext>INDEX_NONE) {iLast=-1; iNext=-1; Pos=-1; goto OP;}
-						else if (!Done.Contains(TEXT('('))) {CH=TEXT('('); Pos=-1; goto OP;}
-						else if (!Done.Contains(TEXT('{'))) {CH=TEXT('{'); Pos=-1; goto OP;}
-						else if (!Done.Contains(TEXT(')'))) {CH=TEXT(')'); Pos=-1; goto OP;}
-						else if (!Done.Contains(TEXT('}'))) {CH=TEXT('}'); Pos=-1; goto OP;}
-						else if (!Done.Contains(TEXT('+'))) {CH=TEXT('+'); Pos=-1; goto OP;}
-						else if (!Done.Contains(TEXT('-'))) {CH=TEXT('-'); Pos=-1; goto OP;}
-						else if (!Done.Contains(TEXT('/'))) {CH=TEXT('/'); Pos=-1; goto OP;}
-						else if (!Done.Contains(TEXT('='))) {CH=TEXT('='); Pos=-1; goto OP;}
-						else if (!Done.Contains(TEXT('*'))) {CH=TEXT('*'); Pos=-1; goto OP;}
-						else if (!Done.Contains(TEXT('&'))) {CH=TEXT('&'); Pos=-1; goto OP;}
-					}///
-				}///
-				//
-				if (Lines[I].EndsWith(TEXT("{"))) {Lines[I].ReplaceInline(TEXT("{"),TEXT("\n{"));}
-				if (Lines[I].EndsWith(TEXT("}"))) {Lines[I].ReplaceInline(TEXT("}"),TEXT("\n}"));}
-			}///
-			//
-			//
-			if (I<Lines.Num()-1) {
-				Lines[I].TrimEndInline();
-				Formatted.Append(Lines[I]+NLS);
-			} else {Formatted.Append(Lines[I]);}
-		}///
-		//
-		//// ToDo:  '\t' on {} pairs
-		//
-		BeginEditTransaction();
-		 SetText(FText::FromString(Formatted));
-		EndEditTransaction();
-		//
-		if (Lines[Local.GetLineIndex()].IsValidIndex(Local.GetOffset())) {
-			GoToLineColumn(Local.GetLineIndex(),Local.GetOffset());
-		} else {GoToLineColumn(Local.GetLineIndex(),Lines[Local.GetLineIndex()].Len()-1);}
 	}///
 	//
 	return FReply::Handled();
@@ -577,16 +528,6 @@ FReply SKMGC_TextEditorWidget::OnMouseWheel(const FGeometry &MyGeometry, const F
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int32 SKMGC_TextEditorWidget::CountLines() const {
-	int32 Count = 0;
-	//
-	for (const TCHAR &CH : GetPlainText().ToString().GetCharArray()) {
-		if (CH==NLC) {Count++;}
-	}///
-	//
-	return Count;
-}
-
 FVector2D SKMGC_TextEditorWidget::GetCompletionBoxPos() const {
 	return CompletionBoxPos;
 }
@@ -597,32 +538,11 @@ FVector2D SKMGC_TextEditorWidget::GetCompletionBoxSize() const {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const FString SKMGC_TextEditorWidget::ParseAutoCompleteWord(const TArray<FString>&Lines, const bool CleanUp) {
+const FString SKMGC_TextEditorWidget::ParseAutoCompleteWord(const bool CleanUp) {
 	if (!HasKeyboardFocus()) {return FString();}
 	//
-	FTextLocation Offset;
-	if (Lines.IsValidIndex(CursorLocation.GetLineIndex())) {
-		if (Lines[CursorLocation.GetLineIndex()].Len() < CursorLocation.GetOffset()) {
-			CursorLocation = FTextLocation(CursorLocation.GetLineIndex(),Lines[CursorLocation.GetLineIndex()].Len()-1);
-		} Offset = CursorLocation;
-	} if (!Offset.IsValid()||(Offset.GetOffset()<=INDEX_NONE+1)) {return FString();}
-	//
-	int32 I = Offset.GetOffset();
-	TCHAR IT = Lines[Offset.GetLineIndex()].GetCharArray()[Offset.GetOffset()];
-	//
-	FString Subject;
-	FString Raw;
-	//
-	while ((I>INDEX_NONE)&&(!(TChar<WIDECHAR>::IsWhitespace(IT)||TChar<WIDECHAR>::IsLinebreak(IT)))&&(TChar<WIDECHAR>::IsAlpha(IT)||TChar<WIDECHAR>::IsDigit(IT)
-		||IT==TEXT('.')||IT==TEXT(':')||IT==TEXT('-')||IT==TEXT('_')||IT==TEXT('<')||IT==TEXT('>')||IT==TEXT('{')||IT==TEXT('}')||IT==TEXT('[')||IT==TEXT(']')||IT==TEXT('(')||IT==TEXT(')')
-	)) {
-		Offset = FTextLocation(CursorLocation.GetLineIndex(),I);
-		IT = EditableTextLayout->GetCharacterAt(Offset);
-		Raw.AppendChar(IT);
-	--I;}
-	//
-	Subject = Raw.TrimStartAndEnd();
-	Subject.ReverseString();
+	EditableTextLayout->GetCurrentTextLine(CurrentLine);
+	FString Subject = CurrentLine;
 	//
 	Subject.Split(TEXT("{"),&Subject,nullptr); Subject.Split(TEXT("("),&Subject,nullptr);
 	Subject.Split(TEXT("["),&Subject,nullptr); Subject.Split(TEXT("<"),&Subject,nullptr);
@@ -685,9 +605,12 @@ void SKMGC_TextEditorWidget::AutoCompleteSubject(const FString &Keyword) {
 	OnAutoCompleted.ExecuteIfBound(AutoCompleteResults);
 }
 
-void SKMGC_TextEditorWidget::AutoCompleteSuggestion(const TArray<FString>&Lines, const FString &Keyword) {
+void SKMGC_TextEditorWidget::AutoCompleteSuggestion(const FString &Keyword) {
 	SuggestionResults.Empty();
 	KeywordInfo.Empty();
+	//
+	TArray<FString>Lines;
+	Lines.Add(GetCurrentLineAtCursor());
 	//
 	IKMGC_ScriptParser::AutoSuggest(Lines,Keyword,SuggestionResults);
 }
@@ -701,30 +624,30 @@ void SKMGC_TextEditorWidget::AutoCleanup(FString &Keyword) {
 		}///
 	}///
 	//
-	Clean.ReplaceCharInline(TEXT('('),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT(')'),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT('['),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT(']'),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT('{'),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT('}'),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT('<'),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT('>'),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT(':'),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT('.'),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT(','),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT(';'),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT('-'),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT('+'),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT('='),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT('&'),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT('/'),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT('?'),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT('!'),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT('*'),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT('%'),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT('#'),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT('|'),TEXT(' '));
-	Clean.ReplaceCharInline(TEXT('\\'),TEXT(' '));
+	Clean.ReplaceCharInline(TEXT('('),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT(')'),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT('['),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT(']'),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT('{'),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT('}'),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT('<'),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT('>'),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT(':'),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT('.'),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT(','),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT(';'),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT('-'),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT('+'),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT('='),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT('&'),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT('/'),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT('?'),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT('!'),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT('*'),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT('%'),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT('#'),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT('|'),TEXT('\0'));
+	Clean.ReplaceCharInline(TEXT('\\'),TEXT('\0'));
 	Clean.RemoveSpacesInline();
 	//
 	Keyword.Empty(); Keyword.Append(Clean);
@@ -763,20 +686,42 @@ const bool SKMGC_TextEditorWidget::IsOperator(const TCHAR &CH) const {
 	);//
 }
 
+const bool SKMGC_TextEditorWidget::IsBracket(const TCHAR &CH) const {
+	return (
+		IsOpenBracket(CH) || IsCloseBracket(CH)
+	);//
+}
+
+const bool SKMGC_TextEditorWidget::IsOpenBracket(const TCHAR &CH) const {
+	return (
+		CH==TEXT('(') ||
+		CH==TEXT('[') ||
+		CH==TEXT('{')
+	);//
+}
+
+const bool SKMGC_TextEditorWidget::IsCloseBracket(const TCHAR &CH) const {
+	return (
+		CH==TEXT(')') ||
+		CH==TEXT(']') ||
+		CH==TEXT('}')
+	);//
+}
+
 const bool SKMGC_TextEditorWidget::HasAutoComplete() const {
 	return (AutoCompleteResults.Num()>0);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SKMGC_TextEditorWidget::AutoSuggest(const TArray<FString>&Lines) {
-	FString Subject = (UnderCursor.IsEmpty()) ? ParseAutoCompleteWord(Lines,false) : UnderCursor;
+void SKMGC_TextEditorWidget::AutoSuggest() {
+	FString Subject = (UnderCursor.IsEmpty()) ? ParseAutoCompleteWord(false) : UnderCursor;
 	AutoCompleteKeyword = Subject; AutoCleanup(AutoCompleteKeyword);
 	//
 	if (Subject.TrimStartAndEnd().IsEmpty()) {
 		SuggestionResults.Empty();
 		KeywordInfo.Empty();
-	} else {AutoCompleteSuggestion(Lines,Subject);}
+	}///
 	//
 	if (HasSuggestion()) {
 		CompletionBoxSize = FVector2D::ZeroVector;

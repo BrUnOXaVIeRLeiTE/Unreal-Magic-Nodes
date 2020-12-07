@@ -18,7 +18,7 @@
 /// MGC Parser:: Internal Types
 
 enum MAGICNODEKISMET_API EMGC_CompilerResult : uint32 {
-	None					=	0		/// No Compilation result.
+	MGC_None				=	0		/// No Compilation result.
 	, UnknownException		=	1		/// Compiler Unknown Exceptions.
 	, InternalError			=	2		/// Compiler Internal Error.
 	, ParsingFailure		=	3		/// Nothing to be parsed, probably a empty header or script.
@@ -42,7 +42,7 @@ private:
 protected:
 	void KMGC_InitParser() {
 		if (IKMGC_ScriptParser::Message.Num()==0) {
-			IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::None,TEXT("OK"));
+			IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::MGC_None,TEXT("OK"));
 			IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::UnknownException,TEXT("'Unknown Exception' while parsing MGC Script."));
 			IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::InternalError,TEXT("'Internal Compiler Error' while parsing MGC Script."));
 			IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::ParsingFailure,TEXT("'Parsing Failure' while parsing MGC Script; This is usually caused by empty scripts or headers."));

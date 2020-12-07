@@ -1715,7 +1715,6 @@ UMGC_SemanticDB::UMGC_SemanticDB() {
 	RegisterClassReflection(UPhysicalAnimationComponent::StaticClass(),TEXT("U"));
 	RegisterClassReflection(UPlatformEventsComponent::StaticClass(),TEXT("U"));
 	RegisterClassReflection(USceneComponent::StaticClass(),TEXT("U"));
-	RegisterClassReflection(UAtmosphericFogComponent::StaticClass(),TEXT("U"));
 	RegisterClassReflection(UAudioComponent::StaticClass(),TEXT("U"));
 	RegisterClassReflection(UCameraComponent::StaticClass(),TEXT("U"));
 	RegisterClassReflection(UChildActorComponent::StaticClass(),TEXT("U"));

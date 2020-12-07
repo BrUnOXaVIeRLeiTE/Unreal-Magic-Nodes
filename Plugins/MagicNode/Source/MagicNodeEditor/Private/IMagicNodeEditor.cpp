@@ -102,7 +102,7 @@ TSharedRef<SDockTab> FMagicNodeEditor::OnSpawnSourceCodeViewerTAB(const FSpawnTa
 }
 
 void FMagicNodeEditor::InvokeSourceCodeViewerTAB(const FTextLocation &Location) {
-	TSharedRef<SDockTab>VIEW = FGlobalTabmanager::Get()->InvokeTab(TABSV);
+	TSharedPtr<SDockTab>VIEW = FGlobalTabmanager::Get()->TryInvokeTab(TABSV);
 	//
 	TSharedRef<SMGC_CodeEditorCore>EDIT=SNew(SMGC_CodeEditorCore,nullptr)
 	.SourceToEdit(EMGC_CodeSource::Script).ExternalSourcePath(ViewerSourcePath);
@@ -123,7 +123,7 @@ TSharedRef<SDockTab> FMagicNodeEditor::OnSpawnSourceCodeSearchTAB(const FSpawnTa
 }
 
 void FMagicNodeEditor::InvokeSourceCodeSearchTAB() {
-	TSharedRef<SDockTab>SEARCH = FGlobalTabmanager::Get()->InvokeTab(TABSS);
+	TSharedPtr<SDockTab>SEARCH = FGlobalTabmanager::Get()->TryInvokeTab(TABSS);
 	SEARCH->SetContent(SNew(SMGC_SearchFiles));
 }
 
@@ -140,7 +140,7 @@ void FMagicNodeEditor::CreateNewScriptAsset() {
 	FString AssetName = FString(TEXT("NewMagicNode"));
 	AssetTools.CreateUniqueAssetName(PackageName,AssetName,PackageName,AssetName);
 	//
-	UPackage* Package = CreatePackage(nullptr,*PackageName);
+	UPackage* Package = CreatePackage(*PackageName);
 	UPackage* OuterPack = Package->GetOutermost();
 	//
 	auto ScriptFactory = NewObject<UMGC_ScriptFactory>();

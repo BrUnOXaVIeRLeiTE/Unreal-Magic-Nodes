@@ -654,8 +654,6 @@ void SKMGC_MagicNodeWidget::UpdateDatabaseReferences() {
 	MARSHALL = FKMGC_TextSyntaxHighlighter::Create(
 		FKMGC_TextSyntaxHighlighter::FSyntaxTextStyle(KeywordDB,ClassDB,FunctionDB,SemanticDB)
 	);//
-	//
-	SetLineCountList(GetLineCount());
 }
 
 void SKMGC_MagicNodeWidget::UpdateDatabaseSemantics() {
@@ -1010,18 +1008,23 @@ FSlateColor SKMGC_MagicNodeWidget::GetTypesIconColor() const {
 }
 
 int32 SKMGC_MagicNodeWidget::GetLineCount() const {
-	TArray<FString>Array;
-	int32 Count = 0;
+	if (!HEADER_EDITOR.IsValid()) {return 0;}
+	if (!SCRIPT_EDITOR.IsValid()) {return 0;}
+	if (!TYPES_EDITOR.IsValid()) {return 0;}
 	//
+	int32 Count = 0;
 	if (Source==ESKMGC_Source::Header) {
-		const FString Text = GetHeaderText().ToString();
-		Count = Text.ParseIntoArray(Array,NLS,false);
+		for (const TCHAR &CH : HEADER_EDITOR->GetPlainText().ToString().GetCharArray()) {
+			if (CH==NLC) {Count++;}
+		}///
 	} else if (Source==ESKMGC_Source::Script) {
-		const FString Text = GetScriptText().ToString();
-		Count = Text.ParseIntoArray(Array,NLS,false);
+		for (const TCHAR &CH : SCRIPT_EDITOR->GetPlainText().ToString().GetCharArray()) {
+			if (CH==NLC) {Count++;}
+		}///
 	} else if (Source==ESKMGC_Source::Types) {
-		const FString Text = GetTypesText().ToString();
-		Count = Text.ParseIntoArray(Array,NLS,false);
+		for (const TCHAR &CH : TYPES_EDITOR->GetPlainText().ToString().GetCharArray()) {
+			if (CH==NLC) {Count++;}
+		}///
 	}///
 	//
 	return Count;
@@ -1066,21 +1069,16 @@ void SKMGC_MagicNodeWidget::OnInternalAutoCompleteScroll(float Offset) {
 void SKMGC_MagicNodeWidget::OnScriptTextChanged(const FText &InText, ETextCommit::Type CommitType) {
 	if (!IsScriptSourceEditable()) {return;}
 	//
-	//
-	TArray<FString>Lines;
-	InText.ToString().ParseIntoArrayLines(Lines,false);
-	//
 	if (AutoComplete==EAutoComplete::Active) {
-		FString Subject = SCRIPT_EDITOR->ParseAutoCompleteWord(Lines,true);
+		const FString &Subject = SCRIPT_EDITOR->ParseAutoCompleteWord(true);
 		if (AutoCompleteList.Num()>=1) {OnAdvanceAutoComplete(Subject);}
 		else {SCRIPT_EDITOR->AutoCompleteSubject(Subject);}
 	} else {
-		FString Subject = SCRIPT_EDITOR->ParseAutoCompleteWord(Lines);
+		const FString &Subject = SCRIPT_EDITOR->ParseAutoCompleteWord();
 		if (SCRIPT_EDITOR->IsAutoComplete(Subject)) {
 			SCRIPT_EDITOR->AutoCompleteSubject(Subject);
-		} else {SCRIPT_EDITOR->AutoSuggest(Lines);}
+		} else {SCRIPT_EDITOR->AutoSuggest();}
 	}///
-	//
 	//
 	SetScriptText(InText);
 	SetLineCountList(GetLineCount());
@@ -1089,21 +1087,16 @@ void SKMGC_MagicNodeWidget::OnScriptTextChanged(const FText &InText, ETextCommit
 void SKMGC_MagicNodeWidget::OnHeaderTextChanged(const FText &InText, ETextCommit::Type CommitType) {
 	if (!IsScriptSourceEditable()) {return;}
 	//
-	//
-	TArray<FString>Lines;
-	InText.ToString().ParseIntoArrayLines(Lines,false);
-	//
 	if (AutoComplete==EAutoComplete::Active) {
-		FString Subject = HEADER_EDITOR->ParseAutoCompleteWord(Lines,true);
+		const FString &Subject = HEADER_EDITOR->ParseAutoCompleteWord(true);
 		if (AutoCompleteList.Num()>=1) {OnAdvanceAutoComplete(Subject);}
 		else {HEADER_EDITOR->AutoCompleteSubject(Subject);}
 	} else {
-		FString Subject = HEADER_EDITOR->ParseAutoCompleteWord(Lines);
+		const FString &Subject = HEADER_EDITOR->ParseAutoCompleteWord();
 		if (HEADER_EDITOR->IsAutoComplete(Subject)) {
 			HEADER_EDITOR->AutoCompleteSubject(Subject);
-		} else {HEADER_EDITOR->AutoSuggest(Lines);}
+		} else {HEADER_EDITOR->AutoSuggest();}
 	}///
-	//
 	//
 	SetHeaderText(InText);
 	SetLineCountList(GetLineCount());
@@ -1112,21 +1105,16 @@ void SKMGC_MagicNodeWidget::OnHeaderTextChanged(const FText &InText, ETextCommit
 void SKMGC_MagicNodeWidget::OnTypesTextChanged(const FText &InText, ETextCommit::Type CommitType) {
 	if (!IsScriptSourceEditable()) {return;}
 	//
-	//
-	TArray<FString>Lines;
-	InText.ToString().ParseIntoArrayLines(Lines,false);
-	//
 	if (AutoComplete==EAutoComplete::Active) {
-		FString Subject = TYPES_EDITOR->ParseAutoCompleteWord(Lines,true);
+		const FString &Subject = TYPES_EDITOR->ParseAutoCompleteWord(true);
 		if (AutoCompleteList.Num()>=1) {OnAdvanceAutoComplete(Subject);}
 		else {TYPES_EDITOR->AutoCompleteSubject(Subject);}
 	} else {
-		FString Subject = TYPES_EDITOR->ParseAutoCompleteWord(Lines);
+		const FString &Subject = TYPES_EDITOR->ParseAutoCompleteWord();
 		if (TYPES_EDITOR->IsAutoComplete(Subject)) {
 			TYPES_EDITOR->AutoCompleteSubject(Subject);
-		} else {TYPES_EDITOR->AutoSuggest(Lines);}
+		} else {TYPES_EDITOR->AutoSuggest();}
 	}///
-	//
 	//
 	SetTypesText(InText);
 	SetLineCountList(GetLineCount());

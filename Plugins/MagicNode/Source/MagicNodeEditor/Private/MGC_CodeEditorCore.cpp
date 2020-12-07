@@ -324,13 +324,13 @@ bool SMGC_CodeEditorCore::IsScriptEditable() const {
 }
 
 int32 SMGC_CodeEditorCore::GetLineCount() const {
+	if (!SCRIPT_EDITOR.IsValid()) {return 0;}
 	if (IsSourceView()) {return 0;}
 	//
-	TArray<FString>Array;
 	int32 Count = 0;
-	//
-	const FString Text = GetScriptText().ToString();
-	Count = Text.ParseIntoArray(Array,NLS,false);
+	for (const TCHAR &CH : SCRIPT_EDITOR->GetPlainText().ToString().GetCharArray()) {
+		if (CH==NLC) {Count++;}
+	}///
 	//
 	return Count;
 }
@@ -549,18 +549,15 @@ void SMGC_CodeEditorCore::OnInternalAutoCompleteScroll(float Offset) {
 void SMGC_CodeEditorCore::OnScriptTextChanged(const FText &InText, ETextCommit::Type CommitType) {
 	if (!IsScriptEditable()) {return;}
 	//
-	TArray<FString>Lines;
-	InText.ToString().ParseIntoArrayLines(Lines,false);
-	//
 	if (SCRIPT_EDITOR->HasAutoComplete()) {
-		FString Subject = SCRIPT_EDITOR->ParseAutoCompleteWord(Lines,true);
+		const FString &Subject = SCRIPT_EDITOR->ParseAutoCompleteWord(true);
 		if (AutoCompleteList.Num()>=1) {OnAdvanceAutoComplete(Subject);}
 		else {SCRIPT_EDITOR->AutoCompleteSubject(Subject);}
 	} else {
-		FString Subject = SCRIPT_EDITOR->ParseAutoCompleteWord(Lines);
+		const FString &Subject = SCRIPT_EDITOR->ParseAutoCompleteWord();
 		if (SCRIPT_EDITOR->IsAutoComplete(Subject)) {
 			SCRIPT_EDITOR->AutoCompleteSubject(Subject);
-		} else {SCRIPT_EDITOR->AutoSuggest(Lines);}
+		} else {SCRIPT_EDITOR->AutoSuggest();}
 	}///
 	//
 	SetScriptText(InText);

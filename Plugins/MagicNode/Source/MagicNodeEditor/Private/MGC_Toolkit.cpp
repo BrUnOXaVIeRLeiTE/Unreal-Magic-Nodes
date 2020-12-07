@@ -520,7 +520,7 @@ void FMGC_Toolkit::CompileScript() {
 		GET()->Source.Macros
 	);//
 	//
-	if (CompilerResult != EMGC_CompilerResult::None) {
+	if (CompilerResult != EMGC_CompilerResult::MGC_None) {
 		switch (CompilerResult) {
 			case EMGC_CompilerResult::Compiled:
 			{

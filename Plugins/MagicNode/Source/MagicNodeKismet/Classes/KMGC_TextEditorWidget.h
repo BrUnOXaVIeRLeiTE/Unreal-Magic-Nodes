@@ -55,9 +55,11 @@ enum class EAutoSuggest : uint8 {
 class MAGICNODEKISMET_API SKMGC_TextEditorWidget : public SMultiLineEditableText {
 private:
 	TWeakObjectPtr<UMagicNodeScript>ScriptObject;
-	//
+private:
 	int32 SuggestPicked;
 	int32 SuggestDrawID;
+	int32 LastLineFeed;
+	int32 NextLineFeed;
 	int32 LineCount;
 	//
 	float LineHeight;
@@ -65,6 +67,9 @@ private:
 	bool IsMouseWithinCompletionBox;
 private:
 	const bool IsOperator(const TCHAR &CH) const;
+	const bool IsBracket(const TCHAR &CH) const;
+	const bool IsOpenBracket(const TCHAR &CH) const;
+	const bool IsCloseBracket(const TCHAR &CH) const;
 protected:
 	TSharedPtr<ITextLayoutMarshaller>Marshall;
 	TSharedPtr<FSlateFontMeasure>FontMeasure;
@@ -80,6 +85,7 @@ protected:
 	TArray<FString>SuggestionResults;
 	//
 	FString AutoCompleteKeyword;
+	FString CurrentLine;
 	FString UnderCursor;
 	FString KeywordInfo;
 	//
@@ -128,22 +134,24 @@ public:
 	void DeleteSelectedText();
 	void GoToLineColumn(int32 Line, int32 Column);
 	//
-	const FString GetUnderCursor() const;
+	const FString &GetUnderCursor() const;
 	const FTextLocation &GetCursorLocation() const;
 	//
+	int32 CountTabs() const;
 	int32 CountLines() const;
 	const FLinearColor GetLineIndexColor(int32 Line) const;
 	//
 	//
+	void AutoSuggest();
 	void GetKeywordInfo();
 	void InsertPickedSuggestion();
-	void AutoSuggest(const TArray<FString>&Lines);
 	void AutoCompleteSubject(const FString &Keyword);
 	void SetAutoCompleteSubject(const FString &Subject);
-	void AutoCompleteSuggestion(const TArray<FString>&Lines, const FString &Keyword);
+	void AutoCompleteSuggestion(const FString &Keyword);
 	//
-	const FString GetAutoCompleteSubject() const;
-	const FString ParseAutoCompleteWord(const TArray<FString>&Lines, const bool CleanUp=false);
+	const FString &GetCurrentLineAtCursor() const;
+	const FString &GetAutoCompleteSubject() const;
+	const FString ParseAutoCompleteWord(const bool CleanUp=false);
 	//
 	FVector2D GetCompletionBoxPos() const;
 	FVector2D GetCompletionBoxSize() const;
@@ -157,7 +165,7 @@ public:
 	const FLinearColor GetSuggestionColor(const FString &Keyword) const;
 public:
 	void SetScriptObject(UMagicNodeScript* Script);
-	//
+public:
 	void BeginEditTransaction();
 	void EndEditTransaction();
 };

@@ -34,7 +34,7 @@ FString IKMGC_ScriptParser::Docs = TEXT("");
 
 const EMGC_CompilerResult IKMGC_ScriptParser::CompileScriptClass(const FString &ScriptName, const FString &Header, const FString &Script, const FString &Types, const FString &ParentClass, const TArray<FString>&Includes, const TArray<FString>&Macros) {
 	if (Header.IsEmpty()||Script.IsEmpty()) {return EMGC_CompilerResult::ParsingFailure;}
-	EMGC_CompilerResult Result = EMGC_CompilerResult::None;
+	EMGC_CompilerResult Result = EMGC_CompilerResult::MGC_None;
 	//
 	//
 	/// :: SETUP ::
@@ -614,6 +614,7 @@ void IKMGC_ScriptParser::AutoSuggest(const TArray<FString>&Lines, const FString 
 	for (const FString &Item : Lines) {
 		if (!Item.Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
 		TArray<FString>Line;
+		//
 		int32 Nums = UE_ARRAY_COUNT(Whitespace);	
 		Item.ParseIntoArray(Line,Whitespace,Nums,true);
 		//
