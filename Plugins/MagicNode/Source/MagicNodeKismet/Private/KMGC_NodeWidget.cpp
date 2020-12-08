@@ -282,7 +282,7 @@ void SKMGC_MagicNodeWidget::CreateBelowWidgetControls(TSharedPtr<SVerticalBox>Ma
 							SNew(SBox)
 							.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
 							.MinDesiredWidth(400.f).MinDesiredHeight(250.f)
-							.MaxDesiredHeight(1250.f).MaxDesiredWidth(1500.f)
+							.MaxDesiredHeight(1500.f).MaxDesiredWidth(1200.f)
 							[
 								SNew(SBorder)
 								.VAlign(VAlign_Fill).HAlign(HAlign_Fill)

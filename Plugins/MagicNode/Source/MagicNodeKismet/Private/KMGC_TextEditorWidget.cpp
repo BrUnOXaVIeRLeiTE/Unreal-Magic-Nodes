@@ -9,10 +9,12 @@
 
 #include "KMGC_TextSyntaxHighlighter.h"
 #include "KMGC_ScriptParser.h"
+#include "KMGC_KismetTypes.h"
 #include "KMGC_NodeStyle.h"
 
 #include "MagicNodeRuntime.h"
 
+#include "Runtime/Core/Public/Async/Async.h"
 #include "Widgets/Text/SlateEditableTextLayout.h"
 #include "Editor/EditorStyle/Public/EditorStyle.h"
 
@@ -605,16 +607,6 @@ void SKMGC_TextEditorWidget::AutoCompleteSubject(const FString &Keyword) {
 	OnAutoCompleted.ExecuteIfBound(AutoCompleteResults);
 }
 
-void SKMGC_TextEditorWidget::AutoCompleteSuggestion(const FString &Keyword) {
-	SuggestionResults.Empty();
-	KeywordInfo.Empty();
-	//
-	TArray<FString>Lines;
-	Lines.Add(GetCurrentLineAtCursor());
-	//
-	IKMGC_ScriptParser::AutoSuggest(Lines,Keyword,SuggestionResults);
-}
-
 void SKMGC_TextEditorWidget::AutoCleanup(FString &Keyword) {
 	FString Clean;
 	//
@@ -650,8 +642,11 @@ void SKMGC_TextEditorWidget::AutoCleanup(FString &Keyword) {
 	Clean.ReplaceCharInline(TEXT('\\'),TEXT('\0'));
 	Clean.RemoveSpacesInline();
 	//
-	Keyword.Empty(); Keyword.Append(Clean);
+	Keyword.Empty();
+	Keyword.Append(Clean);
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const bool SKMGC_TextEditorWidget::IsAutoComplete(const FString &Keyword) const {
 	return (Keyword.EndsWith(TEXT("::"))||Keyword.EndsWith(TEXT("->"))||Keyword.EndsWith(TEXT(".")));
@@ -712,17 +707,43 @@ const bool SKMGC_TextEditorWidget::HasAutoComplete() const {
 	return (AutoCompleteResults.Num()>0);
 }
 
+const bool SKMGC_TextEditorWidget::HasSuggestion() const {
+	return ((SuggestionResults.Num()>0)&&(AutoCompleteKeyword.Len()>2));
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SKMGC_TextEditorWidget::AutoSuggest() {
 	FString Subject = (UnderCursor.IsEmpty()) ? ParseAutoCompleteWord(false) : UnderCursor;
-	AutoCompleteKeyword = Subject; AutoCleanup(AutoCompleteKeyword);
+	//
+	AutoCompleteKeyword = Subject;
+	AutoCleanup(AutoCompleteKeyword);
 	//
 	if (Subject.TrimStartAndEnd().IsEmpty()) {
 		SuggestionResults.Empty();
 		KeywordInfo.Empty();
-	}///
+	} else {AutoCompleteSuggestion(AutoCompleteKeyword);}
+}
+
+void SKMGC_TextEditorWidget::AutoCompleteSuggestion(const FString &Keyword) {
+	SuggestionResults.Empty();
+	KeywordInfo.Empty();
 	//
+	const FString &Script = GetPlainText().ToString();
+	Async(EAsyncExecution::TaskGraph,[this,&Keyword,&Script]() {
+		TArray<FString>Lines;
+		//
+		Script.ParseIntoArrayLines(Lines);
+		IKMGC_ScriptParser::AutoSuggest(Lines,Keyword,SuggestionResults);
+		//
+		FSimpleDelegateGraphTask::CreateAndDispatchWhenReady(
+			FSimpleDelegateGraphTask::FDelegate::CreateRaw(this,&SKMGC_TextEditorWidget::AutoSuggestCompleted),
+			GET_STATID(STAT_AutoComplete), nullptr, ENamedThreads::GameThread
+		);//
+	});//
+}
+
+void SKMGC_TextEditorWidget::AutoSuggestCompleted() {
 	if (HasSuggestion()) {
 		CompletionBoxSize = FVector2D::ZeroVector;
 		CompletionBoxSize.Y = FMath::Clamp(SuggestionResults.Num()*LineHeight,0.f,LineHeight*MAX_SUGGESTIONS);
@@ -737,10 +758,6 @@ void SKMGC_TextEditorWidget::AutoSuggest() {
 			SuggestPicked = SuggestionResults.Num()-1;
 		}///
 	} else {CompletionBoxSize=FVector2D::ZeroVector;}
-}
-
-const bool SKMGC_TextEditorWidget::HasSuggestion() const {
-	return ((SuggestionResults.Num()>0)&&(AutoCompleteKeyword.Len()>2));
 }
 
 void SKMGC_TextEditorWidget::InsertPickedSuggestion() {

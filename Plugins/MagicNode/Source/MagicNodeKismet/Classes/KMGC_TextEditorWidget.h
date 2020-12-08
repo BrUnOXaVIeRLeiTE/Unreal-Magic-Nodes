@@ -7,8 +7,8 @@
 
 #pragma once
 
+#include "MagicNodeKismet_Shared.h"
 #include "MagicNodeDataTypes.h"
-#include "MagicNodeRuntime_Shared.h"
 
 #include "Input/Reply.h"
 #include "Fonts/FontMeasure.h"
@@ -144,6 +144,7 @@ public:
 	//
 	void AutoSuggest();
 	void GetKeywordInfo();
+	void AutoSuggestCompleted();
 	void InsertPickedSuggestion();
 	void AutoCompleteSubject(const FString &Keyword);
 	void SetAutoCompleteSubject(const FString &Subject);
