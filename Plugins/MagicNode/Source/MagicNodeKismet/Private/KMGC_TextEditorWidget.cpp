@@ -180,11 +180,11 @@ void SKMGC_TextEditorWidget::Tick(const FGeometry &AllottedGeometry, const doubl
 	LastTickGeometry = AllottedGeometry;
 	//
 	TSharedPtr<const IRun>Run = EditableTextLayout->GetRunUnderCursor();
-	if (Run.IsValid()&&CursorLocation.IsValid()&&GetSelectedText().IsEmpty()) {
+	if (Run.IsValid() && CursorLocation.IsValid() && AnyTextSelected()) {
 		UnderCursor.Empty(); Run->AppendTextTo(UnderCursor);
 	}///
 	//
-	if (!CursorLocation.IsValid()) {return;}
+	/*if (!CursorLocation.IsValid()) {return;}
 	if (UnderCursor.TrimStartAndEnd().IsEmpty()||IsOperator(UnderCursor[0])) {
 		FTextLocation Offset = CursorLocation;
 		int32 I = CursorLocation.GetOffset()-1;
@@ -199,7 +199,7 @@ void SKMGC_TextEditorWidget::Tick(const FGeometry &AllottedGeometry, const doubl
 		UnderCursor = Raw.TrimStartAndEnd();
 		UnderCursor.ReverseString();
 		AutoCleanup(UnderCursor);
-	}///
+	}*///
 }
 
 void SKMGC_TextEditorWidget::OnTextCursorMoved(const FTextLocation &NewPosition) {
@@ -268,6 +268,19 @@ int32 SKMGC_TextEditorWidget::CountLines() const {
 	return Count;
 }
 
+int32 SKMGC_TextEditorWidget::CountSelectedLines() const {
+	if (!AnyTextSelected()) {return 0;}
+	//
+	const auto &Selected = GetSelectedText().ToString();
+	int32 Count = 1;
+	//
+	for (const TCHAR &CH : Selected.GetCharArray()) {
+		if (CH==NLC) {Count++;}
+	}///
+	//
+	return Count;
+}
+
 int32 SKMGC_TextEditorWidget::CountTabs() const {
 	int32 Count = 0;
 	//
@@ -290,8 +303,6 @@ const FLinearColor SKMGC_TextEditorWidget::GetLineIndexColor(int32 Line) const {
 
 FReply SKMGC_TextEditorWidget::OnKeyChar(const FGeometry &Geometry, const FCharacterEvent &CharacterEvent) {
 	const TCHAR CH = CharacterEvent.GetCharacter();
-	FReply Reply = FReply::Unhandled();
-	//
 	LineCount = CountLines();
 	//
 	if (CH==TEXT('\n')||CH==TEXT('\r')) {
@@ -320,6 +331,7 @@ FReply SKMGC_TextEditorWidget::OnKeyChar(const FGeometry &Geometry, const FChara
 		}///
 		//
 		EditableTextLayout->EndEditTransaction();
+		EditableTextLayout->GetCurrentTextLine(CurrentLine);
 		//
 		return FReply::Handled();
 	}///
@@ -327,35 +339,16 @@ FReply SKMGC_TextEditorWidget::OnKeyChar(const FGeometry &Geometry, const FChara
 	if (TChar<WIDECHAR>::IsWhitespace(CH)) {
 		if (!IsTextReadOnly()) {
 			if (CharacterEvent.IsCommandDown()||CharacterEvent.IsControlDown()) {
-				Reply = FReply::Handled();
+				return FReply::Handled();
 			} else {
-				EditableTextLayout->BeginEditTransation();
-				//
-				FString Space;
-				Space.AppendChar(CH);
-				InsertTextAtCursor(Space);
-				//
-				EditableTextLayout->EndEditTransaction();
-				//
 				AutoCompleteResults.Empty();
 				OnAutoCompleted.ExecuteIfBound(AutoCompleteResults);
-			} Reply = FReply::Handled();
-		} else {Reply=FReply::Unhandled();}
-	} else if (CH==TEXT('\t')) {
-		if (!IsTextReadOnly()&&GetSelectedText().IsEmpty()) {
-			EditableTextLayout->BeginEditTransation();
-			//
-			FString TAB;
-			TAB.AppendChar(CH);
-			InsertTextAtCursor(TAB);
-			//
-			EditableTextLayout->EndEditTransaction();
-			//
-			Reply = FReply::Handled();
-		} else {Reply=FReply::Unhandled();}
-	} else {Reply=SMultiLineEditableText::OnKeyChar(Geometry,CharacterEvent);}
+				SMultiLineEditableText::OnKeyChar(Geometry,CharacterEvent);
+			} return FReply::Handled();
+		} else {return FReply::Unhandled();}
+	} else if (CH==TEXT('\t')) {return FReply::Handled();}
 	//
-	return Reply;
+	return SMultiLineEditableText::OnKeyChar(Geometry,CharacterEvent);
 }
 
 FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEvent &KeyEvent) {
@@ -394,15 +387,60 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 	}///
 	//
 	if (Key==EKeys::Tab) {
+		AutoCompleteResults.Empty();
 		SuggestionResults.Empty();
 		KeywordInfo.Empty();
 		//
-		EditableTextLayout->BeginEditTransation();
+		FString In{};
+		uint32 SelectEnd = 0;
+		uint32 SelectStart = 0;
+		In.AppendChar(TEXT('\t'));
+		ITextInputMethodContext::ECaretPosition Caret = ITextInputMethodContext::ECaretPosition::Beginning;
 		//
-		SMultiLineEditableText::OnKeyDown(Geometry,KeyEvent);
-		//
-		EditableTextLayout->EndEditTransaction();
-		EditableTextLayout->ClearSelection();
+		if (AnyTextSelected()) {
+			auto Context = EditableTextLayout->GetTextInputMethodContext();
+			Context->GetSelectionRange(SelectStart,SelectEnd,Caret);
+			//
+			FTextLocation Origin = CursorLocation;
+			int32 Lines = CountSelectedLines();
+			//
+			EditableTextLayout->BeginEditTransation();
+			//
+			if (Caret==ITextInputMethodContext::ECaretPosition::Beginning) {
+				EditableTextLayout->ClearSelection();
+				InsertTextAtCursor(In);
+				//
+				for (int32 I=1; I<Lines; ++I) {
+					FTextLocation Local = FTextLocation(Origin.GetLineIndex()+I,0);
+					EditableTextLayout->GoTo(Local); InsertTextAtCursor(In);
+				}///
+				//
+				EditableTextLayout->GoTo(FTextLocation(Origin.GetLineIndex(),Origin.GetOffset()+1));
+				Context->SetSelectionRange(SelectStart+1,SelectEnd+(Lines-1),ITextInputMethodContext::ECaretPosition::Beginning);
+			} else {
+				TOptional<SlateEditableTextTypes::ECursorAlignment>Left = SlateEditableTextTypes::ECursorAlignment::Left;
+				FTextLocation Jump; EditableTextLayout->TranslateLocationVertical(Origin,-(Lines-1),Geometry.Scale,Jump,Left);
+				Jump = FTextLocation(Jump.GetLineIndex(),0);
+				EditableTextLayout->GoTo(Jump);
+				InsertTextAtCursor(In);
+				//
+				for (int32 I=1; I<Lines; ++I) {
+					FTextLocation Local = FTextLocation(Jump.GetLineIndex()+I,0);
+					EditableTextLayout->GoTo(Local); InsertTextAtCursor(In);
+				}///
+				//
+				EditableTextLayout->GoTo(FTextLocation(Origin.GetLineIndex(),Origin.GetOffset()+1));
+				Context->SetSelectionRange(SelectStart+1,SelectEnd+(Lines-1),ITextInputMethodContext::ECaretPosition::Beginning);
+			}///
+			//
+			EditableTextLayout->EndEditTransaction();
+		} else {
+			EditableTextLayout->BeginEditTransation();
+			//
+			InsertTextAtCursor(In);
+			//
+			EditableTextLayout->EndEditTransaction();
+		} EditableTextLayout->ClearSelection();
 		//
 		return FReply::Handled();
 	}///
@@ -413,7 +451,6 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 	} else if (Key==EKeys::Enter) {
 		EditableTextLayout->BeginEditTransation();
 		//
-		EditableTextLayout->GetCurrentTextLine(CurrentLine);
 		int32 AtLine = CursorLocation.GetLineIndex();
 		int32 Offset = CursorLocation.GetOffset();
 		//

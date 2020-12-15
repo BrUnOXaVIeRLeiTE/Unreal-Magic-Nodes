@@ -127,21 +127,21 @@ public:
 	virtual FReply OnMouseWheel(const FGeometry &MyGeometry, const FPointerEvent &MouseEvent) override;
 	virtual FReply OnKeyChar(const FGeometry &Geometry, const FCharacterEvent &CharacterEvent) override;
 	virtual FReply OnMouseButtonDown(const FGeometry &Geometry, const FPointerEvent &MouseEvent) override;
-	//
+public:
 	void OnTextCursorMoved(const FTextLocation &NewPosition);
 	//
 	void SelectLine();
 	void DeleteSelectedText();
 	void GoToLineColumn(int32 Line, int32 Column);
-	//
+public:
 	const FString &GetUnderCursor() const;
 	const FTextLocation &GetCursorLocation() const;
-	//
+	const FLinearColor GetLineIndexColor(int32 Line) const;
+public:
 	int32 CountTabs() const;
 	int32 CountLines() const;
-	const FLinearColor GetLineIndexColor(int32 Line) const;
-	//
-	//
+	int32 CountSelectedLines() const;
+public:
 	void AutoSuggest();
 	void GetKeywordInfo();
 	void AutoSuggestCompleted();
@@ -149,7 +149,7 @@ public:
 	void AutoCompleteSubject(const FString &Keyword);
 	void SetAutoCompleteSubject(const FString &Subject);
 	void AutoCompleteSuggestion(const FString &Keyword);
-	//
+public:
 	const FString &GetCurrentLineAtCursor() const;
 	const FString &GetAutoCompleteSubject() const;
 	const FString ParseAutoCompleteWord(const bool CleanUp=false);
