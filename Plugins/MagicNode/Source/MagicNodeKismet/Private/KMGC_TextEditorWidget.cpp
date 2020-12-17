@@ -48,12 +48,25 @@ void SKMGC_TextEditorWidget::Construct(const FArguments &InArgs) {
 	);//
 	//
 	FontMeasure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
-	LineHeight = FontMeasure->Measure("MGC_BlockStyle",FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.CodeBlockStyle").Font).Y;
+	TypeWidth = FontMeasure->Measure("A",FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.CodeBlockStyle").Font).X;
+	LineHeight = FontMeasure->Measure("A",FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.CodeBlockStyle").Font).Y;
 	//
 	LineCount = CountLines();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void SKMGC_TextEditorWidget::Tick(const FGeometry &AllottedGeometry, const double CurrentTime, const float DeltaTime) {
+	EditableTextLayout->Tick(AllottedGeometry,CurrentTime,DeltaTime);
+	LastTickGeometry = AllottedGeometry;
+	//
+	auto Run = EditableTextLayout->GetRunUnderCursor();
+	//
+	if (Run.IsValid() && CursorLocation.IsValid()) {
+		UnderCursor.Empty(); Run->AppendTextTo(UnderCursor);
+		EditableTextLayout->GetCurrentTextLine(CurrentLine);
+	}///
+}
 
 int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &Geometry, const FSlateRect &CullingRect, FSlateWindowElementList &OutDrawElements, int32 LayerID, const FWidgetStyle &WidgetStyle, bool ParentEnabled) const {
 	const ESlateDrawEffect DrawEffects = ESlateDrawEffect::None;
@@ -175,33 +188,6 @@ int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &G
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SKMGC_TextEditorWidget::Tick(const FGeometry &AllottedGeometry, const double CurrentTime, const float DeltaTime) {
-	EditableTextLayout->Tick(AllottedGeometry,CurrentTime,DeltaTime);
-	LastTickGeometry = AllottedGeometry;
-	//
-	TSharedPtr<const IRun>Run = EditableTextLayout->GetRunUnderCursor();
-	if (Run.IsValid() && CursorLocation.IsValid() && AnyTextSelected()) {
-		UnderCursor.Empty(); Run->AppendTextTo(UnderCursor);
-	}///
-	//
-	/*if (!CursorLocation.IsValid()) {return;}
-	if (UnderCursor.TrimStartAndEnd().IsEmpty()||IsOperator(UnderCursor[0])) {
-		FTextLocation Offset = CursorLocation;
-		int32 I = CursorLocation.GetOffset()-1;
-		TCHAR CH = TEXT('_'); FString Raw;
-		//
-		while ((I>INDEX_NONE)&&(!(TChar<WIDECHAR>::IsWhitespace(CH)||TChar<WIDECHAR>::IsLinebreak(CH)))&&(TChar<WIDECHAR>::IsAlpha(CH)||TChar<WIDECHAR>::IsDigit(CH)||CH==TEXT('_'))) {
-			Offset = FTextLocation(CursorLocation.GetLineIndex(),I);
-			CH = EditableTextLayout->GetCharacterAt(Offset);
-			Raw.AppendChar(CH);
-		--I;}
-		//
-		UnderCursor = Raw.TrimStartAndEnd();
-		UnderCursor.ReverseString();
-		AutoCleanup(UnderCursor);
-	}*///
-}
-
 void SKMGC_TextEditorWidget::OnTextCursorMoved(const FTextLocation &NewPosition) {
 	const float DPIScale = FSlateApplication::Get().FindWidgetWindow(this->AsShared())->GetNativeWindow()->GetDPIScaleFactor();
 	CursorLocation = NewPosition;
@@ -281,11 +267,16 @@ int32 SKMGC_TextEditorWidget::CountSelectedLines() const {
 	return Count;
 }
 
-int32 SKMGC_TextEditorWidget::CountTabs() const {
+int32 SKMGC_TextEditorWidget::CountTabs(bool BreakOnAlpha) const {
 	int32 Count = 0;
+	int32 Index = 0;
 	//
 	for (const TCHAR &CH : CurrentLine.GetCharArray()) {
-		if (CH==NLT) {Count++;}
+		if (CH==NLT) {Count++;} else if (BreakOnAlpha) {
+			if (!TChar<WIDECHAR>::IsWhitespace(CH)) {break;}
+		} Index++;
+		//
+		if (Index>=CursorLocation.GetOffset()) {break;}
 	}///
 	//
 	return Count;
@@ -331,7 +322,6 @@ FReply SKMGC_TextEditorWidget::OnKeyChar(const FGeometry &Geometry, const FChara
 		}///
 		//
 		EditableTextLayout->EndEditTransaction();
-		EditableTextLayout->GetCurrentTextLine(CurrentLine);
 		//
 		return FReply::Handled();
 	}///
@@ -638,7 +628,7 @@ void SKMGC_TextEditorWidget::AutoCompleteSubject(const FString &Keyword) {
 		IKMGC_ScriptParser::AutoComplete(Parent,AutoCompleteKeyword,AutoCompleteResults);
 	} else {
 		AutoCompleteKeyword = Subject;
-		IKMGC_ScriptParser::AutoComplete(Parent,Subject,AutoCompleteResults);
+		IKMGC_ScriptParser::AutoComplete(Parent,AutoCompleteKeyword,AutoCompleteResults);
 	}///
 	//
 	OnAutoCompleted.ExecuteIfBound(AutoCompleteResults);

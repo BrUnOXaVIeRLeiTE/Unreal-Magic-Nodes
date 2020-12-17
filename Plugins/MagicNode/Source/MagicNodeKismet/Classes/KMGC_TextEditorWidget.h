@@ -62,7 +62,9 @@ private:
 	int32 NextLineFeed;
 	int32 LineCount;
 	//
+	float TypeWidth;
 	float LineHeight;
+	//
 	bool KeyboardFocus;
 	bool IsMouseWithinCompletionBox;
 private:
@@ -138,9 +140,9 @@ public:
 	const FTextLocation &GetCursorLocation() const;
 	const FLinearColor GetLineIndexColor(int32 Line) const;
 public:
-	int32 CountTabs() const;
 	int32 CountLines() const;
 	int32 CountSelectedLines() const;
+	int32 CountTabs(bool BreakOnAlpha=false) const;
 public:
 	void AutoSuggest();
 	void GetKeywordInfo();
