@@ -1,5 +1,6 @@
-# EPIC MEGA GRANTS RECIPIENT 2020!
-![MegaGrant](https://i.imgur.com/5RkEkpe.png)
+<p align="center">
+	<img src="https://i.imgur.com/5RkEkpe.png" alt="EpicMegaGrant">
+</p>
 
 # MAGIC NODE PLUGIN -- UNREAL ENGINE 4
 
