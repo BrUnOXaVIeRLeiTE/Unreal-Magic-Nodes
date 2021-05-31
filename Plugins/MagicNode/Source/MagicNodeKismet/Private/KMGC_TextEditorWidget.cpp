@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
-///			Copyright 2020 (C) Bruno Xavier B. Leite
+///			Copyright 2021 (C) Bruno Xavier B. Leite
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -82,7 +82,9 @@ int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &G
 				FKMGC_NodeStyle::Get().Get()->GetBrush("KMGC.Lines"),
 				DrawEffects,GetLineIndexColor(L)
 			);//
-		} LayerID++;
+		}///
+		//
+		LayerID++;
 	}///
 	//
 	//
@@ -189,7 +191,9 @@ int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &G
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SKMGC_TextEditorWidget::OnTextCursorMoved(const FTextLocation &NewPosition) {
-	const float DPIScale = FSlateApplication::Get().FindWidgetWindow(this->AsShared())->GetNativeWindow()->GetDPIScaleFactor();
+	auto WidgetWindow = FSlateApplication::Get().FindWidgetWindow(this->AsShared());
+	const float DPIScale = (WidgetWindow.IsValid()) ? WidgetWindow->GetNativeWindow()->GetDPIScaleFactor() : 1.f;
+	//
 	CursorLocation = NewPosition;
 	//
 	///FVector2D OutSize, OutPosition;
@@ -568,10 +572,13 @@ FVector2D SKMGC_TextEditorWidget::GetCompletionBoxSize() const {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const FString SKMGC_TextEditorWidget::ParseAutoCompleteWord(const bool CleanUp) {
-	if (!HasKeyboardFocus()) {return FString();}
+	if (!HasKeyboardFocus()) {return FString{};}
 	//
+	FString Subject{};
 	EditableTextLayout->GetCurrentTextLine(CurrentLine);
-	FString Subject = CurrentLine;
+	if (CursorLocation.GetOffset()<(CurrentLine.Len()-1)) {
+		Subject = CurrentLine.Mid(0,CursorLocation.GetOffset());
+	} else {Subject=CurrentLine;}
 	//
 	Subject.Split(TEXT("{"),&Subject,nullptr); Subject.Split(TEXT("("),&Subject,nullptr);
 	Subject.Split(TEXT("["),&Subject,nullptr); Subject.Split(TEXT("<"),&Subject,nullptr);
@@ -735,7 +742,7 @@ const bool SKMGC_TextEditorWidget::HasAutoComplete() const {
 }
 
 const bool SKMGC_TextEditorWidget::HasSuggestion() const {
-	return ((SuggestionResults.Num()>0)&&(AutoCompleteKeyword.Len()>2));
+	return (SuggestionResults.Num()>0);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

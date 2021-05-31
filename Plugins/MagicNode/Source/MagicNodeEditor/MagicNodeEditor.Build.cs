@@ -1,4 +1,4 @@
-/// Copyright 2020 (C) Bruno Xavier B. Leite
+/// Copyright 2021 (C) Bruno Xavier B. Leite
 
 using UnrealBuildTool;
 using System.IO;
@@ -29,13 +29,13 @@ public class MagicNodeEditor : ModuleRules {
                 "UnrealEd",
                 "Projects",
                 "AssetTools",
-				"GraphEditor",
+		"GraphEditor",
                 "LevelEditor",
                 "EditorStyle",
-				"KismetWidgets",
+		"KismetWidgets",
                 "PropertyEditor",
-				"KismetCompiler",
-				"BlueprintGraph"
+		"KismetCompiler",
+		"BlueprintGraph"
             }///
         );//
         //

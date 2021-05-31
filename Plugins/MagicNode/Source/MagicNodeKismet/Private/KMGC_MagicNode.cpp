@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
-///			Copyright 2020 (C) Bruno Xavier B. Leite
+///			Copyright 2021 (C) Bruno Xavier B. Leite
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -204,7 +204,13 @@ UFunction* UKMGC_MagicNode::ExpandScript(const UMagicNodeScript* Script) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void UKMGC_MagicNode::PinConnectionListChanged(UEdGraphPin* ChangedPin) {
-	if (ChangedPin && (ChangedPin->PinName==UKMGC_MagicNodeHelper::PN_Script)) {ScriptPinChanged();}
+	if (ChangedPin && (ChangedPin->PinName==UKMGC_MagicNodeHelper::PN_Script)) {ScriptPinChanged(); return;}
+	//
+	if (ChangedPin) {
+		if (ScriptNodeWidget.IsValid()) {
+			ScriptNodeWidget->UpdateGraphNode();
+		}///
+	}///
 }
 
 void UKMGC_MagicNode::PinDefaultValueChanged(UEdGraphPin* ChangedPin) {
@@ -480,7 +486,7 @@ UMagicNode* UKMGC_MagicNode::GetRuntimeScriptObject() {
 
 FString UKMGC_MagicNode::GetScriptText() const {
 	UMagicNodeScript* Script = GetScriptObject();
-	if (Script==nullptr) {return FString();}
+	if (Script==nullptr) {return FString{};}
 	//
 	FString Name = Script->GetName();
 	Name.RemoveFromEnd(TEXT("_C"));
@@ -494,7 +500,7 @@ FString UKMGC_MagicNode::GetScriptText() const {
 
 FString UKMGC_MagicNode::GetHeaderText() const {
 	UMagicNodeScript* Script = GetScriptObject();
-	if (Script==nullptr) {return FString();}
+	if (Script==nullptr) {return FString{};}
 	//
 	FString Name = Script->GetName();
 	Name.RemoveFromEnd(TEXT("_C"));
@@ -508,7 +514,7 @@ FString UKMGC_MagicNode::GetHeaderText() const {
 
 FString UKMGC_MagicNode::GetTypesText() const {
 	UMagicNodeScript* Script = GetScriptObject();
-	if (Script==nullptr) {return FString();}
+	if (Script==nullptr) {return FString{};}
 	//
 	FString Name = Script->GetName();
 	Name.RemoveFromEnd(TEXT("_C"));
@@ -521,7 +527,8 @@ FString UKMGC_MagicNode::GetTypesText() const {
 }
 
 FString UKMGC_MagicNode::GetParentClass() const {
-	if (GetScriptObject()==nullptr) {return FString();}
+	if (GetScriptObject()==nullptr) {return FString{};}
+	//
 	UMagicNodeScript* Script = GetScriptObject();
 	//
 	FString Name = Script->ParentClass->GetName();

@@ -2,7 +2,7 @@
 	"FileVersion": 1,
 	"Version": 1,
 	"VersionName": "0.4.5",
-	"EngineVersion" : "4.26.0",
+	"EngineVersion" : "5.0.0",
 	"FriendlyName": "Magic Nodes (C++)",
 	"Description": "Scriptable Blueprint Nodes for EVERYONE!",
 	"Category": "SYNAPTECH",
@@ -23,7 +23,6 @@
 			"WhitelistPlatforms": [
 				"Android",
 				"Win64",
-				"Win32",
 				"Linux",
 				"Mac",
 				"IOS"
@@ -36,7 +35,6 @@
 			"WhitelistPlatforms": [
 				"Android",
 				"Win64",
-				"Win32",
 				"Linux",
 				"Mac",
 				"IOS"

@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
-///			Copyright 2020 (C) Bruno Xavier B. Leite
+///			Copyright 2021 (C) Bruno Xavier B. Leite
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -66,55 +66,50 @@ void SMGC_CodeEditorCore::Construct(const FArguments &InArgs, UMagicNodeScript* 
 			SNew(SVerticalBox)
 			+SVerticalBox::Slot()
 			[
-				/*SNew(SBox)
+				SNew(SBorder)
 				.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-				.MinDesiredWidth(500.f).MinDesiredHeight(300.f)
-				[*/
-					SNew(SBorder)
-					.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-					.BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
-					.OnMouseButtonDown(this,&SMGC_CodeEditorCore::OnTextPanelPressed)
+				.BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
+				.OnMouseButtonDown(this,&SMGC_CodeEditorCore::OnTextPanelPressed)
+				[
+					SAssignNew(VS_SCROLL_BOX,SScrollBox)
+					.OnUserScrolled(this,&SMGC_CodeEditorCore::OnVerticalScroll)
+					.Orientation(EOrientation::Orient_Vertical)
+					.ScrollBarThickness(FVector2D(8.f,8.f))
+					+SScrollBox::Slot()
 					[
-						SAssignNew(VS_SCROLL_BOX,SScrollBox)
-						.OnUserScrolled(this,&SMGC_CodeEditorCore::OnVerticalScroll)
-						.Orientation(EOrientation::Orient_Vertical)
-						.ScrollBarThickness(FVector2D(8.f,8.f))
-						+SScrollBox::Slot()
+						SNew(SHorizontalBox)
+						+SHorizontalBox::Slot()
+						.VAlign(VAlign_Fill).HAlign(HAlign_Left).AutoWidth()
 						[
-							SNew(SHorizontalBox)
-							+SHorizontalBox::Slot()
-							.VAlign(VAlign_Fill).HAlign(HAlign_Left).AutoWidth()
-							[
-								SNew(SBorder)
-								.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-								.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
-								[
-									SAssignNew(LINE_COUNTER,SListView<TSharedPtr<FString>>)
-									.OnSelectionChanged(this,&SMGC_CodeEditorCore::OnSelectedLineCounterItem)
-									.OnGenerateRow(this,&SMGC_CodeEditorCore::OnGenerateLineCounter)
-									.ScrollbarVisibility(EVisibility::Collapsed)
-									.ListItemsSource(&LineCount).ItemHeight(14)
-									.SelectionMode(ESelectionMode::Single)
-								]
-							]
-							+SHorizontalBox::Slot()
+							SNew(SBorder)
 							.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+							.BorderImage(FEditorStyle::GetBrush("Graph.Node.Body"))
 							[
-								SAssignNew(SCRIPT_EDITOR,SKMGC_TextEditorWidget)
-								.OnTextChanged(this,&SMGC_CodeEditorCore::OnScriptTextChanged,ETextCommit::Default)
-								.OnTextCommitted(this,&SMGC_CodeEditorCore::OnScriptTextComitted)
-								.OnInvokeSearch(this,&SMGC_CodeEditorCore::OnInvokedSearch)
-								.OnAutoComplete(this,&SMGC_CodeEditorCore::OnAutoComplete)
-								.IsEnabled(this,&SMGC_CodeEditorCore::HasScript)
-								.Text(this,&SMGC_CodeEditorCore::GetScriptText)
-								.VScrollBar(VS_SCROLL).HScrollBar(HS_SCROLL)
-								.Marshaller(MARSHALL.ToSharedRef())
-								.CanKeyboardFocus(true)
-								.IsReadOnly(false)
+								SAssignNew(LINE_COUNTER,SListView<TSharedPtr<FString>>)
+								.OnSelectionChanged(this,&SMGC_CodeEditorCore::OnSelectedLineCounterItem)
+								.OnGenerateRow(this,&SMGC_CodeEditorCore::OnGenerateLineCounter)
+								.ScrollbarVisibility(EVisibility::Collapsed)
+								.ListItemsSource(&LineCount).ItemHeight(14)
+								.SelectionMode(ESelectionMode::Single)
 							]
 						]
+						+SHorizontalBox::Slot()
+						.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
+						[
+							SAssignNew(SCRIPT_EDITOR,SKMGC_TextEditorWidget)
+							.OnTextChanged(this,&SMGC_CodeEditorCore::OnScriptTextChanged,ETextCommit::Default)
+							.OnTextCommitted(this,&SMGC_CodeEditorCore::OnScriptTextComitted)
+							.OnInvokeSearch(this,&SMGC_CodeEditorCore::OnInvokedSearch)
+							.OnAutoComplete(this,&SMGC_CodeEditorCore::OnAutoComplete)
+							.IsEnabled(this,&SMGC_CodeEditorCore::HasScript)
+							.Text(this,&SMGC_CodeEditorCore::GetScriptText)
+							.VScrollBar(VS_SCROLL).HScrollBar(HS_SCROLL)
+							.Marshaller(MARSHALL.ToSharedRef())
+							.CanKeyboardFocus(true)
+							.IsReadOnly(false)
+						]
 					]
-				/*]*/
+				]
 			]
 			+SVerticalBox::Slot()
 			.AutoHeight().Padding(0,5,0,0)
