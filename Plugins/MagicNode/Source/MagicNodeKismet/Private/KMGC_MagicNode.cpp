@@ -478,7 +478,8 @@ UMagicNode* UKMGC_MagicNode::GetRuntimeScriptObject() {
 			//
 			if (Script->RefreshRuntimeScriptClass()) {
 				UClass* Class = Script->GetRuntimeScriptClass();
-				RuntimeScriptObject = NewObject<UMagicNode>(GetTransientPackage(),Class,FName(*Name),RF_Transient);
+				const FName CheckedID = MakeUniqueObjectName(GetTransientPackage(),UMagicNode::StaticClass(),FName(*Name));
+				RuntimeScriptObject = NewObject<UMagicNode>(GetTransientPackage(),Class,CheckedID,RF_Transient);
 			}///
 		}///
 	} return RuntimeScriptObject.Get();
