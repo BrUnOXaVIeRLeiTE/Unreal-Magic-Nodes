@@ -763,18 +763,13 @@ void SKMGC_TextEditorWidget::AutoCompleteSuggestion(const FString &Keyword) {
 	SuggestionResults.Empty();
 	KeywordInfo.Empty();
 	//
-	const FString &Script = GetPlainText().ToString();
-	Async(EAsyncExecution::TaskGraph,[this,&Keyword,&Script]() {
-		TArray<FString>Lines;
-		//
-		Script.ParseIntoArrayLines(Lines);
-		IKMGC_ScriptParser::AutoSuggest(Lines,Keyword,SuggestionResults);
-		//
-		FSimpleDelegateGraphTask::CreateAndDispatchWhenReady(
-			FSimpleDelegateGraphTask::FDelegate::CreateRaw(this,&SKMGC_TextEditorWidget::AutoSuggestCompleted),
-			GET_STATID(STAT_AutoComplete), nullptr, ENamedThreads::GameThread
-		);//
-	});//
+	TArray<FString>Lines;
+	const FString Script = GetPlainText().ToString();
+	//
+	Script.ParseIntoArrayLines(Lines);
+	IKMGC_ScriptParser::AutoSuggest(Lines,Keyword,SuggestionResults);
+	//
+	AutoSuggestCompleted();
 }
 
 void SKMGC_TextEditorWidget::AutoSuggestCompleted() {
