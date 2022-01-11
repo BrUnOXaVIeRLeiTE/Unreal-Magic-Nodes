@@ -50,25 +50,25 @@ struct FSearchInfo {
 			(MatchLine==Other.MatchLine) &&
 			(MatchFilePath==Other.MatchFilePath) &&
 			(MatchWordLocation==Other.MatchWordLocation)
-		);//
-	}///
+		);
+	}
 	//
 	bool operator != (const FSearchInfo &Other) const {
 		return !(*this==Other);
-	}///
+	}
 	//
 	//
 	FSearchInfo() {
 		MatchLine = FString();
 		MatchFilePath = FString();
 		MatchWordLocation = FTextLocation();
-	}///
+	}
 	//
 	FSearchInfo(const FString &Line, const FString &Path, const FTextLocation &Local) {
 		MatchLine = Line;
 		MatchFilePath = Path;
 		MatchWordLocation = Local;
-	}///
+	}
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -92,7 +92,7 @@ public:
 	//
 	FORCEINLINE TStatId GetStatId() const {
 		RETURN_QUICK_DECLARE_CYCLE_STAT(TASK_SearchFiles,STATGROUP_ThreadPoolAsyncTasks);
-	}///
+	}
 	//
 	void DoWork() {
 		SearchResultList.Empty();
@@ -100,7 +100,7 @@ public:
 		for (const TSharedPtr<FSourceTreeNode>&Node : GlobalSourceTreeView) {
 			if ((!TASK_SearchFiles::SearchRoot.IsEmpty())&&(TASK_SearchFiles::SearchRoot!=TEXT("All"))) {
 				if (!Node->Path.Contains(TASK_SearchFiles::SearchRoot)) {continue;}
-			}///
+			}
 			//
 			SearchInFile(Node->FullPath);
 			//
@@ -116,8 +116,8 @@ public:
 								SearchInFile(N5->FullPath);
 								for (const TSharedPtr<FSourceTreeNode>&N6 : N5->ChildNodes) {
 									SearchInFile(N6->FullPath);
-			}	}	}	}	}	}///
-		}///
+			}	}	}	}	}	}
+		}
 		//
 		if (SearchResultList.Num()>0) {
 			SearchResultList.Sort(
@@ -130,12 +130,12 @@ public:
 					if (TI->MatchLine.StartsWith(TEXT("//"))) {return false;}
 					//
 					return (TI->MatchLine > SI->MatchLine);
-				}///
-			);//
+				}
+			);
 			//
 			RequestListRefresh = true;
-		}///
-	}///
+		}
+	}
 	//
 	bool CanAbandon() {return true;}
 };
@@ -164,7 +164,7 @@ public:
 	virtual ~SMGC_SearchFiles();
 	//
 	SLATE_BEGIN_ARGS(SMGC_SearchFiles)
-	{}///
+	{}
 		SLATE_ARGUMENT(FString,SearchWord)
 	SLATE_END_ARGS()
 	//

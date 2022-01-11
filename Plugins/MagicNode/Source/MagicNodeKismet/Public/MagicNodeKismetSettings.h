@@ -23,30 +23,30 @@ class UMGC_ClassDB;
 UCLASS(classGroup="Synaptech", Category="Synaptech", config="MagicNode")
 class MAGICNODEKISMET_API UKMGC_Settings : public UObject {
 	GENERATED_BODY()
-	//
+
 	UKMGC_Settings();
 public:
 	void PostLoad() override;
-	//
+
 	/// :: KISMET ::
-	///
+
 	UPROPERTY(Category="MGC Kismet Data", config, EditDefaultsOnly, meta=(DisplayName="Keyword Database"))
 	TSet<TSoftObjectPtr<UMGC_KeywordDB>>KeywordDB;
-	//
+
 	UPROPERTY(Category="MGC Kismet Data", config, EditDefaultsOnly, meta=(DisplayName="Function Database"))
 	TSet<TSoftObjectPtr<UMGC_FunctionDB>>FunctionDB;
-	//
+
 	UPROPERTY(Category="MGC Kismet Data", config, EditDefaultsOnly, meta=(DisplayName="Class Database"))
 	TSet<TSoftObjectPtr<UMGC_ClassDB>>ClassDB;
-	//
+
 	UPROPERTY(Category="MGC Kismet Data", config, EditDefaultsOnly, meta=(DisplayName="Semantic Database"))
 	TSet<TSoftObjectPtr<UMGC_SemanticDB>>SemanticDB;
-	//
-	//
+
+
 	UPROPERTY(Category="MGC Node Editor", config, EditDefaultsOnly)
 	bool ShowKeywordHints;
-	//
-	//
+
+
 	/* If enabled, the auto-complete system will search for Unreal Types on Editor launch.
 	The list of types is HUGE and Editor startup could increase by several minutes with this activated. */
 	UPROPERTY(Category="MGC Code Completion", config, EditDefaultsOnly)

@@ -1,8 +1,8 @@
 {
 	"FileVersion": 1,
 	"Version": 1,
-	"VersionName": "0.4.5",
-	"EngineVersion" : "5.0.0",
+	"VersionName": "0.4.7",
+	"EngineVersion" : "4.27.0",
 	"FriendlyName": "Magic Nodes (C++)",
 	"Description": "Scriptable Blueprint Nodes for EVERYONE!",
 	"Category": "SYNAPTECH",
@@ -11,9 +11,9 @@
 	"DocsURL": "https://brunoxavierleite.wordpress.com/2019/01/16/unreal-magic-nodes-programming/",
 	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/38f49e7411bc47588e0d219758d6b16f",
 	"SupportURL": "mailto:bruno_xavier_@msn.com",
-	"IsBetaVersion": true,
 	"CanContainContent": true,
 	"EnabledByDefault": true,
+	"IsBetaVersion": true,
 	"Installed": true,
 	"Modules": [
 		{

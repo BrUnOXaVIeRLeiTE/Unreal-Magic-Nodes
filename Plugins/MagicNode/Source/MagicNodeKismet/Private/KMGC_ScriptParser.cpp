@@ -90,8 +90,8 @@ const EMGC_CompilerResult IKMGC_ScriptParser::CompileScriptClass(const FString &
 		} else {
 			Include.Append(In);
 			Include.AppendChar(NLC);
-		}///
-	}///
+		}
+	}
 	Include.RemoveFromEnd(NLS);
 	IKMGC_ScriptParser::THeader.ReplaceInline(TEXT("{Includes}"),*Include);
 	//
@@ -102,7 +102,7 @@ const EMGC_CompilerResult IKMGC_ScriptParser::CompileScriptClass(const FString &
 	for (FString In : Macros) {
 		Macroe.Append(In);
 		Macroe.AppendChar(NLC);
-	}///
+	}
 	Macroe.RemoveFromEnd(NLS);
 	IKMGC_ScriptParser::THeader.ReplaceInline(TEXT("{Macros}"),*Macroe);
 	//
@@ -131,7 +131,7 @@ const EMGC_CompilerResult IKMGC_ScriptParser::CompileScriptClass(const FString &
 	} if (!HeaderCheck.Contains(TEXT("BlueprintCallable"),ESearchCase::CaseSensitive)) {
 		LOG_MGC(EMGCSeverity::Error,TEXT("'BlueprintCallable' property must exist on 'Execute' function."));
 		Result=EMGC_CompilerResult::InvalidSyntax;
-	}}///
+	}}
 	//
 	//
 	/// :: PARSE SYNTAX (Script Types to C++ Types) ::
@@ -189,8 +189,8 @@ const FKeywordDefinition & IKMGC_ScriptParser::GetKeywordInfo(const FString &Key
 			if (DB.Get()->KeywordDefinitions.Contains(Keyword)) {return DB.Get()->KeywordDefinitions.FindChecked(Keyword);}
 			if (DB.Get()->MacroDefinitions.Contains(Keyword)) {return DB.Get()->MacroDefinitions.FindChecked(Keyword);}
 			if (DB.Get()->TypeDefinitions.Contains(Keyword)) {return DB.Get()->TypeDefinitions.FindChecked(Keyword);}
-		}///
-	}///
+		}
+	}
 	//
 	return IKMGC_ScriptParser::NOKeywordInfo;
 }
@@ -201,8 +201,8 @@ FClassDefinition & IKMGC_ScriptParser::GetClassReference(const FString &Keyword)
 	for (auto DB : _Settings->SemanticDB.Array()) {
 		if (DB.IsValid()) {
 			if (DB.Get()->ClassDefinitions.Contains(Keyword)) {return DB.Get()->ClassDefinitions.FindChecked(Keyword);}
-		}///
-	}///
+		}
+	}
 	//
 	return IKMGC_ScriptParser::ClassPointer;
 }
@@ -213,8 +213,8 @@ const FClassDefinition & IKMGC_ScriptParser::GetClassInfo(const FString &Keyword
 	for (auto DB : _Settings->SemanticDB.Array()) {
 		if (DB.IsValid()) {
 			if (DB.Get()->ClassDefinitions.Contains(Keyword)) {return DB.Get()->ClassDefinitions.FindChecked(Keyword);}
-		}///
-	}///
+		}
+	}
 	//
 	//
 	UMGC_SemanticDB* DB = _Settings->SemanticDB.Array()[0].Get();
@@ -225,21 +225,21 @@ const FClassDefinition & IKMGC_ScriptParser::GetClassInfo(const FString &Keyword
 		if (UClass*Class=FindObject<UClass>(ANY_PACKAGE,*NPK,true)) {
 			DB->RegisterClassReflection(Class,Class->GetPrefixCPP());
 			return DB->ClassDefinitions.FindChecked(Class->GetPrefixCPP()+NPK);
-		}///
+		}
 	} else if (NPK.RemoveFromStart(TEXT("U"),ESearchCase::CaseSensitive)) {
 		if (UClass*Class=FindObject<UClass>(ANY_PACKAGE,*NPK,true)) {
 			DB->RegisterClassReflection(Class,Class->GetPrefixCPP());
 			return DB->ClassDefinitions.FindChecked(Class->GetPrefixCPP()+NPK);
-		}///
+		}
 	} else if (NPK.RemoveFromStart(TEXT("F"),ESearchCase::CaseSensitive)) {
 		if (UScriptStruct*Struct=FindObject<UScriptStruct>(ANY_PACKAGE,*NPK,true)) {
 			DB->RegisterStructReflection(Struct);
 			return DB->ClassDefinitions.FindChecked(Struct->GetPrefixCPP()+NPK);
-		}///
+		}
 	} else if (UEnum*Enum=FindObject<UEnum>(ANY_PACKAGE,*Keyword,true)) {
 		DB->RegisterEnumReflection(Enum);
 		return DB->ClassDefinitions.FindChecked(Keyword);
-	}///
+	}
 	//
 	return IKMGC_ScriptParser::NOClassInfo;
 }
@@ -268,7 +268,7 @@ const FClassDefinition & IKMGC_ScriptParser::GetClassPointerInfo(const FString &
 						return IKMGC_ScriptParser::GetClassInfo(Container);
 					} else {
 						return IKMGC_ScriptParser::GetClassInfo(Subject);
-					}///
+					}
 				} else if (OwnerClass.Variables.Contains(Instance.ObjectName)) {
 					const FPropertyDefinition &PropInfo = IKMGC_ScriptParser::GetPropertyInfo(Instance.ObjectName);
 					FString Subject = PropInfo.ReturnType; FString Container;
@@ -280,11 +280,11 @@ const FClassDefinition & IKMGC_ScriptParser::GetClassPointerInfo(const FString &
 						return IKMGC_ScriptParser::GetClassInfo(Container);
 					} else {
 						return IKMGC_ScriptParser::GetClassInfo(Subject);
-					}///
-				}///
-			}///
+					}
+				}
+			}
 		} else {return IKMGC_ScriptParser::GetClassInfo(Keyword);}
-	}///
+	}
 	//
 	return IKMGC_ScriptParser::NOClassInfo;
 }
@@ -295,8 +295,8 @@ const FClassRedirector & IKMGC_ScriptParser::GetClassRedirector(const FString &K
 	for (auto DB : _Settings->SemanticDB.Array()) {
 		if (DB.IsValid()&&DB.Get()->ClassRedirectors.Contains(Keyword)) {
 			return DB.Get()->ClassRedirectors.FindChecked(Keyword);
-		}///
-	}///
+		}
+	}
 	//
 	return IKMGC_ScriptParser::NORedirector;
 }
@@ -311,9 +311,9 @@ const FPropertyDefinition & IKMGC_ScriptParser::GetPropertyInfo(const FString &K
 			//
 			for (const auto &ClassInfo : Classes) {
 				if (ClassInfo.Variables.Contains(Keyword)) {return ClassInfo.Variables.FindChecked(Keyword);}
-			}///
-		}///
-	}///
+			}
+		}
+	}
 	//
 	return IKMGC_ScriptParser::NOPropertyInfo;
 }
@@ -326,8 +326,8 @@ const FPropertyDefinition & IKMGC_ScriptParser::GetPropertyInfo(const UClass* Fr
 		if (DB.IsValid()&&DB.Get()->ClassDefinitions.Contains(FString(TEXT("U"))+FromClass->GetName())) {
 			const FClassDefinition &ClassInfo = DB.Get()->ClassDefinitions.FindChecked(FString(TEXT("U"))+FromClass->GetName());
 			if (ClassInfo.Variables.Contains(Keyword)) {return ClassInfo.Variables.FindChecked(Keyword);}
-		}///
-	}///
+		}
+	}
 	//
 	return IKMGC_ScriptParser::NOPropertyInfo;
 }
@@ -340,8 +340,8 @@ const FPropertyDefinition & IKMGC_ScriptParser::GetPropertyInfo(const UScriptStr
 		if (DB.IsValid()&&DB.Get()->ClassDefinitions.Contains(FString(TEXT("F"))+FromStruct->GetName())) {
 			const FClassDefinition &ClassInfo = DB.Get()->ClassDefinitions.FindChecked(FString(TEXT("F"))+FromStruct->GetName());
 			if (ClassInfo.Variables.Contains(Keyword)) {return ClassInfo.Variables.FindChecked(Keyword);}
-		}///
-	}///
+		}
+	}
 	//
 	return IKMGC_ScriptParser::NOPropertyInfo;
 }
@@ -354,8 +354,8 @@ const FPropertyDefinition & IKMGC_ScriptParser::GetPropertyInfo(const FString &F
 		if (DB.IsValid()&&DB.Get()->ClassDefinitions.Contains(FromClass)) {
 			const FClassDefinition &ClassInfo = DB.Get()->ClassDefinitions.FindChecked(FromClass);
 			if (ClassInfo.Variables.Contains(Keyword)) {return ClassInfo.Variables.FindChecked(Keyword);}
-		}///
-	}///
+		}
+	}
 	//
 	return IKMGC_ScriptParser::NOPropertyInfo;
 }
@@ -370,9 +370,9 @@ const FFunctionDefinition & IKMGC_ScriptParser::GetFunctionInfo(const FString &K
 			//
 			for (const auto &ClassInfo : Classes) {
 				if (ClassInfo.Functions.Contains(Keyword)) {return ClassInfo.Functions.FindChecked(Keyword);}
-			}///
-		}///
-	}///
+			}
+		}
+	}
 	//
 	return IKMGC_ScriptParser::NOFunctionInfo;
 }
@@ -385,8 +385,8 @@ const FFunctionDefinition & IKMGC_ScriptParser::GetFunctionInfo(const UClass* Fr
 		if (DB.IsValid()&&DB.Get()->ClassDefinitions.Contains(FString(TEXT("U"))+FromClass->GetName())) {
 			const FClassDefinition &ClassInfo = DB.Get()->ClassDefinitions.FindChecked(FString(TEXT("U"))+FromClass->GetName());
 			if (ClassInfo.Functions.Contains(Keyword)) {return ClassInfo.Functions.FindChecked(Keyword);}
-		}///
-	}///
+		}
+	}
 	//
 	return IKMGC_ScriptParser::NOFunctionInfo;
 }
@@ -399,8 +399,8 @@ const FFunctionDefinition & IKMGC_ScriptParser::GetFunctionInfo(const FString &F
 		if (DB.IsValid()&&DB.Get()->ClassDefinitions.Contains(FromClass)) {
 			const FClassDefinition &ClassInfo = DB.Get()->ClassDefinitions.FindChecked(FromClass);
 			if (ClassInfo.Functions.Contains(Keyword)) {return ClassInfo.Functions.FindChecked(Keyword);}
-		}///
-	}///
+		}
+	}
 	//
 	return IKMGC_ScriptParser::NOFunctionInfo;
 }
@@ -411,8 +411,8 @@ const FString & IKMGC_ScriptParser::GetClassDocumentation(const FString &Keyword
 	for (auto DB : _Settings->SemanticDB.Array()) {
 		if (DB.IsValid()) {
 			if (DB.Get()->Documentation.Contains(Keyword)) {return DB.Get()->Documentation.FindChecked(Keyword);}
-		}///
-	}///
+		}
+	}
 	//
 	return Docs;
 }
@@ -475,7 +475,7 @@ void IKMGC_ScriptParser::AutoComplete(const FString &Owner, const FString &Keywo
 				} else {
 					const FClassDefinition &ReturnInfo = IKMGC_ScriptParser::GetClassPointerInfo(Subject);
 					IKMGC_ScriptParser::BuildAutoComplete(ReturnInfo,Results);
-				}///
+				}
 			} else { 
 				const FClassRedirector &Redirect = IKMGC_ScriptParser::GetClassRedirector(Owner);
 				const FFunctionDefinition &Fun2Info = IKMGC_ScriptParser::GetFunctionInfo(Redirect.ObjectClass,Keyword);
@@ -492,7 +492,7 @@ void IKMGC_ScriptParser::AutoComplete(const FString &Owner, const FString &Keywo
 					} else {
 						const FClassDefinition &ReturnInfo = IKMGC_ScriptParser::GetClassPointerInfo(Subject);
 						IKMGC_ScriptParser::BuildAutoComplete(ReturnInfo,Results);
-					}///
+					}
 				} else {
 					const FPropertyDefinition &PropInfo = IKMGC_ScriptParser::GetPropertyInfo(Owner,Keyword);
 					if (PropInfo != IKMGC_ScriptParser::NOPropertyInfo) {
@@ -508,7 +508,7 @@ void IKMGC_ScriptParser::AutoComplete(const FString &Owner, const FString &Keywo
 						} else {
 							const FClassDefinition &ReturnInfo = IKMGC_ScriptParser::GetClassPointerInfo(Subject);
 							IKMGC_ScriptParser::BuildAutoComplete(ReturnInfo,Results);
-						}///
+						}
 					} else {
 						const FPropertyDefinition &Prop2Info = IKMGC_ScriptParser::GetPropertyInfo(Redirect.ObjectClass,Keyword);
 						if (Prop2Info != IKMGC_ScriptParser::NOPropertyInfo) {
@@ -524,13 +524,13 @@ void IKMGC_ScriptParser::AutoComplete(const FString &Owner, const FString &Keywo
 							} else {
 								const FClassDefinition &ReturnInfo = IKMGC_ScriptParser::GetClassPointerInfo(Subject);
 								IKMGC_ScriptParser::BuildAutoComplete(ReturnInfo,Results);
-							}///
-						}///
-					}///
-				}///
-			}///
-		}///
-	}///
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 const bool IKMGC_ScriptParser::BuildAutoComplete(const FClassDefinition &Definition, TArray<FString>&Results) {
@@ -572,7 +572,7 @@ const bool IKMGC_ScriptParser::BuildAutoComplete(const FClassDefinition &Definit
 			//
 			Result += Item;
 			Results.Add(Result);
-		}///
+		}
 		//
 		for (const FString &Item : Funs) {
 			const FFunctionDefinition &DEF = Definition.Functions.FindChecked(Item);
@@ -587,7 +587,7 @@ const bool IKMGC_ScriptParser::BuildAutoComplete(const FClassDefinition &Definit
 			//
 			Result += Item;
 			Results.Add(Result);
-		}///
+		}
 	} else {return false;}
 	//
 	return true;
@@ -625,12 +625,12 @@ void IKMGC_ScriptParser::AutoSuggest(const TArray<FString>&Lines, const FString 
 			FString Clean;
 			for (const TCHAR &CH : Key) {
 				if ((TChar<WIDECHAR>::IsAlpha(CH)||TChar<WIDECHAR>::IsDigit(CH)||CH==TEXT('_'))) {Clean.AppendChar(CH);}
-			}///
+			}
 			//
 			if (Keyword.Contains(Clean)||Clean.Len()<Keyword.Len())
 			{continue;} else {Results.AddUnique(Clean);}
-		}///
-	}///
+		}
+	}
 	//
 	for (auto DB : MGC_Settings->KeywordDB.Array()) {
 		auto DTB = DB.Get(); if (DTB) {
@@ -640,7 +640,7 @@ void IKMGC_ScriptParser::AutoSuggest(const TArray<FString>&Lines, const FString 
 				if (!IT->Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
 				if (Keyword.Contains((*IT),ESearchCase::CaseSensitive)||IT->Len()<Keyword.Len())
 				{continue;} else {Results.AddUnique(*IT);}
-			}///
+			}
 			//
 			for (auto IT=DTB->Macros.CreateConstIterator(); IT; ++IT) {
 				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
@@ -648,7 +648,7 @@ void IKMGC_ScriptParser::AutoSuggest(const TArray<FString>&Lines, const FString 
 				if (!IT->Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
 				if (Keyword.Contains((*IT),ESearchCase::CaseSensitive)||IT->Len()<Keyword.Len())
 				{continue;} else {Results.AddUnique(*IT);}
-			}///
+			}
 			//
 			for (auto IT=DTB->Processors.CreateConstIterator(); IT; ++IT) {
 				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
@@ -656,7 +656,7 @@ void IKMGC_ScriptParser::AutoSuggest(const TArray<FString>&Lines, const FString 
 				if (!IT->Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
 				if (Keyword.Contains((*IT),ESearchCase::CaseSensitive)||IT->Len()<Keyword.Len())
 				{continue;} else {Results.AddUnique(*IT);}
-			}///
+			}
 			//
 			for (auto IT=DTB->Extensions.CreateConstIterator(); IT; ++IT) {
 				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
@@ -664,9 +664,9 @@ void IKMGC_ScriptParser::AutoSuggest(const TArray<FString>&Lines, const FString 
 				if (!IT->Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
 				if (Keyword.Contains((*IT),ESearchCase::CaseSensitive)||IT->Len()<Keyword.Len())
 				{continue;} else {Results.AddUnique(*IT);}
-			}///
-		}///
-	}///
+			}
+		}
+	}
 	//
 	for (auto DB : MGC_Settings->ClassDB.Array()) {
 		auto DTB = DB.Get(); if (DTB) {
@@ -676,7 +676,7 @@ void IKMGC_ScriptParser::AutoSuggest(const TArray<FString>&Lines, const FString 
 				if (!IT->Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
 				if (Keyword.Contains((*IT),ESearchCase::CaseSensitive)||IT->Len()<Keyword.Len())
 				{continue;} else {Results.AddUnique(*IT);}
-			}///
+			}
 			//
 			for (auto IT=DTB->ScriptTypes.CreateConstIterator(); IT; ++IT) {
 				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
@@ -684,7 +684,7 @@ void IKMGC_ScriptParser::AutoSuggest(const TArray<FString>&Lines, const FString 
 				if (!IT->Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
 				if (Keyword.Contains((*IT),ESearchCase::CaseSensitive)||IT->Len()<Keyword.Len())
 				{continue;} else {Results.AddUnique(*IT);}
-			}///
+			}
 			//
 			for (auto IT=DTB->Extensions.CreateConstIterator(); IT; ++IT) {
 				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
@@ -692,9 +692,9 @@ void IKMGC_ScriptParser::AutoSuggest(const TArray<FString>&Lines, const FString 
 				if (!IT->Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
 				if (Keyword.Contains((*IT),ESearchCase::CaseSensitive)||IT->Len()<Keyword.Len())
 				{continue;} else {Results.AddUnique(*IT);}
-			}///
-		}///
-	}///
+			}
+		}
+	}
 	//
 	for (auto DB : MGC_Settings->FunctionDB.Array()) {
 		auto DTB = DB.Get(); if (DTB) {
@@ -704,7 +704,7 @@ void IKMGC_ScriptParser::AutoSuggest(const TArray<FString>&Lines, const FString 
 				if (!IT->Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
 				if (Keyword.Contains((*IT),ESearchCase::CaseSensitive)||IT->Len()<Keyword.Len())
 				{continue;} else {Results.AddUnique(*IT);}
-			}///
+			}
 			//
 			for (auto IT=DTB->Extensions.CreateConstIterator(); IT; ++IT) {
 				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
@@ -712,9 +712,9 @@ void IKMGC_ScriptParser::AutoSuggest(const TArray<FString>&Lines, const FString 
 				if (!IT->Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
 				if (Keyword.Contains((*IT),ESearchCase::CaseSensitive)||IT->Len()<Keyword.Len())
 				{continue;} else {Results.AddUnique(*IT);}
-			}///
-		}///
-	}///
+			}
+		}
+	}
 	//
 	for (auto DB : MGC_Settings->SemanticDB.Array()) {
 		auto DTB = DB.Get(); if (DTB) {
@@ -724,7 +724,7 @@ void IKMGC_ScriptParser::AutoSuggest(const TArray<FString>&Lines, const FString 
 				if (!IT->Key.Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
 				if (Keyword.Contains(IT->Key,ESearchCase::CaseSensitive)||IT->Key.Len()<Keyword.Len())
 				{continue;} else {Results.AddUnique(IT->Key);}
-			}///
+			}
 			//
 			for (auto IT=DTB->ClassRedirectors.CreateConstIterator(); IT; ++IT) {
 				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
@@ -732,7 +732,7 @@ void IKMGC_ScriptParser::AutoSuggest(const TArray<FString>&Lines, const FString 
 				if (!IT->Key.Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
 				if (Keyword.Contains(IT->Key,ESearchCase::CaseSensitive)||IT->Key.Len()<Keyword.Len())
 				{continue;} else {Results.AddUnique(IT->Key);}
-			}///
+			}
 			//
 			for (auto IT=DTB->MacroDefinitions.CreateConstIterator(); IT; ++IT) {
 				if (Results.Num()>=MAX_SUGGESTIONS) {return;}
@@ -740,15 +740,15 @@ void IKMGC_ScriptParser::AutoSuggest(const TArray<FString>&Lines, const FString 
 				if (!IT->Key.Contains(Keyword,ESearchCase::CaseSensitive)) {continue;}
 				if (Keyword.Contains(IT->Key,ESearchCase::CaseSensitive)||IT->Key.Len()<Keyword.Len())
 				{continue;} else {Results.AddUnique(IT->Key);}
-			}///
-		}///
-	}///
+			}
+		}
+	}
 	//
 	Results.Sort();
 	//
 	if (Results.Num()==0) {
 		//@ToDo: Search C++/H files...
-	}///
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -791,8 +791,8 @@ const bool IKMGC_ScriptParser::ParseClassFromHeader(const FString &Header, const
 		Parse.ParseIntoArray(Comments,TEXT("|~|"));
 		for (const FString &C : Comments) {
 			Raw.ReplaceInline(*C,TEXT(""));
-		}///
-	}///
+		}
+	}
 	Parse.Empty();
 	{///
 		int32 I=0;
@@ -814,8 +814,8 @@ const bool IKMGC_ScriptParser::ParseClassFromHeader(const FString &Header, const
 		Parse.ParseIntoArray(Comments,TEXT("|~|"));
 		for (const FString &C : Comments) {
 			Raw.ReplaceInline(*C,TEXT(""));
-		}///
-	}///
+		}
+	}
 	//
 	//
 	bool Parsed = false;
@@ -829,8 +829,8 @@ const bool IKMGC_ScriptParser::ParseClassFromHeader(const FString &Header, const
 		for (const FString &Island : Islands) {
 			const bool _Parsed = IKMGC_ScriptParser::ParseHeaderIsland(Class,Island,ClassInfo,Level);
 			if (!Parsed) {Parsed=_Parsed;}
-		}///
-	}///
+		}
+	}
 	//
 	if (ClassInfo != IKMGC_ScriptParser::NOClassInfo) {
 		if (!SemanticDB->ClassDefinitions.Contains(Class)) {
@@ -840,9 +840,9 @@ const bool IKMGC_ScriptParser::ParseClassFromHeader(const FString &Header, const
 			if (ClassRef != IKMGC_ScriptParser::NOClassInfo) {
 				ClassRef.Variables.Append(ClassInfo.Variables);
 				ClassRef.Functions.Append(ClassInfo.Functions);
-			}///
-		}///
-	}///
+			}
+		}
+	}
 	//
 	//
 	TArray<FString>Props;
@@ -853,7 +853,7 @@ const bool IKMGC_ScriptParser::ParseClassFromHeader(const FString &Header, const
 		Redirect.ObjectClass = ClassInfo.Variables[Prop].ReturnType;
 		Redirect.Hint = FString::Printf(TEXT("%s  ::  %s  %s"),*Class,*Redirect.ObjectClass,*Redirect.ObjectName);
 		SemanticDB->ClassRedirectors.Add(Redirect.ObjectName,Redirect);
-	}///
+	}
 	//
 	TArray<FString>Funs;
 	ClassInfo.Functions.GenerateKeyArray(Funs);
@@ -864,7 +864,7 @@ const bool IKMGC_ScriptParser::ParseClassFromHeader(const FString &Header, const
 		Redirect.Hint = FString::Printf(TEXT("%s  ::  %s  %s"),*Class,*Redirect.ObjectClass,*Redirect.ObjectName);
 		SemanticDB->ClassRedirectors.Add(Redirect.ObjectName,Redirect);
 		FunctionDB->Extensions.Add(Redirect.ObjectName);
-	}///
+	}
 	//
 	return Parsed;
 }
@@ -969,7 +969,7 @@ const bool IKMGC_ScriptParser::ParseHeaderIsland(const FString &Class, const FSt
 				Line.Split(TEXT(" "),&Ptr,&Var);
 				Fun.ReturnType=Ptr.TrimStartAndEnd();
 				Prop.ReturnType=Ptr.TrimStartAndEnd();
-			}///
+			}
 			//
 			if (Line.Contains(TEXT("("))) {
 				Line.Split(TEXT("("),&Line,nullptr);
@@ -981,10 +981,10 @@ const bool IKMGC_ScriptParser::ParseHeaderIsland(const FString &Class, const FSt
 				} else {Line.Split(TEXT(" "),&Ptr,&Var);}
 				//
 				Fun.ReturnType = Ptr.TrimStartAndEnd();
-			}///
+			}
 			//
 			Var.TrimStartAndEndInline();
-		}///
+		}
 		//
 		if (Flag==0) {
 			Prop.Access = Level;
@@ -997,8 +997,8 @@ const bool IKMGC_ScriptParser::ParseHeaderIsland(const FString &Class, const FSt
 			Fun.TypeOf = TypeOf;
 			Fun.StackOf = StackOf;
 			ClassInfo.Functions.Add(Var,Fun);
-		}///
-	}///
+		}
+	}
 	//
 	return true;
 }

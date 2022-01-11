@@ -33,14 +33,14 @@ TSharedRef<FKMGC_TextSyntaxHighlighter>FKMGC_TextSyntaxHighlighter::Create(const
 			//
 			for (const FString Keyword : Core) {
 				TokenizerRules.Emplace(FSyntaxTokenizer::FRule(Keyword));
-			}///
+			}
 			//
 			for (const FString Keyword : Extended) {
 				if (Core.Contains(Keyword)) {continue;}
 				TokenizerRules.Emplace(FSyntaxTokenizer::FRule(Keyword));
-			}///
-		}///
-	}///
+			}
+		}
+	}
 	//
 	if (InSyntaxStyle.KeywordDB.Num()>0) {
 		for (const UMGC_KeywordDB* DB : InSyntaxStyle.KeywordDB) {
@@ -50,9 +50,9 @@ TSharedRef<FKMGC_TextSyntaxHighlighter>FKMGC_TextSyntaxHighlighter::Create(const
 			//
 			for (const FString Operator : Operators) {
 				TokenizerRules.Emplace(FSyntaxTokenizer::FRule(Operator));
-			}///
-		}///
-	}///
+			}
+		}
+	}
 	//
 	if (InSyntaxStyle.KeywordDB.Num()>0) {
 		for (const UMGC_KeywordDB* DB : InSyntaxStyle.KeywordDB) {
@@ -62,9 +62,9 @@ TSharedRef<FKMGC_TextSyntaxHighlighter>FKMGC_TextSyntaxHighlighter::Create(const
 			//
 			for (const FString Processor : Processors) {
 				TokenizerRules.Emplace(FSyntaxTokenizer::FRule(Processor));
-			}///
-		}///
-	}///
+			}
+		}
+	}
 	//
 	if (InSyntaxStyle.ClassDB.Num()>0) {
 		for (const UMGC_ClassDB* DB : InSyntaxStyle.ClassDB) {
@@ -74,9 +74,9 @@ TSharedRef<FKMGC_TextSyntaxHighlighter>FKMGC_TextSyntaxHighlighter::Create(const
 			//
 			for (const FString Typed : Types) {
 				TokenizerRules.Emplace(FSyntaxTokenizer::FRule(Typed));
-			}///
-		}///
-	}///
+			}
+		}
+	}
 	//
 	//
 	return MakeShareable(new FKMGC_TextSyntaxHighlighter(FSyntaxTokenizer::Create(TokenizerRules),InSyntaxStyle));
@@ -112,11 +112,11 @@ void FKMGC_TextSyntaxHighlighter::ParseTokens(const FString &Source, FTextLayout
 				bool LoopBack=false;
 				ParseToken(Source,Token,TText,RunInfo,TextStyle,ParserState,LoopBack);
 				TSharedRef<ISlateRun>Run=FSlateTextRun::Create(RunInfo,Runner,TextStyle,RunRange); Runs.Add(Run);
-			}///
-		}///
+			}
+		}
 		//
 		ParsedLines.Emplace(MoveTemp(Runner),MoveTemp(Runs));
-	}///
+	}
 	//
 	Layout.AddLines(ParsedLines);
 }
@@ -167,25 +167,25 @@ void FKMGC_TextSyntaxHighlighter::ParseToken(const FString &Source, const FSynta
 					if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
 						Info.Name = TEXT("KMGC.SyntaxHighlight.Keyword");
 						TextStyle = SyntaxTextStyle.KeywordTextStyle;
-					}///
+					}
 				break;}
 				//
 				if (const FString*F=DB->Extensions.Find(Keyword)) {
 					if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
 						Info.Name = TEXT("KMGC.SyntaxHighlight.Keyword");
 						TextStyle = SyntaxTextStyle.KeywordTextStyle;
-					}///
+					}
 				break;}
-			}///
+			}
 			//
 			for (const UMGC_ClassDB* DB : SyntaxTextStyle.ClassDB) {
 				if (const FString*F=DB->ScriptTypes.Find(Keyword)) {
 					if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
 						Info.Name = TEXT("KMGC.SyntaxHighlight.Type");
 						TextStyle = SyntaxTextStyle.TypeTextStyle;
-					}///
+					}
 				break;}
-			}///
+			}
 			//
 			ParserState = EParserState::None;
 		} else if (ParserState==EParserState::None && !TChar<WIDECHAR>::IsAlpha(Keyword[0])) {
@@ -204,13 +204,13 @@ void FKMGC_TextSyntaxHighlighter::ParseToken(const FString &Source, const FSynta
 						if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
 							Info.Name = TEXT("KMGC.SyntaxHighlight.Operator");
 							TextStyle = SyntaxTextStyle.OperatorTextStyle;
-						}///
+						}
 					break;}
-				}///
-			}///
+				}
+			}
 			//
 			ParserState = EParserState::None;
-		}///
+		}
 	} else if (ParserState==EParserState::None && (Keyword.IsNumeric()||
 		Keyword.Replace(TEXT("f"),TEXT("")).IsNumeric()||
 		Keyword.Replace(TEXT(".f"),TEXT("")).IsNumeric())
@@ -223,25 +223,25 @@ void FKMGC_TextSyntaxHighlighter::ParseToken(const FString &Source, const FSynta
 				if (IT->Key.Equals(Keyword,ESearchCase::CaseSensitive)) {
 					Info.Name = TEXT("KMGC.SyntaxHighlight.Variable");
 					TextStyle = SyntaxTextStyle.VariableTextStyle;
-				}///
+				}
 			break;}
-		}///
+		}
 		//
 		for (const UMGC_FunctionDB* DB : SyntaxTextStyle.FunctionDB) {
 			if (const FString*F=DB->ScriptCore.Find(Keyword)) {
 				if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
 					Info.Name = TEXT("KMGC.SyntaxHighlight.Function");
 					TextStyle = SyntaxTextStyle.FunctionTextStyle;
-				}///
+				}
 			break;}
 			//
 			if (const FString*F=DB->Extensions.Find(Keyword)) {
 				if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
 					Info.Name = TEXT("KMGC.SyntaxHighlight.Function");
 					TextStyle = SyntaxTextStyle.FunctionTextStyle;
-				}///
+				}
 			break;}
-		}///
+		}
 		//
 		for (const UMGC_ClassDB* DB : SyntaxTextStyle.ClassDB) {
 			if (Keyword.Contains(TEXT("."))) {
@@ -253,51 +253,51 @@ void FKMGC_TextSyntaxHighlighter::ParseToken(const FString &Source, const FSynta
 						if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
 							Info.Name = TEXT("KMGC.SyntaxHighlight.Function");
 							TextStyle = SyntaxTextStyle.FunctionTextStyle;
-						}///
+						}
 					break;}
 					//
 					if (const FString*F=DB->Extensions.Find(SubToken)) {
 						if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
 							Info.Name = TEXT("KMGC.SyntaxHighlight.Function");
 							TextStyle = SyntaxTextStyle.FunctionTextStyle;
-						}///
+						}
 					break;}
-				}///
+				}
 			} else {
 				if (const FString*F=DB->ScriptCore.Find(Keyword)) {
 					if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
 						Info.Name = TEXT("KMGC.SyntaxHighlight.Class");
 						TextStyle = SyntaxTextStyle.ClassTextStyle;
-					}///
+					}
 				break;}
 				//
 				if (const FString*F=DB->Extensions.Find(Keyword)) {
 					if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
 						Info.Name = TEXT("KMGC.SyntaxHighlight.Class");
 						TextStyle = SyntaxTextStyle.ClassTextStyle;
-					}///
+					}
 				break;}
-			}///
-		}///
+			}
+		}
 		//
 		for (const UMGC_ClassDB* DB : SyntaxTextStyle.ClassDB) {
 			if (const FString*F=DB->ScriptTypes.Find(Keyword)) {
 				if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
 					Info.Name = TEXT("KMGC.SyntaxHighlight.Type");
 					TextStyle = SyntaxTextStyle.TypeTextStyle;
-				}///
+				}
 			break;}
-		}///
+		}
 		//
 		for (const UMGC_KeywordDB* DB : SyntaxTextStyle.KeywordDB) {
 			if (const FString*F=DB->Macros.Find(Keyword)) {
 				if (F->Equals(Keyword,ESearchCase::CaseSensitive)) {
 					Info.Name = TEXT("KMGC.SyntaxHighlight.Macro");
 					TextStyle = SyntaxTextStyle.MacroTextStyle;
-				}///
+				}
 			break;}
-		}///
-	}///
+		}
+	}
 	//
 	if (Token.Type==FSyntaxTokenizer::ETokenType::Literal||!LoopBack) {
 		if (ParserState==EParserState::LookingForSingleLineComment) {
@@ -312,8 +312,8 @@ void FKMGC_TextSyntaxHighlighter::ParseToken(const FString &Source, const FSynta
 		} else if (ParserState==EParserState::LookingForChar) {
 			Info.Name = TEXT("KMGC.SyntaxHighlight.String");
 			TextStyle = SyntaxTextStyle.StringTextStyle;
-		}///
-	}///
+		}
+	}
 }
 
 uint32 FKMGC_TextSyntaxHighlighter::CountCharacters(const FString &Source, const TCHAR &Char) const {
@@ -322,7 +322,7 @@ uint32 FKMGC_TextSyntaxHighlighter::CountCharacters(const FString &Source, const
 	//
 	for (const TCHAR CH : Chars) {
 		if (CH==Char) {C++;}
-	}///
+	}
 	//
 	return C;
 }

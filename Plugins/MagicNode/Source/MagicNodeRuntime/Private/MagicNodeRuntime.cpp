@@ -28,8 +28,8 @@ void FSelf::Execute(UObject* Context)\n\
 	Ensure(Context);\n\
 	UE_LOG(LogTemp,Log,TEXT(\"%s\"),TEXT(\"Hello World!\"));\n\
 }\n\n\n\n\n\
-");//
-}/////
+");
+}//
 	//
 	//
 	LockSourceCode = false;
@@ -63,7 +63,7 @@ const bool UMagicNodeScript::RefreshRuntimeScriptClass() {
 		if (Name==Compared) {
 			RuntimeScriptClass = *IT;
 		break;}
-	}///
+	}
 	//
 	if (RuntimeScriptClass.Get()!=nullptr) {return true;}
 #endif
@@ -91,7 +91,7 @@ void UMagicNode::Run() {
 	if (CanTick) {
 		const FTimerDelegate TimerDelegate = FTimerDelegate::CreateUObject(this,&UMagicNode::Tick);
 		World->GetTimerManager().SetTimer(UpdateHandler,TimerDelegate,TickRate,true);
-	}///
+	}
 	//
 	Start();
 }

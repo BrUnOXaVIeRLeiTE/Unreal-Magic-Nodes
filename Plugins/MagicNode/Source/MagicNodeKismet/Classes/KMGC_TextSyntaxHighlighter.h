@@ -66,7 +66,7 @@ public:
 			FunctionDB = InFunctionDB;
 			KeywordDB = InKeywordDB;
 			ClassDB = InClassDB;
-		}///
+		}
 	};//
 protected:
 	FKMGC_TextSyntaxHighlighter(TSharedPtr<FSyntaxTokenizer>InTokenizer, const FSyntaxTextStyle &InSyntaxTextStyle)

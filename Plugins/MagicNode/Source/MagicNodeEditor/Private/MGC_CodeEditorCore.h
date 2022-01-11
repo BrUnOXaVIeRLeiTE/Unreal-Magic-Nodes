@@ -42,15 +42,15 @@ public:
 public:
 	TASK_LoadFile(const TSharedPtr<FString>&Output, const TSharedPtr<FString>&Path) {
 		TargetFilePath = Path; TargetString = Output;
-	}///
+	}
 	//
 	FORCEINLINE TStatId GetStatId() const {
 		RETURN_QUICK_DECLARE_CYCLE_STAT(TASK_LoadFile,STATGROUP_ThreadPoolAsyncTasks);
-	}///
+	}
 	//
 	void DoWork() {
 		FFileHelper::LoadFileToString(TargetString.ToSharedRef().Get(),**TargetFilePath.Get());
-	}///
+	}
 	//
 	bool CanAbandon() {return true;}
 };
@@ -95,7 +95,7 @@ public:
 	virtual ~SMGC_CodeEditorCore();
 	//
 	SLATE_BEGIN_ARGS(SMGC_CodeEditorCore)
-	{}///
+	{}
 		SLATE_ARGUMENT(EMGC_CodeSource,SourceToEdit)
 		SLATE_ARGUMENT(FString,ExternalSourcePath)
 	SLATE_END_ARGS()

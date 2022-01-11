@@ -45,7 +45,7 @@ void SKMGC_TextEditorWidget::Construct(const FArguments &InArgs) {
 		.AutoWrapText(false)
 		.Text(InArgs._Text)
 		.Margin(0.f)
-	);//
+	);
 	//
 	FontMeasure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
 	TypeWidth = FontMeasure->Measure("A",FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.CodeBlockStyle").Font).X;
@@ -65,7 +65,7 @@ void SKMGC_TextEditorWidget::Tick(const FGeometry &AllottedGeometry, const doubl
 	if (Run.IsValid() && CursorLocation.IsValid()) {
 		UnderCursor.Empty(); Run->AppendTextTo(UnderCursor);
 		EditableTextLayout->GetCurrentTextLine(CurrentLine);
-	}///
+	}
 }
 
 int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &Geometry, const FSlateRect &CullingRect, FSlateWindowElementList &OutDrawElements, int32 LayerID, const FWidgetStyle &WidgetStyle, bool ParentEnabled) const {
@@ -81,11 +81,11 @@ int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &G
 				Geometry.ToPaintGeometry(FVector2D(0,(LineHeight*L)-EditableTextLayout->GetScrollOffset().Y),FVector2D(AllotedWidth,LineHeight)),
 				FKMGC_NodeStyle::Get().Get()->GetBrush("KMGC.Lines"),
 				DrawEffects,GetLineIndexColor(L)
-			);//
-		}///
+			);
+		}
 		//
 		LayerID++;
-	}///
+	}
 	//
 	//
 	LayerID = SMultiLineEditableText::OnPaint(Args,Geometry,CullingRect,OutDrawElements,LayerID,WidgetStyle,ParentEnabled); LayerID++;
@@ -97,7 +97,7 @@ int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &G
 			Geometry.ToPaintGeometry(FVector2D(0,(LineHeight*CursorLocation.GetLineIndex())-EditableTextLayout->GetScrollOffset().Y),FVector2D(AllotedWidth,LineHeight)),
 			FKMGC_NodeStyle::Get().Get()->GetBrush("KMGC.Focus"),
 			DrawEffects,FLinearColor(0.1f,0.5f,1.f,0.45f)
-		);//
+		);
 		//
 		LayerID++;
 		//
@@ -113,14 +113,14 @@ int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &G
 				Geometry.ToPaintGeometry(BorderPos,BorderSize),
 				FEditorStyle::GetBrush("Graph.Node.Body"),
 				DrawEffects,FLinearColor::White
-			);//
+			);
 			//
 			FSlateDrawElement::MakeBox(
 				OutDrawElements,LayerID,
 				Geometry.ToPaintGeometry(BoxPos,BoxSize),
 				FEditorStyle::GetBrush("Menu.Background"),
 				DrawEffects,FLinearColor::White
-			);//
+			);
 			//
 			for (int32 I=SuggestDrawID; I<(SuggestDrawID+MAX_SUGGESTIONS); ++I) {
 				if (SuggestionResults.IsValidIndex(I)) {
@@ -135,7 +135,7 @@ int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &G
 						Geometry.ToPaintGeometry(Position,FVector2D(LineFraction,LineFraction)),
 						GetSuggestionIcon(SuggestionResults[I]),DrawEffects,
 						GetSuggestionColor(SuggestionResults[I])
-					);//
+					);
 					//
 					TextPos.X += (LineHeight*1.5f);
 					FSlateDrawElement::MakeText(
@@ -143,9 +143,9 @@ int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &G
 						Geometry.ToPaintGeometry(TextPos,FVector2D(BoxSize.X,LineHeight)),
 						SuggestionResults[I],FCoreStyle::GetDefaultFontStyle("Bold",12),
 						DrawEffects,GetSuggestionColor(SuggestionResults[I])
-					);//
-				}///
-			}///
+					);
+				}
+			}
 			//
 			BoxPos.Y += (LineHeight*SuggestPicked);
 			//
@@ -155,9 +155,9 @@ int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &G
 					Geometry.ToPaintGeometry(BoxPos,FVector2D(BoxSize.X,LineHeight)),
 					FKMGC_NodeStyle::Get().Get()->GetBrush("KMGC.Lines"),
 					DrawEffects,FLinearColor(0.85f,0.95f,1.f,.45f)
-				);//
-			}///
-		}///
+				);
+			}
+		}
 		//
 		if (!KeywordInfo.IsEmpty()) {
 			FVector2D BoxSize = GetCompletionBoxSize();
@@ -172,7 +172,7 @@ int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &G
 				Geometry.ToPaintGeometry(FVector2D(BoxOffset.X,((CursorLocation.GetLineIndex()*LineHeight)-EditableTextLayout->GetScrollOffset().Y)+(LineHeight*(SuggestPicked+1))),BorderSize),
 				FEditorStyle::GetBrush("Menu.Background"),
 				DrawEffects,FLinearColor::White
-			);//
+			);
 			//
 			FSlateDrawElement::MakeText(
 				OutDrawElements,LayerID,
@@ -180,9 +180,9 @@ int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &G
 				KeywordInfo,
 				FCoreStyle::GetDefaultFontStyle("Default",11),
 				DrawEffects,FLinearColor::White
-			);//
-		}///
-	}///
+			);
+		}
+	}
 	//
 	//
 	return LayerID;
@@ -208,8 +208,8 @@ void SKMGC_TextEditorWidget::OnTextCursorMoved(const FTextLocation &NewPosition)
 	if (HasSuggestion()) {
 		if (AutoCompleteKeyword.TrimStartAndEnd().IsEmpty()||(!AutoCompleteKeyword.Contains(UnderCursor))) {
 			KeywordInfo.Empty(); AutoCompleteKeyword.Empty();
-		}///
-	}///
+		}
+	}
 	//
 	OnMovedCursor.ExecuteIfBound(NewPosition);
 }
@@ -253,7 +253,7 @@ int32 SKMGC_TextEditorWidget::CountLines() const {
 	//
 	for (const TCHAR &CH : GetPlainText().ToString().GetCharArray()) {
 		if (CH==NLC) {Count++;}
-	}///
+	}
 	//
 	return Count;
 }
@@ -266,7 +266,7 @@ int32 SKMGC_TextEditorWidget::CountSelectedLines() const {
 	//
 	for (const TCHAR &CH : Selected.GetCharArray()) {
 		if (CH==NLC) {Count++;}
-	}///
+	}
 	//
 	return Count;
 }
@@ -281,7 +281,7 @@ int32 SKMGC_TextEditorWidget::CountTabs(bool BreakOnAlpha) const {
 		} Index++;
 		//
 		if (Index>=CursorLocation.GetOffset()) {break;}
-	}///
+	}
 	//
 	return Count;
 }
@@ -289,7 +289,7 @@ int32 SKMGC_TextEditorWidget::CountTabs(bool BreakOnAlpha) const {
 const FLinearColor SKMGC_TextEditorWidget::GetLineIndexColor(int32 Line) const {
 	if (Line % 2 == 0) {
 		return FLinearColor(0.1f,1.f,0.5f,0.01f);
-	}///
+	}
 	//
 	return FLinearColor(0.1f,0.5f,1.f,0.05f);
 }
@@ -322,13 +322,13 @@ FReply SKMGC_TextEditorWidget::OnKeyChar(const FGeometry &Geometry, const FChara
 			if (IsCloseBracket(Next)) {
 				FTextLocation LOC = CursorLocation;
 				InsertTextAtCursor(NLS); GoTo(LOC);
-			}///
-		}///
+			}
+		}
 		//
 		EditableTextLayout->EndEditTransaction();
 		//
 		return FReply::Handled();
-	}///
+	}
 	//
 	if (TChar<WIDECHAR>::IsWhitespace(CH)) {
 		if (!IsTextReadOnly()) {
@@ -354,7 +354,7 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 		OnInvokedSearch.ExecuteIfBound(true);
 		//
 		return FReply::Handled();
-	}///
+	}
 	//
 	if ((Key==EKeys::Up)&&HasSuggestion()) {
 		SuggestPicked -= 1;
@@ -366,7 +366,7 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 		GetKeywordInfo();
 		//
 		return FReply::Handled();
-	}///
+	}
 	//
 	if ((Key==EKeys::Down)&&HasSuggestion()) {
 		SuggestPicked += 1;
@@ -378,7 +378,7 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 		GetKeywordInfo();
 		//
 		return FReply::Handled();
-	}///
+	}
 	//
 	if (Key==EKeys::Tab) {
 		AutoCompleteResults.Empty();
@@ -407,7 +407,7 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 				for (int32 I=1; I<Lines; ++I) {
 					FTextLocation Local = FTextLocation(Origin.GetLineIndex()+I,0);
 					EditableTextLayout->GoTo(Local); InsertTextAtCursor(In);
-				}///
+				}
 				//
 				EditableTextLayout->GoTo(FTextLocation(Origin.GetLineIndex(),Origin.GetOffset()+1));
 				Context->SetSelectionRange(SelectStart+1,SelectEnd+(Lines-1),ITextInputMethodContext::ECaretPosition::Beginning);
@@ -421,11 +421,11 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 				for (int32 I=1; I<Lines; ++I) {
 					FTextLocation Local = FTextLocation(Jump.GetLineIndex()+I,0);
 					EditableTextLayout->GoTo(Local); InsertTextAtCursor(In);
-				}///
+				}
 				//
 				EditableTextLayout->GoTo(FTextLocation(Origin.GetLineIndex(),Origin.GetOffset()+1));
 				Context->SetSelectionRange(SelectStart+1,SelectEnd+(Lines-1),ITextInputMethodContext::ECaretPosition::Beginning);
-			}///
+			}
 			//
 			EditableTextLayout->EndEditTransaction();
 		} else {
@@ -437,7 +437,7 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 		} EditableTextLayout->ClearSelection();
 		//
 		return FReply::Handled();
-	}///
+	}
 	//
 	if ((Key==EKeys::Enter)&&HasSuggestion()) {
 		InsertPickedSuggestion();
@@ -461,7 +461,7 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 		EditableTextLayout->ClearSelection();
 		//
 		return FReply::Handled();
-	}///
+	}
 	//
 	if (Key==EKeys::Delete) {
 		AutoCompleteKeyword.Empty();
@@ -475,7 +475,7 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 		EditableTextLayout->EndEditTransaction();
 		//
 		return FReply::Handled();
-	}///
+	}
 	//
 	if ((Key==EKeys::Escape||Key==EKeys::BackSpace)&&HasAutoComplete()) {
 		AutoCompleteResults.Empty();
@@ -492,7 +492,7 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 		OnInvokedSearch.ExecuteIfBound(false);
 		//
 		return FReply::Handled();
-	}///
+	}
 	//
 	return SMultiLineEditableText::OnKeyDown(Geometry,KeyEvent);
 }
@@ -503,7 +503,7 @@ FReply SKMGC_TextEditorWidget::OnKeyUp(const FGeometry &Geometry, const FKeyEven
 	FKey Key = KeyEvent.GetKey();
 	if ((Key==EKeys::K)&&(KeyEvent.IsCommandDown()||KeyEvent.IsControlDown())) {
 		//
-	}///
+	}
 	//
 	return FReply::Handled();
 }
@@ -524,10 +524,10 @@ FReply SKMGC_TextEditorWidget::OnMouseButtonDown(const FGeometry &Geometry, cons
 			LOG_MGC(EMGCSeverity::Info,FString::Printf(TEXT("Unable to locate documentation for keyword. Launching search page for:   %s"),*UnderCursor));
 			const FString _Search = FString::Printf(TEXT("https://www.unrealengine.com/en-US/bing-search?keyword=%s"),*UnderCursor);
 			UKismetSystemLibrary::LaunchURL(_Search);
-		}///
+		}
 		//
 		return FReply::Handled();
-	}///
+	}
 	//
 	if (HasSuggestion()&&(IsMouseWithinCompletionBox)) {
 		InsertPickedSuggestion();
@@ -536,7 +536,7 @@ FReply SKMGC_TextEditorWidget::OnMouseButtonDown(const FGeometry &Geometry, cons
 		AutoCompleteKeyword.Empty();
 		SuggestionResults.Empty();
 		KeywordInfo.Empty();
-	}///
+	}
 	//
 	return SMultiLineEditableText::OnMouseButtonDown(Geometry,MouseEvent);
 }
@@ -553,8 +553,8 @@ FReply SKMGC_TextEditorWidget::OnMouseWheel(const FGeometry &MyGeometry, const F
 			SuggestDrawID = FMath::Clamp(SuggestDrawID-1,0,SuggestionResults.Num()-MAX_SUGGESTIONS);
 		} else {
 			SuggestDrawID = FMath::Clamp(SuggestDrawID+1,0,SuggestionResults.Num()-MAX_SUGGESTIONS);
-		}///
-	}///
+		}
+	}
 	//
 	return (SMultiLineEditableText::OnMouseWheel(MyGeometry,MouseEvent));
 }
@@ -587,7 +587,7 @@ const FString SKMGC_TextEditorWidget::ParseAutoCompleteWord(const bool CleanUp) 
 		if (Subject.Contains(TEXT("::"))) {Subject.Split(TEXT("::"),nullptr,&Subject,ESearchCase::IgnoreCase,ESearchDir::FromEnd);}
 		if (Subject.Contains(TEXT("->"))) {Subject.Split(TEXT("->"),nullptr,&Subject,ESearchCase::IgnoreCase,ESearchDir::FromEnd);}
 		if (Subject.Contains(TEXT("."))) {Subject.Split(TEXT("."),nullptr,&Subject,ESearchCase::IgnoreCase,ESearchDir::FromEnd);}
-	}///
+	}
 	//
 	return Subject;
 }
@@ -602,7 +602,7 @@ void SKMGC_TextEditorWidget::SetAutoCompleteSubject(const FString &Subject) {
 	//
 	if (AutoCompleteResults.Num()>=1) {
 		OnAutoCompleted.ExecuteIfBound(AutoCompleteResults);
-	}///
+	}
 }
 
 void SKMGC_TextEditorWidget::AutoCompleteSubject(const FString &Keyword) {
@@ -636,7 +636,7 @@ void SKMGC_TextEditorWidget::AutoCompleteSubject(const FString &Keyword) {
 	} else {
 		AutoCompleteKeyword = Subject;
 		IKMGC_ScriptParser::AutoComplete(Parent,AutoCompleteKeyword,AutoCompleteResults);
-	}///
+	}
 	//
 	OnAutoCompleted.ExecuteIfBound(AutoCompleteResults);
 }
@@ -647,8 +647,8 @@ void SKMGC_TextEditorWidget::AutoCleanup(FString &Keyword) {
 	for (const TCHAR &CH : Keyword) {
 		if (TChar<WIDECHAR>::IsAlpha(CH)||TChar<WIDECHAR>::IsDigit(CH)||CH==TEXT('_')) {
 			Clean.AppendChar(CH);
-		}///
-	}///
+		}
+	}
 	//
 	Clean.ReplaceCharInline(TEXT('('),TEXT('\0'));
 	Clean.ReplaceCharInline(TEXT(')'),TEXT('\0'));
@@ -712,13 +712,13 @@ const bool SKMGC_TextEditorWidget::IsOperator(const TCHAR &CH) const {
 		CH==TEXT('#') ||
 		CH==TEXT('|') ||
 		CH==TEXT('\\')
-	);//
+	);
 }
 
 const bool SKMGC_TextEditorWidget::IsBracket(const TCHAR &CH) const {
 	return (
 		IsOpenBracket(CH) || IsCloseBracket(CH)
-	);//
+	);
 }
 
 const bool SKMGC_TextEditorWidget::IsOpenBracket(const TCHAR &CH) const {
@@ -726,7 +726,7 @@ const bool SKMGC_TextEditorWidget::IsOpenBracket(const TCHAR &CH) const {
 		CH==TEXT('(') ||
 		CH==TEXT('[') ||
 		CH==TEXT('{')
-	);//
+	);
 }
 
 const bool SKMGC_TextEditorWidget::IsCloseBracket(const TCHAR &CH) const {
@@ -734,7 +734,7 @@ const bool SKMGC_TextEditorWidget::IsCloseBracket(const TCHAR &CH) const {
 		CH==TEXT(')') ||
 		CH==TEXT(']') ||
 		CH==TEXT('}')
-	);//
+	);
 }
 
 const bool SKMGC_TextEditorWidget::HasAutoComplete() const {
@@ -781,18 +781,18 @@ void SKMGC_TextEditorWidget::AutoSuggestCompleted() {
 			const float Width = FontMeasure->Measure(Suggestion,FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.CodeBlockStyle").Font).X + MAX_SUGGESTIONS;
 			if (CompletionBoxSize.X<MIN_BOX_SIZE){CompletionBoxSize.X=MIN_BOX_SIZE;}
 			if (Width>CompletionBoxSize.X){CompletionBoxSize.X=Width;}
-		}///
+		}
 		//
 		if (SuggestPicked>SuggestionResults.Num()-1) {
 			SuggestPicked = SuggestionResults.Num()-1;
-		}///
+		}
 	} else {CompletionBoxSize=FVector2D::ZeroVector;}
 }
 
 void SKMGC_TextEditorWidget::InsertPickedSuggestion() {
 	if (SuggestPicked>SuggestionResults.Num()-1) {
 		SuggestPicked = SuggestionResults.Num()-1;
-	}///
+	}
 	//
 	if (AutoCompleteKeyword.TrimStartAndEnd().IsEmpty()) {
 		FTextLocation Offset = CursorLocation;
@@ -807,7 +807,7 @@ void SKMGC_TextEditorWidget::InsertPickedSuggestion() {
 		//
 		AutoCompleteKeyword = Raw.TrimStartAndEnd();
 		AutoCompleteKeyword.ReverseString();
-	}///
+	}
 	//
 	int32 Offset = (CursorLocation.GetOffset()-(AutoCompleteKeyword.Len()+1));
 	if (Offset<=INDEX_NONE) {Offset=0;}
@@ -822,7 +822,7 @@ void SKMGC_TextEditorWidget::InsertPickedSuggestion() {
 		//
 		InsertTextAtCursor(SuggestionResults[SuggestPicked]);
 		EditableTextLayout->EndEditTransaction();
-	}///
+	}
 	//
 	AutoCompleteKeyword.Empty();
 	SuggestionResults.Empty();
@@ -868,22 +868,22 @@ void SKMGC_TextEditorWidget::GetKeywordInfo() {
 						for (const FString &Input : FunInfo.Inputs) {
 							Info += (FString(TEXT("\t"))+Input+NLS);
 						} Info += NLS;
-					}///
+					}
 					//
 					if (FunInfo.Outputs.Num()>=1) {
 						Info+=(FString(TEXT("Outputs:\n"))); Nill=false;
 						for (const FString &Output : FunInfo.Outputs) {
 							Info += (FString(TEXT("\t"))+Output+NLS);
 						} Info += NLS;
-					}///
+					}
 					//
 					if (Info.Contains(TEXT("Return"))) {Info+=NLS;}
 					if (!FunInfo.Tooltip.IsEmpty()) {Info+=(FunInfo.Tooltip+NLS); Nill=false;}
 					//
 					if (!Nill) {KeywordInfo=Info;}
-				}///
-			}///
-		}///
+				}
+			}
+		}
 	} else {KeywordInfo.Empty();}
 }
 
@@ -908,9 +908,9 @@ const FSlateBrush* SKMGC_TextEditorWidget::GetSuggestionIcon(const FString &Keyw
 					case EStack::Array: {Brush=FEditorStyle::GetBrush(TEXT("Kismet.VariableList.ArrayTypeIcon"));} break;
 					case EStack::Map: {Brush=FEditorStyle::GetBrush(TEXT("Kismet.VariableList.MapValueTypeIcon"));} break;
 				default: break;}
-			}///
-		}///
-	}///
+			}
+		}
+	}
 	//
 	return Brush;
 }
@@ -941,8 +941,8 @@ const FLinearColor SKMGC_TextEditorWidget::GetSuggestionColor(const FString &Key
 				case EStack::Map: {Color=FLinearColor(0.85f,0.55f,0.45f);} break;
 				case EStack::Array: {Color=FLinearColor(0.55f,0.45f,0.85f);} break;
 			default: break;}
-		}///
-	}///
+		}
+	}
 	//
 	return Color;
 }

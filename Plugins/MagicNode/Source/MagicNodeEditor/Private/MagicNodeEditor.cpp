@@ -41,8 +41,8 @@ void FATA_MagicNode::OpenAssetEditor(const TArray<UObject*>&InObjects, TSharedPt
 		if (UMagicNodeScript* ScriptObject = Cast<UMagicNodeScript>(*IT)) {
 			TSharedRef<FMGC_Toolkit>MGC_CodeEditor(new FMGC_Toolkit());
 			MGC_CodeEditor->INIT(Mode,EditWithinLevelEditor,ScriptObject);
-		}///
-	}///
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

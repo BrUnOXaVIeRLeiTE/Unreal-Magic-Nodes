@@ -27,7 +27,7 @@ public:
 		TArray<FAssetData>ScriptData; AssetRegistry.Get().GetAssetsByClass(UMagicNodeScript::StaticClass()->GetFName(),ScriptData,true);
 		for (FAssetData Data : ScriptData) {Data.GetAsset();}
 		#endif
-	}///
+	}
 	//
 	//virtual void ShutdownModule() override {}
 	virtual bool SupportsDynamicReloading() override {return false;}

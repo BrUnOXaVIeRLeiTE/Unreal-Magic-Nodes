@@ -24,7 +24,7 @@ FVector2D FWhiteSpaceTextRun::Measure(int32 StartIndex, int32 EndIndex, float Sc
 	int32 TabCount = 0;
 	for(int32 Index = StartIndex; Index < EndIndex; Index++) {
 		if ((*Text)[Index]==TEXT('\t')) {TabCount++;}
-	}///
+	}
 	//
 	const TSharedRef<FSlateFontMeasure> FontMeasure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
 	FVector2D Size = FontMeasure->Measure(**Text,StartIndex,EndIndex,Style.Font,true,Scale) + ShadowOffsetToApply;

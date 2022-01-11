@@ -60,7 +60,7 @@ void FMagicNodeEditor::StartupModule() {
 		FMGC_Toolkit::RefreshEngineSourceView();
 		FMGC_Toolkit::RefreshPluginSourceView();
 		FMGC_Toolkit::RefreshProjectSourceView();
-	}///
+	}
 }
 
 void FMagicNodeEditor::ShutdownModule() {
@@ -83,7 +83,7 @@ void FMagicNodeEditor::ExtendMainMenu(FMenuBuilder &MenuBuilder) {
 		LOCTEXT("MGC_NewScriptAsset_Tooltip", "Create a new 'Magic Node' class.\nThis special class allows you to create custom functions,\ntyping code within user Blueprint Graphs executing the node.\nChanges to the node's source code will update all instances in all graphs."),
 		FSlateIcon(FMagicNodeEditorStyle::Get().Get()->GetStyleSetName(),"ClassIcon.MagicNode"),
 		FUIAction(FExecuteAction::CreateStatic(&FMagicNodeEditor::CreateNewScriptAsset))
-	);//
+	);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ TSharedRef<SDockTab> FMagicNodeEditor::OnSpawnSourceCodeViewerTAB(const FSpawnTa
 		SNew(SMGC_CodeEditorCore,nullptr)
 		.ExternalSourcePath(ViewerSourcePath)
 		.SourceToEdit(EMGC_CodeSource::Script)
-	);//
+	);
 	//
 	return VIEW;
 }

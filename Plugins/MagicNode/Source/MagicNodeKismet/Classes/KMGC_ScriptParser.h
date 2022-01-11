@@ -51,8 +51,8 @@ protected:
 			IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::InvalidSyntax,TEXT("'Invalid Syntax' while parsing MGC Script; This is usually caused by invalid or missing 'Execute' function signature."));
 			IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::InvalidOutput,TEXT("'Invalid Output' while parsing MGC Script; This is usually caused by OS limited permissions when writing to Source/Project/MagicNodes/ directory."));
 			IKMGC_ScriptParser::Message.Add((uint32)EMGC_CompilerResult::Compiled,TEXT("MGC 'Compiled', Script successfully parsed and CPP Class successfully generated."));
-		}///
-	}///
+		}
+	}
 	//
 	MAGICNODEKISMET_API const EMGC_CompilerResult CompileScriptClass(const FString &ScriptName, const FString &Header, const FString &Script, const FString &Types, const FString &ParentClass, const TArray<FString>&Includes, const TArray<FString>&Macros);
 protected:

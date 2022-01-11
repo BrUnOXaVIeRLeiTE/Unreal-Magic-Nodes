@@ -84,17 +84,17 @@ public:
 public:
 	friend inline uint32 GetTypeHash(const FKeywordDefinition &DEF) {
 		return FCrc::MemCrc32(&DEF,sizeof(FKeywordDefinition));
-	}///
+	}
 	//
 	bool operator == (const FKeywordDefinition &Other) const {
 		return (
 			Info == Other.Info
-		);//
-	}///
+		);
+	}
 	//
 	bool operator != (const FKeywordDefinition &Other) const {
 		return !(*this==Other);
-	}///
+	}
 public:
 	FKeywordDefinition() : Info(TEXT("")) {}
 };
@@ -113,7 +113,7 @@ public:
 public:
 	friend inline uint32 GetTypeHash(const FPropertyDefinition &DEF) {
 		return FCrc::MemCrc32(&DEF,sizeof(FPropertyDefinition));
-	}///
+	}
 	//
 	bool operator == (const FPropertyDefinition &Other) const {
 		return (
@@ -121,12 +121,12 @@ public:
 			TypeOf == Other.TypeOf &&
 			Access == Other.Access &&
 			Hint == Other.Hint
-		);//
-	}///
+		);
+	}
 	//
 	bool operator != (const FPropertyDefinition &Other) const {
 		return !(*this==Other);
-	}///
+	}
 public:
 	FString TypeToString() const {
 		switch (TypeOf) {
@@ -145,7 +145,7 @@ public:
 		default: break;}
 		//
 		return TEXT("<?>");
-	}///
+	}
 	//
 	FString StackToString() const {
 		switch (StackOf) {
@@ -155,7 +155,7 @@ public:
 		default: break;}
 		//
 		return TEXT("<?>");
-	}///
+	}
 	//
 	FString AccessToString() const {
 		switch (Access) {
@@ -166,7 +166,7 @@ public:
 		default: break;}
 		//
 		return TEXT("<?>");
-	}///
+	}
 public:
 	FPropertyDefinition()
 		: TypeOf(EType::None)
@@ -197,7 +197,7 @@ struct FFunctionDefinition {
 	//
 	friend inline uint32 GetTypeHash(const FFunctionDefinition &DEF) {
 		return FCrc::MemCrc32(&DEF,sizeof(FFunctionDefinition));
-	}///
+	}
 	//
 	bool operator == (const FFunctionDefinition &Other) const {
 		return (
@@ -210,12 +210,12 @@ struct FFunctionDefinition {
 			//
 			Tooltip == Other.Tooltip &&
 			Hint == Other.Hint
-		);//
-	}///
+		);
+	}
 	//
 	bool operator != (const FFunctionDefinition &Other) const {
 		return !(*this==Other);
-	}///
+	}
 	//
 	//
 	FString TypeToString() const {
@@ -229,7 +229,7 @@ struct FFunctionDefinition {
 		default: break;}
 		//
 		return TEXT("<?>");
-	}///
+	}
 	//
 	FString AccessToString() const {
 		switch (Access) {
@@ -240,7 +240,7 @@ struct FFunctionDefinition {
 		default: break;}
 		//
 		return TEXT("<?>");
-	}///
+	}
 public:
 	FFunctionDefinition()
 		: TypeOf(EType::None)
@@ -269,7 +269,7 @@ struct FClassDefinition {
 	//
 	friend inline uint32 GetTypeHash(const FClassDefinition &DEF) {
 		return FCrc::MemCrc32(&DEF,sizeof(FClassDefinition));
-	}///
+	}
 	//
 	bool operator == (const FClassDefinition &Other) const {
 		return (
@@ -279,12 +279,12 @@ struct FClassDefinition {
 			ParentClass == Other.ParentClass &&
 			Tooltip == Other.Tooltip &&
 			Hint == Other.Hint
-		);//
-	}///
+		);
+	}
 	//
 	bool operator != (const FClassDefinition &Other) const {
 		return !(*this==Other);
-	}///
+	}
 public:
 	FClassDefinition()
 		: Variables()
@@ -426,7 +426,7 @@ public:
 	//
 	FORCEINLINE TStatId GetStatId() const {
 		RETURN_QUICK_DECLARE_CYCLE_STAT(TASK_BuildAutoCompleteData,STATGROUP_ThreadPoolAsyncTasks);
-	}///
+	}
 	//
 	void DoWork() {DB->UpdateExtensions();}
 };

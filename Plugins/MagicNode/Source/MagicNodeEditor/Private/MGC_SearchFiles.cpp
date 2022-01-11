@@ -216,13 +216,13 @@ void SMGC_SearchFiles::Tick(const FGeometry &AllottedGeometry, const double Curr
 	} else if (RequestListRefresh) {
 		if (ASYNC_Search && (ASYNC_Search->IsDone()||ASYNC_Search->IsIdle())) {
 			SearchState = ESearchState::COMPLETE;
-		}///
+		}
 		//
 		SearchLoad = 0.f;
 		RequestListRefresh = false;
 		//
 		if (SEARCH_RESULTS.IsValid()) {SEARCH_RESULTS->RebuildList();}
-	}///
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -236,7 +236,7 @@ TSharedRef<ITableRow> SMGC_SearchFiles::OnGenerateSearchResult(TSharedPtr<FSearc
 		||	Item.Get()->MatchLine.StartsWith(TEXT("void"),ESearchCase::CaseSensitive)) {
 			COLOR = FSlateColor(FLinearColor(1.f,0.3f,0.f,1.f));
 			ICON = SNew(SImage).Image(FEditorStyle::GetBrush(TEXT("Kismet.AllClasses.FunctionIcon"))).ColorAndOpacity(COLOR);
-		}///
+		}
 		//
 		if (Item.Get()->MatchLine.StartsWith(TEXT("class"),ESearchCase::CaseSensitive)
 		||	Item.Get()->MatchLine.StartsWith(TEXT("UCLASS"),ESearchCase::CaseSensitive)
@@ -245,16 +245,16 @@ TSharedRef<ITableRow> SMGC_SearchFiles::OnGenerateSearchResult(TSharedPtr<FSearc
 		||	Item.Get()->MatchLine.StartsWith(TEXT("protected class"),ESearchCase::CaseSensitive)) {
 			COLOR = FSlateColor(FLinearColor(1.f,0.55f,0.95f,1.f));
 			ICON = SNew(SImage).Image(FEditorStyle::GetBrush(TEXT("CodeView.ClassIcon")));
-		}///
+		}
 		//
 		if (Item.Get()->MatchLine.StartsWith(TEXT("//"),ESearchCase::CaseSensitive)
 		||	Item.Get()->MatchLine.StartsWith(TEXT("/*"),ESearchCase::CaseSensitive)) {
 			COLOR = FSlateColor(FLinearColor(0.f,0.9f,0.1f,1.f));
-		}///
+		}
 		//
 		if (Item.Get()->MatchLine.StartsWith("#",ESearchCase::CaseSensitive)) {
 			COLOR = FSlateColor(FLinearColor(0.45f,0.45f,0.45f,1.f));
-		}///
+		}
 		//
 		return SNew(SComboRow<TSharedRef<FString>>,OwnerTable)
 		[
@@ -278,7 +278,7 @@ TSharedRef<ITableRow> SMGC_SearchFiles::OnGenerateSearchResult(TSharedPtr<FSearc
 				]
 			]
 		];//
-	}///
+	}
 	//
 	return SNew(SComboRow<TSharedRef<FSearchInfo>>,OwnerTable);
 }
@@ -293,7 +293,7 @@ void SMGC_SearchFiles::OnClickedSearchResult(TSharedPtr<FSearchInfo>Item) {
 	if (Item.IsValid()) {
 		ViewerSourcePath = Item->MatchFilePath;
 		FMagicNodeEditor::InvokeSourceCodeViewerTAB(Item->MatchWordLocation);
-	}///
+	}
 }
 
 void SMGC_SearchFiles::OnSelectedSearchResult(TSharedPtr<FSearchInfo>Item, ESelectInfo::Type SelectInfo) {}
@@ -335,12 +335,12 @@ FReply SMGC_SearchFiles::OnClickedSearchFiles() {
 	//
 	if (SMGC_SearchFiles::ASYNC_Search==nullptr) {
 		SMGC_SearchFiles::ASYNC_Search = (new FAsyncTask<TASK_SearchFiles>());
-	}///
+	}
 	//
 	if (ASYNC_Search->IsIdle()) {
 		SMGC_SearchFiles::ASYNC_Search->StartBackgroundTask();
 		SearchState = ESearchState::SEARCHING;
-	}///
+	}
 	//
 	return FReply::Handled();
 }
@@ -349,7 +349,7 @@ FReply SMGC_SearchFiles::OnClickedCancelSearch() {
 	if (ASYNC_Search) {
 		ASYNC_Search->EnsureCompletion(false);
 		SearchState = ESearchState::COMPLETE;
-	}///
+	}
 	//
 	return FReply::Handled();
 }
@@ -396,7 +396,7 @@ bool SMGC_SearchFiles::CanCancel() const {
 	return (
 		(SearchState==ESearchState::SEARCHING) &&
 		(ASYNC_Search && !ASYNC_Search->IsDone())
-	);//
+	);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -406,7 +406,7 @@ bool TASK_SearchFiles::IsSourceFile(const FString &Path) {
 		Path.EndsWith(TEXT(".h"))||Path.EndsWith(TEXT(".cpp"))||Path.EndsWith(TEXT(".txt")) ||
 		Path.EndsWith(TEXT(".c"))||Path.EndsWith(TEXT(".cs"))||Path.EndsWith(TEXT(".hpp"))  ||
 		Path.EndsWith(TEXT(".uproject"))||Path.EndsWith(TEXT(".uplugin"))||Path.EndsWith(TEXT(".ini"))
-	);//
+	);
 }
 
 bool TASK_SearchFiles::SearchInFile(const FString &FilePath) {
@@ -429,12 +429,12 @@ bool TASK_SearchFiles::SearchInFile(const FString &FilePath) {
 				if (LO>INDEX_NONE) {
 					FTextLocation MatchLocation(LI,LO); AnyFound = true;
 					SearchResultList.Add(MakeShareable(new FSearchInfo((*IT).TrimStartAndEnd(),FilePath,MatchLocation)));
-				}///
+				}
 			LI++;}
 			//
 			return AnyFound;
 		} else {return false;}
-	}///
+	}
 	//
 	return false;
 }

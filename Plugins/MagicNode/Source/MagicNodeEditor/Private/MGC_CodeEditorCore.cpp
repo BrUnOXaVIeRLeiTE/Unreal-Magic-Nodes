@@ -287,7 +287,7 @@ void SMGC_CodeEditorCore::Construct(const FArguments &InArgs, UMagicNodeScript* 
 	//
 	if (IsSourceView()) {
 		SCRIPT_EDITOR->SetIsReadOnly(true);
-	}///
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -297,7 +297,7 @@ void SMGC_CodeEditorCore::Tick(const FGeometry &AllottedGeometry, const double C
 		&&(SCRIPT_EDITOR->HasSuggestion()||SCRIPT_EDITOR->HasAutoComplete())
 	) {
 		FSlateApplication::Get().SetKeyboardFocus(SCRIPT_EDITOR.ToSharedRef());
-	}///
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -325,7 +325,7 @@ int32 SMGC_CodeEditorCore::GetLineCount() const {
 	int32 Count = 0;
 	for (const TCHAR &CH : SCRIPT_EDITOR->GetPlainText().ToString().GetCharArray()) {
 		if (CH==NLC) {Count++;}
-	}///
+	}
 	//
 	return Count;
 }
@@ -333,13 +333,13 @@ int32 SMGC_CodeEditorCore::GetLineCount() const {
 FText SMGC_CodeEditorCore::GetScriptText() const {
 	if (IsSourceView()) {
 		return FText::FromString(*ExternalFileText.Get());
-	}///
+	}
 	//
 	if (Source==EMGC_CodeSource::Script) {
 		return FText::FromString(ScriptObject->Source.Script);
 	} else if (Source==EMGC_CodeSource::Header) {
 		return FText::FromString(ScriptObject->Source.Header);
-	}///
+	}
 	//
 	return FText::FromString(ScriptObject->Source.Types);
 }
@@ -366,7 +366,7 @@ void SMGC_CodeEditorCore::SetLineCountList(const int32 Count) {
 	for (int32 I=1; I<=Count; I++) {
 		FString ID = FString::Printf(TEXT("%i"),I);
 		LineCount.Add(MakeShareable(new FString(*ID)));
-	}///
+	}
 	//
 	if (LINE_COUNTER.IsValid()) {LINE_COUNTER->RequestListRefresh();}
 }
@@ -378,18 +378,18 @@ void SMGC_CodeEditorCore::SetScriptText(const FText &NewText) {
 		if (ScriptObject->Source.Script != NewText.ToString()) {
 			ScriptObject->Modify();
 			ScriptObject->Source.Script = NewText.ToString();
-		}///
+		}
 	} else if (Source==EMGC_CodeSource::Header) {
 		if (ScriptObject->Source.Header != NewText.ToString()) {
 			ScriptObject->Modify();
 			ScriptObject->Source.Header = NewText.ToString();
-		}///
+		}
 	} else {
 		if (ScriptObject->Source.Types != NewText.ToString()) {
 			ScriptObject->Modify();
 			ScriptObject->Source.Types = NewText.ToString();
-		}///
-	}///
+		}
+	}
 }
 
 void SMGC_CodeEditorCore::SetAutoCompleteList(const TArray<FString>&List) {
@@ -398,7 +398,7 @@ void SMGC_CodeEditorCore::SetAutoCompleteList(const TArray<FString>&List) {
 	for (const FString &S : List) {
 		if (S.TrimStartAndEnd().IsEmpty()) {continue;}
 		AutoCompleteList.Add(MakeShareable(new FString(S)));
-	}///
+	}
 	//
 	if (AUTOCOMPLETE.IsValid()) {AUTOCOMPLETE->RequestListRefresh();}
 }
@@ -436,7 +436,7 @@ EVisibility SMGC_CodeEditorCore::GetSearchBoxVisibility() const {
 EVisibility SMGC_CodeEditorCore::GetDatabaseWarningVisibility() const {
 	if (UMGC_SemanticDB::DBState==EDatabaseState::ASYNCLOADING) {
 		return EVisibility::Visible;
-	}///
+	}
 	//
 	return EVisibility::Collapsed;
 }
@@ -447,7 +447,7 @@ EVisibility SMGC_CodeEditorCore::GetAutoCompleteVisibility() const {
 	//
 	if (AutoComplete==EAutoComplete::Active) {
 		return EVisibility::Visible;
-	}///
+	}
 	//
 	return EVisibility::Collapsed;
 }
@@ -486,7 +486,7 @@ FReply SMGC_CodeEditorCore::OnClickedReplaceSearch() {
 		DO = FText::FromString(ScriptObject->Source.Script.Replace(*SearchText,*ReplaceText));
 	} else if (Source==EMGC_CodeSource::Types) {
 		DO = FText::FromString(ScriptObject->Source.Types.Replace(*SearchText,*ReplaceText));
-	}///
+	}
 	//
 	SCRIPT_EDITOR->BeginEditTransaction();
 	 SCRIPT_EDITOR->SetText(DO);
@@ -512,8 +512,8 @@ void SMGC_CodeEditorCore::OnClickedAutoCompleteItem(TSharedPtr<FString>Item) {
 				SCRIPT_EDITOR->InsertTextAtCursor(Result+TEXT("()"));
 			} else {SCRIPT_EDITOR->InsertTextAtCursor(Result);}
 			SCRIPT_EDITOR->EndEditTransaction();
-		}///
-	}///
+		}
+	}
 	//
 	if (Item.IsValid()) {AUTOCOMPLETE->SetItemSelection(Item,false);}
 	//
@@ -553,7 +553,7 @@ void SMGC_CodeEditorCore::OnScriptTextChanged(const FText &InText, ETextCommit::
 		if (SCRIPT_EDITOR->IsAutoComplete(Subject)) {
 			SCRIPT_EDITOR->AutoCompleteSubject(Subject);
 		} else {SCRIPT_EDITOR->AutoSuggest();}
-	}///
+	}
 	//
 	SetScriptText(InText);
 	SetLineCountList(GetLineCount());
@@ -665,7 +665,7 @@ TSharedRef<ITableRow> SMGC_CodeEditorCore::OnGenerateAutoComplete(TSharedPtr<FSt
 				]
 			]
 		];//
-	}///
+	}
 	//
 	return SNew(SComboRow<TSharedRef<FString>>,OwnerTable);
 }
@@ -686,7 +686,7 @@ void SMGC_CodeEditorCore::OnAutoComplete(const TArray<FString>&Results) {
 	for (const FString &Item : Results) {
 		if (Item.Contains(TEXT("VAR|"))) {Results_PROP.Add(Item);} else
 		if (Item.Contains(TEXT("FUN|"))) {Results_FUN.Add(Item);}
-	}///
+	}
 	//
 	Results_PROP.Append(Results_FUN);
 	SetAutoCompleteList(Results_PROP);
@@ -705,7 +705,7 @@ void SMGC_CodeEditorCore::OnAdvanceAutoComplete(const FString &Search) {
 		if (!Item.IsValid()) {continue;}
 		//
 		if (Item->Contains(Search)) {Found.Add(**Item.Get());}
-	}///
+	}
 	//
 	if (Found.Num()>=1) {SetAutoCompleteList(Found);}
 }
@@ -716,7 +716,7 @@ void SMGC_CodeEditorCore::OnInvokedSearch(bool DoSearch) {
 	//
 	if (ViewSearchBox) {
 		FSlateApplication::Get().SetKeyboardFocus(SEARCH_TEXT.ToSharedRef());
-	}///
+	}
 }
 
 void SMGC_CodeEditorCore::OnSearchSensitiveChanged(ECheckBoxState NewState) {
@@ -743,8 +743,8 @@ void SMGC_CodeEditorCore::GoToTextLocation(const FTextLocation &Location) {
 		if (Location.IsValid()) {
 			SCRIPT_EDITOR->GoToLineColumn(Location.GetLineIndex(),Location.GetOffset());
 			SCRIPT_EDITOR->SelectLine();
-		}///
-	}///
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -759,24 +759,24 @@ void SMGC_CodeEditorCore::UpdateDatabaseReferences() {
 	//
 	for (auto DB : _Settings->KeywordDB.Array()) {
 		if (DB.IsValid()) {KeywordDB.Add(DB.LoadSynchronous());}
-	}///
+	}
 	//
 	for (auto DB : _Settings->ClassDB.Array()) {
 		if (DB.IsValid()) {ClassDB.Add(DB.LoadSynchronous());}
-	}///
+	}
 	//
 	for (auto DB : _Settings->FunctionDB.Array()) {
 		if (DB.IsValid()) {FunctionDB.Add(DB.LoadSynchronous());}
-	}///
+	}
 	//
 	for (auto DB : _Settings->SemanticDB.Array()) {
 		if (DB.IsValid()) {SemanticDB.Add(DB.LoadSynchronous());}
-	}///
+	}
 	//
 	//
 	MARSHALL = FKMGC_TextSyntaxHighlighter::Create(
 		FKMGC_TextSyntaxHighlighter::FSyntaxTextStyle(KeywordDB,ClassDB,FunctionDB,SemanticDB)
-	);//
+	);
 	//
 	SetLineCountList(GetLineCount());
 }
@@ -788,8 +788,8 @@ void SMGC_CodeEditorCore::UpdateDatabaseSemantics() {
 	for (auto DB : _Settings->SemanticDB.Array()) {
 		if (DB.IsValid()) {
 			(new FAutoDeleteAsyncTask<TASK_BuildAutoCompleteData>(DB.LoadSynchronous()))->StartBackgroundTask();
-		}///
-	}///
+		}
+	}
 }
 
 void SMGC_CodeEditorCore::UpdateTextEditorScriptReference() {
@@ -797,7 +797,7 @@ void SMGC_CodeEditorCore::UpdateTextEditorScriptReference() {
 	//
 	if (SCRIPT_EDITOR.IsValid()) {
 		SCRIPT_EDITOR->SetScriptObject(ScriptObject);
-	}///
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

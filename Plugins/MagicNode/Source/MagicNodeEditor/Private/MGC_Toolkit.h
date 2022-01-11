@@ -29,7 +29,7 @@
 #include "Editor/UnrealEd/Public/Editor.h"
 #include "Editor/UnrealEd/Public/EditorUndoClient.h"
 #include "Editor/UnrealEd/Public/Toolkits/AssetEditorToolkit.h"
-#include "Editor/EditorFramework/Public/Toolkits/IToolkitHost.h"
+#include "Editor/Kismet/Public/WorkflowOrientedApp/SContentReference.h"
 
 #include "Developer/DirectoryWatcher/Public/IDirectoryWatcher.h"
 #include "Developer/DirectoryWatcher/Public/DirectoryWatcherModule.h"
@@ -147,7 +147,7 @@ public:
 /* /// Graph Notification System::
 static void MGC_HandleHyperlinkNavigate() {
 	FGlobalTabmanager::Get()->InvokeTab(FName("OutputLog"));
-}/////////
+}//////
 	//
 	FNotificationInfo NInfo = FNotificationInfo(FText::FromString(TEXT("Derp!  DEERRRRPPPP !!!!!!!!!!!!!!!")));
 	NInfo.ExpireDuration = 6.5f;

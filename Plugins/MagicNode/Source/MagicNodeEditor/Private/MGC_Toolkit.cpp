@@ -35,14 +35,14 @@ FMGC_Toolkit::FMGC_Toolkit() {
 		ProjectRoot,IDirectoryWatcher::FDirectoryChanged::CreateRaw(
 			this,&FMGC_Toolkit::OnProjectDirectoryChanged
 		), FMGC_Toolkit::WatcherHandle, IDirectoryWatcher::WatchOptions::IncludeDirectoryChanges
-	);//
+	);
 	//
 	//
 	if (FMGC_Toolkit::SourceViewCount()==0) {
 		RefreshEngineSourceView();
 		RefreshPluginSourceView();
 		RefreshProjectSourceView();
-	}///
+	}
 	//
 	Search.Reset();
 }
@@ -65,12 +65,12 @@ public:
 			SSingleObjectDetailsPanel::FArguments().HostCommandList(MGC_Toolkit->GetToolkitCommands()).HostTabManager(MGC_Toolkit->GetTabManager()),
 			true,
 			true
-		);//
-	}///
+		);
+	}
 	//
 	virtual UObject* GetObjectToObserve() const override {
 		return CodeEditor.Pin()->GET();
-	}///
+	}
 	//
 	virtual TSharedRef<SWidget>PopulateSlot(TSharedRef<SWidget>PropertyEditorWidget) override {
 		return SNew(SVerticalBox)
@@ -79,7 +79,7 @@ public:
 		[
 			PropertyEditorWidget
 		];
-	}///
+	}
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -148,7 +148,7 @@ void FMGC_Toolkit::INIT(const EToolkitMode::Type Mode, const TSharedPtr<IToolkit
 				)
 			)
 		)
-	);//
+	);
 	//
 	//
 	InitAssetEditor(Mode,InitToolkitHost,MGC_APP,FCodeEditorLayout,true,true,ScriptObject);
@@ -162,12 +162,12 @@ void FMGC_Toolkit::INIT(const EToolkitMode::Type Mode, const TSharedPtr<IToolkit
 	if (SourceTreeWidget.IsValid()) {
 		for (const TSharedPtr<FSourceTreeNode>&Node : GlobalSourceTreeView) {
 			SourceTreeWidget->SetItemExpansion(Node,true);
-		}///
-	}///
+		}
+	}
 	//
 	if (MGC_CodeEditor.IsValid()) {
 		MGC_CodeEditor->UpdateDatabaseReferences();
-	}///
+	}
 }
 
 void FMGC_Toolkit::SET(UMagicNodeScript* NewScriptObject) {
@@ -177,7 +177,7 @@ void FMGC_Toolkit::SET(UMagicNodeScript* NewScriptObject) {
 		//
 		RemoveEditingObject(OldScriptObject);
 		AddEditingObject(NewScriptObject);
-	}///
+	}
 }
 
 UMagicNodeScript* FMGC_Toolkit::GET() const {
@@ -360,44 +360,44 @@ TSharedRef<ITableRow>FMGC_Toolkit::OnGenerateSourceViewRow(TSharedPtr<FSourceTre
 		//
 		if (InItem->Path.Len()>InItem->FullPath.Len()){
 			Tooltip=FText::FromString(InItem->Path);
-		}///
+		}
 		//
 		if (InItem->Path==TEXT("UNREAL")) {
 			Icon = SNew(SImage).Image(FMagicNodeEditorStyle::Get()->GetBrush("SourceView.Engine"));
-		}///
+		}
 		//
 		if (InItem->Path==TEXT("PLUGINS")) {
 			Icon = SNew(SImage).Image(FMagicNodeEditorStyle::Get()->GetBrush("SourceView.Plugins"));
-		}///
+		}
 		//
 		if (InItem->Path==TEXT("PROJECT")) {
 			Icon = SNew(SImage).Image(FMagicNodeEditorStyle::Get()->GetBrush("SourceView.Project"));
-		}///
+		}
 		//
 		if (InItem->Path.EndsWith(".h")) {
 			Icon = SNew(SImage).Image(FMagicNodeEditorStyle::Get()->GetBrush("SourceView.HeaderFile"));
-		}///
+		}
 		//
 		if (InItem->Path.EndsWith(".cpp")||InItem->Path.EndsWith(".hpp")) {
 			Icon = SNew(SImage).Image(FMagicNodeEditorStyle::Get()->GetBrush("SourceView.CppFile"));
-		}///
+		}
 		//
 		if (InItem->Path.EndsWith(".cs")) {
 			Icon = SNew(SImage).Image(FMagicNodeEditorStyle::Get()->GetBrush("SourceView.CsFile"));
-		}///
+		}
 		//
 		if (InItem->Path.EndsWith(".txt")) {
 			Icon = SNew(SImage).Image(FMagicNodeEditorStyle::Get()->GetBrush("SourceView.Text"));
-		}///
+		}
 		//
 		if (InItem->Path.EndsWith(".obj")) {
 			Icon = SNew(SImage).Image(FMagicNodeEditorStyle::Get()->GetBrush("SourceView.Object"));
-		}///
+		}
 		//
 		if (InItem->Path.EndsWith(".ini")||InItem->Path.EndsWith(".uproject")||InItem->Path.EndsWith(".uplugin")) {
 			Icon = SNew(SImage).Image(FMagicNodeEditorStyle::Get()->GetBrush("SourceView.ConfigFile"));
-		}///
-	}///
+		}
+	}
 	//
 	//
 	return SNew(STableRow<TSharedPtr<FSourceTreeNode>>,OwnerTable)
@@ -448,7 +448,7 @@ void FMGC_Toolkit::BindCommands() {
 			Commands.Compile,
 			FExecuteAction::CreateSP(this,&FMGC_Toolkit::CompileScript),
 			FCanExecuteAction::CreateStatic(&FLevelEditorActionCallbacks::Recompile_CanExecute)
-		);//
+		);
 	}
 }
 
@@ -469,15 +469,15 @@ void FMGC_Toolkit::ExtendToolbar() {
 					ToolbarBuilder.AddToolBarButton(FMagicNodeEditorCommands::Get().Compile);
 				}
 				ToolbarBuilder.EndSection();
-			}///
-		}///
+			}
+		}
 	};//
 	//
 	TSharedPtr<FExtender>ToolbarExtender = MakeShareable(new FExtender);
 	ToolbarExtender->AddToolBarExtension(
 		"Asset", EExtensionHook::After, GetToolkitCommands(),
 		FToolBarExtensionDelegate::CreateStatic(&Local::FillToolbar)
-	);//
+	);
 	//
 	//
 	AddToolbarExtender(ToolbarExtender);
@@ -498,13 +498,13 @@ void FMGC_Toolkit::LaunchSourceCodeSearch() {
 void FMGC_Toolkit::RebuildDatabases() {
 	if (MGC_CodeEditor.IsValid()) {
 		MGC_CodeEditor->UpdateDatabaseSemantics();
-	}///
+	}
 }
 
 void FMGC_Toolkit::CompileProject() {
 	if (FSourceCodeNavigation::IsCompilerAvailable()) {
 		FLevelEditorActionCallbacks::RecompileGameCode_Clicked();
-	}///
+	}
 }
 
 void FMGC_Toolkit::CompileScript() {
@@ -518,7 +518,7 @@ void FMGC_Toolkit::CompileScript() {
 		GetParentClass(),
 		GET()->Source.Includes,
 		GET()->Source.Macros
-	);//
+	);
 	//
 	if (CompilerResult != EMGC_CompilerResult::MGC_None) {
 		switch (CompilerResult) {
@@ -544,10 +544,10 @@ void FMGC_Toolkit::CompileScript() {
 				//
 				if (GEditor) {
 					GEditor->PlayEditorSound(TEXT("/Engine/EditorSounds/Notifications/CompileFailed_Cue.CompileFailed_Cue"));
-				}///
-			}///
+				}
+			}
 		break;}
-	}///
+	}
 	//
 	UpdateDatabaseReferences();
 }
@@ -557,7 +557,7 @@ void FMGC_Toolkit::CompileScript() {
 EVisibility FMGC_Toolkit::GetSourceTreeViewVisibility() const {
 	if (Search.IsValid()&&(Search->Len()<2)) {
 		return EVisibility::Visible;
-	}///
+	}
 	//
 	return EVisibility::Collapsed;
 }
@@ -565,7 +565,7 @@ EVisibility FMGC_Toolkit::GetSourceTreeViewVisibility() const {
 EVisibility FMGC_Toolkit::GetSourceTreeSearchVisibility() const {
 	if (Search.IsValid()&&(Search->Len()<2)) {
 		return EVisibility::Collapsed;
-	}///
+	}
 	//
 	return EVisibility::Visible;
 }
@@ -586,7 +586,7 @@ void FMGC_Toolkit::OnSelectedSourceViewItem(TSharedPtr<FSourceTreeNode>TreeItem,
 	//
 	if (IsSourceFile(TreeItem->FullPath)) {
 		ViewerSourcePath = TreeItem->FullPath;
-	}///
+	}
 }
 
 void FMGC_Toolkit::OnGetSourceViewChildren(TSharedPtr<FSourceTreeNode>InItem, TArray<TSharedPtr<FSourceTreeNode>>&OutChildren) {
@@ -626,7 +626,7 @@ void FMGC_Toolkit::RefreshEngineSourceView() {
 	for (FString &Path : EngineSource) {
 		Path = FPaths::ConvertRelativePathToFull(Path);
 		Path.ReplaceInline(*RootPath,TEXT(""));
-	}///
+	}
 	//
 	for (const FString &Path : EngineSource) {
 		if (Path.Contains(TEXT("/Intermediate/"))) {continue;}
@@ -650,10 +650,10 @@ void FMGC_Toolkit::RefreshEngineSourceView() {
 				//
 				ParentNode->ChildNodes.Add(TreeNode);
 			} ParentNode = TreeNode.ToSharedRef();
-		}///
+		}
 		//
 		ParentNode = RootNode.ToSharedRef();
-	}///
+	}
 }
 
 void FMGC_Toolkit::RefreshPluginSourceView() {
@@ -684,7 +684,7 @@ void FMGC_Toolkit::RefreshPluginSourceView() {
 	for (FString &Path : PluginSource) {
 		Path = FPaths::ConvertRelativePathToFull(Path);
 		Path.ReplaceInline(*RootPath,TEXT(""));
-	}///
+	}
 	//
 	for (const FString &Path : PluginSource) {
 		if (!IsSourceFile(Path)) {continue;}
@@ -707,10 +707,10 @@ void FMGC_Toolkit::RefreshPluginSourceView() {
 				//
 				ParentNode->ChildNodes.Add(TreeNode);
 			} ParentNode = TreeNode.ToSharedRef();
-		}///
+		}
 		//
 		ParentNode = RootNode.ToSharedRef();
-	}///
+	}
 }
 
 void FMGC_Toolkit::RefreshProjectSourceView() {
@@ -741,7 +741,7 @@ void FMGC_Toolkit::RefreshProjectSourceView() {
 	for (FString &Path : ProjectSource) {
 		Path = FPaths::ConvertRelativePathToFull(Path);
 		Path.ReplaceInline(*RootPath,TEXT(""));
-	}///
+	}
 	//
 	for (const FString &Path : ProjectSource) {
 		if (!IsSourceFile(Path)) {continue;}
@@ -764,10 +764,10 @@ void FMGC_Toolkit::RefreshProjectSourceView() {
 				//
 				ParentNode->ChildNodes.Add(TreeNode);
 			} ParentNode = TreeNode.ToSharedRef();
-		}///
+		}
 		//
 		ParentNode = RootNode.ToSharedRef();
-	}///
+	}
 }
 
 void FMGC_Toolkit::UpdateDatabaseReferences() {
@@ -796,7 +796,7 @@ void FMGC_Toolkit::UpdateDatabaseReferences() {
 		//
 		FString Class = FString::Printf(TEXT("U%s"),*Script->GetRuntimeScriptClass()->GetName());
 		IKMGC_ScriptParser::ParseClassFromHeader(Script->Source.Header,Class);
-	}///
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -902,44 +902,44 @@ void FMGC_Toolkit::OnSearchChanged(const FText &Filter) {
 	for (const TSharedPtr<FSourceTreeNode>&Node : GlobalSourceTreeView) {
 		if (Node->Path.Contains(**Search.Get())) {
 			SourceViewSearch.Add(Node);
-		}///
+		}
 		//
 		for (const TSharedPtr<FSourceTreeNode>&N1 : Node->ChildNodes) {
 			if (N1->Path.Contains(**Search.Get())) {
 				SourceViewSearch.Add(N1);
-			}///
+			}
 			//
 			for (const TSharedPtr<FSourceTreeNode>&N2 : N1->ChildNodes) {
 				if (N2->Path.Contains(**Search.Get())) {
 					SourceViewSearch.Add(N2);
-				}///
+				}
 				//
 				for (const TSharedPtr<FSourceTreeNode>&N3 : N2->ChildNodes) {
 					if (N3->Path.Contains(**Search.Get())) {
 						SourceViewSearch.Add(N3);
-					}///
+					}
 					//
 					for (const TSharedPtr<FSourceTreeNode>&N4 : N3->ChildNodes) {
 						if (N4->Path.Contains(**Search.Get())) {
 							SourceViewSearch.Add(N4);
-						}///
+						}
 						//
 						for (const TSharedPtr<FSourceTreeNode>&N5 : N4->ChildNodes) {
 							if (N5->Path.Contains(**Search.Get())) {
 								SourceViewSearch.Add(N5);
-							}///
+							}
 							//
 							for (const TSharedPtr<FSourceTreeNode>&N6 : N5->ChildNodes) {
 								if (N6->Path.Contains(**Search.Get())) {
 									SourceViewSearch.Add(N6);
-								}///
-							}///
-						}///
-					}///
-				}///
-			}///
-		}///
-	}///
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 	//
 	//
 	SourceSearchWidget->RequestListRefresh();
@@ -948,7 +948,7 @@ void FMGC_Toolkit::OnSearchChanged(const FText &Filter) {
 void FMGC_Toolkit::OnSearchCommitted(const FText &NewText, ETextCommit::Type CommitInfo) {
 	if (NewText.ToString().Len()<2) {
 		SourceViewSearch.Empty();
-	}///
+	}
 	//
 	SourceSearchWidget->RequestListRefresh();
 }
@@ -970,7 +970,7 @@ bool FMGC_Toolkit::IsSourceFile(const FString &Path) {
 		Path.EndsWith(TEXT(".h"))||Path.EndsWith(TEXT(".cpp"))||Path.EndsWith(TEXT(".txt")) ||
 		Path.EndsWith(TEXT(".c"))||Path.EndsWith(TEXT(".cs"))||Path.EndsWith(TEXT(".hpp"))  ||
 		Path.EndsWith(TEXT(".uproject"))||Path.EndsWith(TEXT(".uplugin"))||Path.EndsWith(TEXT(".ini"))
-	);//
+	);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
