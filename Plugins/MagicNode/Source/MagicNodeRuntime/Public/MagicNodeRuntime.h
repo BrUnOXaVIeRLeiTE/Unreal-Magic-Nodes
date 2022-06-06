@@ -111,12 +111,10 @@ public:
 template<typename T>
 static T* MGC_Allocate(UObject* Context, UClass* Class) {
 	if (Context && Context->GetWorld()) {
-		UMagicNode* NewMGC = NewObject<UMagicNode>(Context,Class,Class->GetFName(),RF_Standalone);
+		UMagicNode* NewMGC = NewObject<UMagicNode>(Context,Class,NAME_None,RF_Standalone);
 		NewMGC->RegisterWorld(Context->GetWorld());
 		return CastChecked<T>(NewMGC);
-	}
-	//
-	return nullptr;
+	} return nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

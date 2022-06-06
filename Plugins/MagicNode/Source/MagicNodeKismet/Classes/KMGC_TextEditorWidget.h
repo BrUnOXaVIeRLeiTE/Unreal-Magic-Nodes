@@ -100,7 +100,7 @@ protected:
 	void AutoCleanup(FString &Keyword);
 public:
 	SLATE_BEGIN_ARGS(SKMGC_TextEditorWidget)
-	{}//
+	{}
 		SLATE_ARGUMENT(TSharedPtr<SMultiLineEditableText>,LineCounter)
 		SLATE_ARGUMENT(TSharedPtr<ITextLayoutMarshaller>,Marshaller)
 		SLATE_ARGUMENT(TSharedPtr<SScrollBar>,HScrollBar)

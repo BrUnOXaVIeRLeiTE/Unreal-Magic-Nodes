@@ -116,7 +116,7 @@ void SMGC_CodeEditorCore::Construct(const FArguments &InArgs, UMagicNodeScript* 
 			[
 				SNew(SBorder)
 				.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-				.BorderImage(FEditorStyle::GetBrush("Menu.Background"))
+				.BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
 				[
 					SNew(STextBlock).Margin(FMargin(5,0,0,0))
 					.Text(this,&SMGC_CodeEditorCore::GetCursorLocation)
@@ -128,7 +128,7 @@ void SMGC_CodeEditorCore::Construct(const FArguments &InArgs, UMagicNodeScript* 
 			[
 				SNew(SBorder)
 				.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-				.BorderImage(FEditorStyle::GetBrush("Menu.Background"))
+				.BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
 				.Visibility(this,&SMGC_CodeEditorCore::GetDatabaseWarningVisibility)
 				[
 					SNew(SVerticalBox)
@@ -164,7 +164,7 @@ void SMGC_CodeEditorCore::Construct(const FArguments &InArgs, UMagicNodeScript* 
 				[
 					SNew(SBorder)
 					.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-					.BorderImage(FEditorStyle::GetBrush("Menu.Background"))
+					.BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
 					[
 						SNew(SVerticalBox)
 						+SVerticalBox::Slot().Padding(5)
@@ -327,7 +327,7 @@ int32 SMGC_CodeEditorCore::GetLineCount() const {
 		if (CH==NLC) {Count++;}
 	}
 	//
-	return Count;
+	return (Count+1);
 }
 
 FText SMGC_CodeEditorCore::GetScriptText() const {
@@ -594,7 +594,7 @@ TSharedRef<ITableRow> SMGC_CodeEditorCore::OnGenerateLineCounter(TSharedPtr<FStr
 			.ColorAndOpacity(FSlateColor(FLinearColor(FColor(75,185,245,225))))
 			.Font(FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.CodeBlockStyle").Font)
 		]
-	];//
+	];
 }
 
 TSharedRef<ITableRow> SMGC_CodeEditorCore::OnGenerateAutoComplete(TSharedPtr<FString>Item, const TSharedRef<STableViewBase>&OwnerTable) {
@@ -634,7 +634,7 @@ TSharedRef<ITableRow> SMGC_CodeEditorCore::OnGenerateAutoComplete(TSharedPtr<FSt
 					.Font(FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.CodeBlockStyle").Font)
 				]
 			]
-		];//
+		];
 	} else if (Item.IsValid()&&(Item.Get()->Contains(TEXT("VAR|")))) {
 		FString Caption;
 		//
@@ -664,7 +664,7 @@ TSharedRef<ITableRow> SMGC_CodeEditorCore::OnGenerateAutoComplete(TSharedPtr<FSt
 					.Font(FKMGC_NodeStyle::Get().Get()->GetWidgetStyle<FTextBlockStyle>("KMGC.CodeBlockStyle").Font)
 				]
 			]
-		];//
+		];
 	}
 	//
 	return SNew(SComboRow<TSharedRef<FString>>,OwnerTable);
@@ -787,7 +787,8 @@ void SMGC_CodeEditorCore::UpdateDatabaseSemantics() {
 	if (UMGC_SemanticDB::DBState==EDatabaseState::ASYNCLOADING) {return;}
 	for (auto DB : _Settings->SemanticDB.Array()) {
 		if (DB.IsValid()) {
-			(new FAutoDeleteAsyncTask<TASK_BuildAutoCompleteData>(DB.LoadSynchronous()))->StartBackgroundTask();
+			UMGC_SemanticDB::DBAsyncTask = (new FAutoDeleteAsyncTask<TASK_BuildAutoCompleteData>(DB.LoadSynchronous()));
+			UMGC_SemanticDB::DBAsyncTask->StartBackgroundTask();
 		}
 	}
 }

@@ -27,7 +27,7 @@
 #include "Editor/UnrealEd/Public/FileHelpers.h"
 #include "Editor/GraphEditor/Public/SGraphNode.h"
 #include "Editor/EditorStyle/Public/EditorStyle.h"
-#include "Editor/Kismet/Public/WorkflowOrientedApp/SContentReference.h"
+#include "Editor/UnrealEd/Public/WorkflowOrientedApp/SContentReference.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

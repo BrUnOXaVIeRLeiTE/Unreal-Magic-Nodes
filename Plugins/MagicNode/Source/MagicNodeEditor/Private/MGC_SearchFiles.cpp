@@ -167,7 +167,7 @@ void SMGC_SearchFiles::Construct(const FArguments &InArgs) {
 		[
 			SNew(SBorder)
 			.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-			.BorderImage(FEditorStyle::GetBrush("Menu.Background"))
+			.BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
 			[
 				SAssignNew(SEARCH_SCROLLBOX,SScrollBox)
 				.OnUserScrolled(this,&SMGC_SearchFiles::OnSearchResultScroll)
@@ -194,7 +194,7 @@ void SMGC_SearchFiles::Construct(const FArguments &InArgs) {
 	[
 		SNew(SBorder)
 		.VAlign(VAlign_Fill).HAlign(HAlign_Fill)
-		.BorderImage(FEditorStyle::GetBrush("Menu.Background"))
+		.BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
 		.Visibility(this,&SMGC_SearchFiles::GetSearchProgressVisibility)
 		[
 			SNew(SProgressBar)
@@ -277,7 +277,7 @@ TSharedRef<ITableRow> SMGC_SearchFiles::OnGenerateSearchResult(TSharedPtr<FSearc
 					.Text(FText::FromString(Item.Get()->MatchLine))
 				]
 			]
-		];//
+		];
 	}
 	//
 	return SNew(SComboRow<TSharedRef<FSearchInfo>>,OwnerTable);

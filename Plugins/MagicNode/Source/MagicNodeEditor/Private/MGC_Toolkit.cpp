@@ -105,7 +105,7 @@ void FMGC_Toolkit::INIT(const EToolkitMode::Type Mode, const TSharedPtr<IToolkit
 			FTabManager::NewStack()
 			->SetSizeCoefficient(0.1f)
 			->SetHideTabWell(true)
-			->AddTab(GetToolbarTabId(),ETabState::OpenedTab)
+			->AddTab(FCodeEditorTAB::TAB_Toolbar,ETabState::OpenedTab)
 		)
 		->Split
 		(
@@ -184,7 +184,7 @@ UMagicNodeScript* FMGC_Toolkit::GET() const {
 	return ScriptObject_Inline;
 }
 
-TSharedRef<SDockTab> FMGC_Toolkit::TABSpawn_Script(const FSpawnTabArgs &Args) {
+TSharedRef<SDockTab>FMGC_Toolkit::TABSpawn_Script(const FSpawnTabArgs &Args) {
 	const auto Label = FText(LOCTEXT("MGC_Script.Watermark","CPP"));
 	//
 	//
@@ -192,8 +192,7 @@ TSharedRef<SDockTab> FMGC_Toolkit::TABSpawn_Script(const FSpawnTabArgs &Args) {
 	.SourceToEdit(EMGC_CodeSource::Script);
 	//
 	//
-	return SNew(SDockTab)
-	.Icon(FKMGC_NodeStyle::Get().Get()->GetBrush("KMGC.Toolbar.CPP"))
+	TSharedRef<SDockTab>DockTab = SNew(SDockTab)
 	.Label(LOCTEXT("MGC_ScriptTitle","Script"))
 	[
 		SNew(SOverlay)
@@ -213,9 +212,12 @@ TSharedRef<SDockTab> FMGC_Toolkit::TABSpawn_Script(const FSpawnTabArgs &Args) {
 			.TextStyle(FEditorStyle::Get(),"Graph.CornerText")
 		]
 	];
+	//
+	DockTab->SetTabIcon(FKMGC_NodeStyle::Get().Get()->GetBrush("KMGC.Toolbar.CPP"));
+	return DockTab;
 }
 
-TSharedRef<SDockTab> FMGC_Toolkit::TABSpawn_Header(const FSpawnTabArgs &Args) {
+TSharedRef<SDockTab>FMGC_Toolkit::TABSpawn_Header(const FSpawnTabArgs &Args) {
 	const auto Label = FText(LOCTEXT("MGC_Header.Watermark","H"));
 	//
 	//
@@ -223,8 +225,7 @@ TSharedRef<SDockTab> FMGC_Toolkit::TABSpawn_Header(const FSpawnTabArgs &Args) {
 	.SourceToEdit(EMGC_CodeSource::Header);
 	//
 	//
-	return SNew(SDockTab)
-	.Icon(FKMGC_NodeStyle::Get().Get()->GetBrush("KMGC.Toolbar.H"))
+	TSharedRef<SDockTab>DockTab = SNew(SDockTab)
 	.Label(LOCTEXT("MGC_HeaderTitle","Header"))
 	[
 		SNew(SOverlay)
@@ -244,9 +245,12 @@ TSharedRef<SDockTab> FMGC_Toolkit::TABSpawn_Header(const FSpawnTabArgs &Args) {
 			.TextStyle(FEditorStyle::Get(),"Graph.CornerText")
 		]
 	];
+	//
+	DockTab->SetTabIcon(FKMGC_NodeStyle::Get().Get()->GetBrush("KMGC.Toolbar.H"));
+	return DockTab;
 }
 
-TSharedRef<SDockTab> FMGC_Toolkit::TABSpawn_Types(const FSpawnTabArgs &Args) {
+TSharedRef<SDockTab>FMGC_Toolkit::TABSpawn_Types(const FSpawnTabArgs &Args) {
 	const auto Label = FText(LOCTEXT("MGC_Types.Watermark","T"));
 	//
 	//
@@ -254,8 +258,7 @@ TSharedRef<SDockTab> FMGC_Toolkit::TABSpawn_Types(const FSpawnTabArgs &Args) {
 	.SourceToEdit(EMGC_CodeSource::Types);
 	//
 	//
-	return SNew(SDockTab)
-	.Icon(FKMGC_NodeStyle::Get().Get()->GetBrush("KMGC.Toolbar.T"))
+	TSharedRef<SDockTab>DockTab = SNew(SDockTab)
 	.Label(LOCTEXT("MGC_TypesTitle","Types"))
 	[
 		SNew(SOverlay)
@@ -275,26 +278,30 @@ TSharedRef<SDockTab> FMGC_Toolkit::TABSpawn_Types(const FSpawnTabArgs &Args) {
 			.TextStyle(FEditorStyle::Get(),"Graph.CornerText")
 		]
 	];
+	//
+	DockTab->SetTabIcon(FKMGC_NodeStyle::Get().Get()->GetBrush("KMGC.Toolbar.T"));
+	return DockTab;
 }
 
 TSharedRef<SDockTab> FMGC_Toolkit::TABSpawn_Details(const FSpawnTabArgs &Args) {
 	TSharedPtr<FMGC_Toolkit>FCodeEditor = SharedThis(this);
 	//
-	return SNew(SDockTab)
-	.Icon(FEditorStyle::GetBrush("LevelEditor.Tabs.Details"))
+	TSharedRef<SDockTab>DockTab = SNew(SDockTab)
 	.Label(LOCTEXT("MGC_DetailsTitle","Details"))
 	[
 		SNew(SMGC_PropertyTab,FCodeEditor)
 	];
+	//
+	DockTab->SetTabIcon(FEditorStyle::GetBrush("LevelEditor.Tabs.Details"));
+	return DockTab;
 }
 
-TSharedRef<SDockTab> FMGC_Toolkit::TABSpawn_TreeView(const FSpawnTabArgs &Args) {
+TSharedRef<SDockTab>FMGC_Toolkit::TABSpawn_TreeView(const FSpawnTabArgs &Args) {
 	TSharedPtr<FMGC_Toolkit>FCodeEditor = SharedThis(this);
 	Search = MakeShared<FString>(TEXT(""));
 	//
 	//
-	return SNew(SDockTab)
-	.Icon(FEditorStyle::GetBrush("LevelEditor.Tabs.Details"))
+	TSharedRef<SDockTab>DockTab = SNew(SDockTab)
 	.Label(LOCTEXT("MGC_TreeViewTitle","Source"))
 	[
 		SNew(SVerticalBox)
@@ -344,7 +351,10 @@ TSharedRef<SDockTab> FMGC_Toolkit::TABSpawn_TreeView(const FSpawnTabArgs &Args) 
 				]
 			]
 		]
-	];//
+	];
+	//
+	DockTab->SetTabIcon(FEditorStyle::GetBrush("LevelEditor.Tabs.Details"));
+	return DockTab;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -420,14 +430,14 @@ TSharedRef<ITableRow>FMGC_Toolkit::OnGenerateSourceViewRow(TSharedPtr<FSourceTre
 		.HAlign(HAlign_Fill)
 		[
 			SNew(SBorder)
-			.BorderImage(FEditorStyle::GetBrush("Menu.Background"))
+			.BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
 			[
 				SNew(STextBlock)
 				.Text(FText::FromString(InItem->Path))
 				.ToolTip(FSlateApplication::Get().MakeToolTip(Tooltip))
 			]
 		]
-	];//
+	];
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

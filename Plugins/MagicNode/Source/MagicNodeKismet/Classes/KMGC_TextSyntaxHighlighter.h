@@ -72,7 +72,7 @@ protected:
 	FKMGC_TextSyntaxHighlighter(TSharedPtr<FSyntaxTokenizer>InTokenizer, const FSyntaxTextStyle &InSyntaxTextStyle)
 		: FSyntaxHighlighterTextLayoutMarshaller(MoveTemp(InTokenizer))
 		, SyntaxTextStyle(InSyntaxTextStyle)
-	{}//
+	{}
 	//
 	enum class EParserState : uint8 {
 		None,

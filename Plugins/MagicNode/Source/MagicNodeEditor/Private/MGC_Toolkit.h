@@ -29,7 +29,7 @@
 #include "Editor/UnrealEd/Public/Editor.h"
 #include "Editor/UnrealEd/Public/EditorUndoClient.h"
 #include "Editor/UnrealEd/Public/Toolkits/AssetEditorToolkit.h"
-#include "Editor/Kismet/Public/WorkflowOrientedApp/SContentReference.h"
+#include "Editor/EditorFramework/Public/Toolkits/IToolkitHost.h"
 
 #include "Developer/DirectoryWatcher/Public/IDirectoryWatcher.h"
 #include "Developer/DirectoryWatcher/Public/DirectoryWatcherModule.h"
@@ -44,6 +44,7 @@ class FMagicNodeEditor;
 struct FCodeEditorTAB {
 	static const FName TAB_TreeView;
 	static const FName TAB_Details;
+	static const FName TAB_Toolbar;
 	static const FName TAB_Script;
 	static const FName TAB_Header;
 	static const FName TAB_Types;
@@ -53,6 +54,7 @@ static FString ViewerSourcePath("C:/");
 
 const FName FCodeEditorTAB::TAB_TreeView(TEXT("MGC_TreeView"));
 const FName FCodeEditorTAB::TAB_Details(TEXT("MGC_Details"));
+const FName FCodeEditorTAB::TAB_Toolbar(TEXT("MGC_Toolbar"));
 const FName FCodeEditorTAB::TAB_Script(TEXT("MGC_Script"));
 const FName FCodeEditorTAB::TAB_Header(TEXT("MGC_Header"));
 const FName FCodeEditorTAB::TAB_Types(TEXT("MGC_Types"));
@@ -147,9 +149,9 @@ public:
 /* /// Graph Notification System::
 static void MGC_HandleHyperlinkNavigate() {
 	FGlobalTabmanager::Get()->InvokeTab(FName("OutputLog"));
-}//////
+}
 	//
-	FNotificationInfo NInfo = FNotificationInfo(FText::FromString(TEXT("Derp!  DEERRRRPPPP !!!!!!!!!!!!!!!")));
+	FNotificationInfo NInfo = FNotificationInfo(FText::FromString(TEXT("!!!!!!!!!!!!!!!")));
 	NInfo.ExpireDuration = 6.5f;
 	NInfo.bUseThrobber = true;
 	NInfo.bFireAndForget = true;

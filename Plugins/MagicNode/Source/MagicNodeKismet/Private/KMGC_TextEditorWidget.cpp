@@ -118,7 +118,7 @@ int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &G
 			FSlateDrawElement::MakeBox(
 				OutDrawElements,LayerID,
 				Geometry.ToPaintGeometry(BoxPos,BoxSize),
-				FEditorStyle::GetBrush("Menu.Background"),
+				FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"),
 				DrawEffects,FLinearColor::White
 			);
 			//
@@ -154,7 +154,7 @@ int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &G
 					OutDrawElements,LayerID,
 					Geometry.ToPaintGeometry(BoxPos,FVector2D(BoxSize.X,LineHeight)),
 					FKMGC_NodeStyle::Get().Get()->GetBrush("KMGC.Lines"),
-					DrawEffects,FLinearColor(0.85f,0.95f,1.f,.45f)
+					DrawEffects,FLinearColor(0.85f,0.95f,1.f,.35f)
 				);
 			}
 		}
@@ -170,7 +170,7 @@ int32 SKMGC_TextEditorWidget::OnPaint(const FPaintArgs &Args, const FGeometry &G
 			FSlateDrawElement::MakeBox(
 				OutDrawElements,LayerID,
 				Geometry.ToPaintGeometry(FVector2D(BoxOffset.X,((CursorLocation.GetLineIndex()*LineHeight)-EditableTextLayout->GetScrollOffset().Y)+(LineHeight*(SuggestPicked+1))),BorderSize),
-				FEditorStyle::GetBrush("Menu.Background"),
+				FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"),
 				DrawEffects,FLinearColor::White
 			);
 			//
@@ -500,6 +500,7 @@ FReply SKMGC_TextEditorWidget::OnKeyDown(const FGeometry &Geometry, const FKeyEv
 FReply SKMGC_TextEditorWidget::OnKeyUp(const FGeometry &Geometry, const FKeyEvent &KeyEvent) {
 	if (IsTextReadOnly()) {return FReply::Unhandled();}
 	//
+	LineCount = CountLines();
 	FKey Key = KeyEvent.GetKey();
 	if ((Key==EKeys::K)&&(KeyEvent.IsCommandDown()||KeyEvent.IsControlDown())) {
 		//
@@ -892,7 +893,7 @@ const FSlateBrush* SKMGC_TextEditorWidget::GetSuggestionIcon(const FString &Keyw
 	//
 	if (HasSuggestion()) {
 		const FKeywordDefinition &KeyInfo = IKMGC_ScriptParser::GetKeywordInfo(Keyword);
-		if (KeyInfo!=IKMGC_ScriptParser::NOKeywordInfo) {Brush=FEditorStyle::GetBrush(TEXT("Kismet.VariableList.VariableNotUsed")); return Brush;}
+		if (KeyInfo!=IKMGC_ScriptParser::NOKeywordInfo) {Brush=FEditorStyle::GetBrush(TEXT("Kismet.AllClasses.VariableIcon")); return Brush;}
 		//
 		const FClassDefinition &ClassInfo = IKMGC_ScriptParser::GetClassPointerInfo(Keyword);
 		if (ClassInfo!=IKMGC_ScriptParser::NOClassInfo) {Brush=FEditorStyle::GetBrush(TEXT("CodeView.ClassIcon")); return Brush;}
