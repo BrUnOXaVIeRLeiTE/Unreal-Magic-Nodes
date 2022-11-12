@@ -31,11 +31,11 @@ TSharedRef<FKMGC_TextSyntaxHighlighter>FKMGC_TextSyntaxHighlighter::Create(const
 			const TSet<FString>Core = DB->ScriptCore;
 			const TSet<FString>Extended = DB->Extensions;
 			//
-			for (const FString Keyword : Core) {
+			for (const FString & Keyword : Core) {
 				TokenizerRules.Emplace(FSyntaxTokenizer::FRule(Keyword));
 			}
 			//
-			for (const FString Keyword : Extended) {
+			for (const FString & Keyword : Extended) {
 				if (Core.Contains(Keyword)) {continue;}
 				TokenizerRules.Emplace(FSyntaxTokenizer::FRule(Keyword));
 			}
@@ -48,7 +48,7 @@ TSharedRef<FKMGC_TextSyntaxHighlighter>FKMGC_TextSyntaxHighlighter::Create(const
 			//
 			const TSet<FString>Operators = DB->Operators;
 			//
-			for (const FString Operator : Operators) {
+			for (const FString & Operator : Operators) {
 				TokenizerRules.Emplace(FSyntaxTokenizer::FRule(Operator));
 			}
 		}
@@ -60,7 +60,7 @@ TSharedRef<FKMGC_TextSyntaxHighlighter>FKMGC_TextSyntaxHighlighter::Create(const
 			//
 			const TSet<FString>Processors = DB->Processors;
 			//
-			for (const FString Processor : Processors) {
+			for (const FString & Processor : Processors) {
 				TokenizerRules.Emplace(FSyntaxTokenizer::FRule(Processor));
 			}
 		}
@@ -72,7 +72,7 @@ TSharedRef<FKMGC_TextSyntaxHighlighter>FKMGC_TextSyntaxHighlighter::Create(const
 			//
 			const TSet<FString>Types = DB->ScriptTypes;
 			//
-			for (const FString Typed : Types) {
+			for (const FString & Typed : Types) {
 				TokenizerRules.Emplace(FSyntaxTokenizer::FRule(Typed));
 			}
 		}

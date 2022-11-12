@@ -218,7 +218,7 @@ const FClassDefinition & IKMGC_ScriptParser::GetClassInfo(const FString &Keyword
 	//
 	//
 	UMGC_SemanticDB* DB = _Settings->SemanticDB.Array()[0].Get();
-	if (DB==nullptr) {IKMGC_ScriptParser::ClassPointer;}
+	//if (DB==nullptr) {IKMGC_ScriptParser::ClassPointer;}
 	//
 	FString NPK = Keyword;
 	if (NPK.RemoveFromStart(TEXT("A"),ESearchCase::CaseSensitive)) {
